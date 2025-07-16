@@ -1,0 +1,19 @@
+[package]
+org = "cosmobilis"
+name = "eliteauto_services"
+version = "0.1.0"
+distribution = "2201.12.7"
+
+[build-options]
+observabilityIncluded = true
+
+[[dependency]]
+org = "cosmobilis"
+name = "update_customer_dispo"
+version = "0.1.0"
+repository = "local"
+[[dependency]]
+org = "cosmobilis"
+name = "zero_km"
+version = "0.1.0"
+repository = "local"

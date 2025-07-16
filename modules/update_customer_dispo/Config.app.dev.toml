@@ -1,0 +1,9 @@
+
+[algolia]
+appId = "2IADKFQCGN"
+apiKey = "5fcaf1dbd539cf76c630c3fa0a748b78"
+indexName = "prod_ELITE_OFFERS"
+
+[customerDispo]
+dryRun = true
+dryRunNotify = true
