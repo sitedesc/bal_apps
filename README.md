@@ -58,19 +58,25 @@ NB: un module est également déployable via un tel clonage: on peut donc exécu
 ## Gestion des configuration
 
 Le fichier de configuration d'une app ou d'un module est un fichier Config.toml non commité;<br>
-On peut gérer ce fichier par environnement comme ceci:
+on peut gérer ce fichier par environnement comme ceci:
 - créer un fichier à la racine de l'app/du module Config.app.&lt;env&gt;.toml avec &lt;env&gt; valant dev, preprod ou prod;
 - on peut commiter ce fichier, mais il ne doit contenir que des valeur commitables (donc pas de valeur secretes);
 - ensuite on peut soit recopier à la main  ce fichier dans l'env cible en Config.toml, soit lancer le script à la racine de ce repo:
 ```
 ./generate_config.sh <app_or_module_name> <env> modules|apps
 ```
-Ce script concatène le fichier à la racine de ce repo Config.shared.&lt;env&gt;.toml au fichier Config.app.&lt;env&gt;.toml de l'app/du module et créer le fichier Config.toml de l'app/du module avec ces contenus concaténés.<br>
-_(NB: le 3eme paramètre doit valoir apps pour une app et modules pour un module)._
+Ce script:
+- concatène le fichier à la racine de ce repo Config.shared.&lt;env&gt;.toml au fichier Config.app.&lt;env&gt;.toml de l'app/du module et créer le fichier Config.toml de l'app/du module avec ces contenus concaténés.<br>
+_(NB: le 3eme paramètre doit valoir apps pour une app et modules pour un module);_
+- s'il existe un fichier à la racine de ce repo Secrets.shared.&lt;env&gt;, il le concatène aussi;
+- s'il existe un fichier à la racine de ce repo Secrets.shared.&lt;env&gt;.toml, il le concatène aussi;
+- s'il existe un fichier Secrets.app.&lt;env&gt;.toml dans l'app/le module, il le concatène aussi.
 
-Ce fichier "shared" permet de gérer de variables de configuration communes à toutes les apps/modules.
+Les fichier de conf "shared" permettent de gérer de variables de configuration communes à toutes les apps/modules par environnement, et éviter ainsi les duplication de variables de conf.
 
 NB: une variable de conf myConfVar dans le fichier Config.toml d'un module, doit être préfixée par le nom du module dans le Config.toml d'une app qui utilise ce module.<br>
+
+NB: si une variable de conf est définie dans le Config.toml, mais n'est pas utilisée, Ballerina petera une erreur et ne compilera pas l'app/le module. Il faut donc supprimer du Config.toml les éventuelles variables récupérées automatiquement de shared, mais non utilisées.
 
 Exemple: le module update_customer_dispo définit une variable de type record définie comme ceci:
 ```
@@ -86,4 +92,4 @@ dryRunNotify = true
 ```
 Ce préfixe permet donc d'utiliser deux packages qui ont des noms de variables identiques... et on voit donc à cette occasion qu'une app doit définir les valeur de conf de ces packages, donc : il faut décrire dans le README des packages (mais aussi des apps), comment les variables de conf du package/de l'app doivent être définies.
 
-NB: il faut gérer les variables de conf secretes dans un outil tiers (un password manager par défaut) et les inclure à la main: les variables secretes doivent donc aussi être décrites dans les README.
+NB: les variables secretes doivent aussi être décrites dans les README.
