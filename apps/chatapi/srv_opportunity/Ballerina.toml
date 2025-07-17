@@ -1,0 +1,19 @@
+[package]
+org = "franck"
+name = "srv_opportunity"
+version = "0.1.0"
+distribution = "2201.10.3"
+
+[build-options]
+observabilityIncluded = true
+
+[[dependency]]
+org = "ballerina"
+name = "yaml"
+version = "0.5.3"
+
+[[platform.java11.dependency]]
+groupId = "mysql"
+artifactId = "mysql-connector-java"
+version = "9.0.0"
+path = "./lib/mysql-connector-j-9.0.0.jar"

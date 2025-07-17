@@ -1,0 +1,112 @@
+{
+    "containerDefinitions": [
+        {
+            "name": "nginx",
+            "image": "223371910612.dkr.ecr.eu-west-3.amazonaws.com/nginx:latest",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "containerPort": 80,
+                    "hostPort": 80,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [{
+                "name": "IT_NGINX_USE_CONF",
+                "value": "aws"
+            },{
+                "name": "IT_NGINX_CUST_AUTH_PATH",
+                "value": "/api/docs"
+            }],
+            "mountPoints": [
+                {
+                    "sourceVolume": "public",
+                    "containerPath": "/srv/app/public"
+                }
+            ],
+            "volumesFrom": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/staging/it-automotive/svc_opportunity",
+                    "awslogs-region": "eu-west-3",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
+        },
+        {
+            "name": "php-fpm",
+            "image": "489815799287.dkr.ecr.eu-west-3.amazonaws.com/svc_opportunity:latest",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "containerPort": 9000,
+                    "hostPort": 9000,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [{
+                "name":"APP_ENV",
+                "value":"staging"
+            },{
+                "name": "CORS_ALLOW_ORIGIN",
+                "value": "^https://opportunity.stag.itautomotive.fr$"
+            },{
+                "name": "OPENFLEX_AUTH_SERVER_URI",
+                "value": "https://identity-api.openflex-preprod.eu"
+            },{
+                "name": "OPENFLEX_SELLING_URI",
+                "value": "https://selling-api.openflex-preprod.eu"
+            },{
+                "name": "OPENFLEX_CUSTOMERS_URI",
+                "value": "https://customer-api.openflex-preprod.eu"
+            },{
+                "name": "OPENFLEX_GATEWAY_URI",
+                "value": "https://gateway-api.openflex-preprod.eu"
+            },{
+                "name": "JWT_SECRET_KEY",
+                "value": "%kernel.project_dir%/config/jwt/staging/private.pem"
+            },{
+                "name": "JWT_PUBLIC_KEY",
+                "value": "%kernel.project_dir%/config/jwt/staging/public.pem"
+            },{
+                "name": "SALESFORCE_API_URL",
+                "value": "https://bymycar--rec04.sandbox.my.salesforce.com"
+            }],
+            "mountPoints": [
+                {
+                    "sourceVolume": "public",
+                    "containerPath": "/srv/app/public"
+                }
+            ],
+            "volumesFrom": [],
+            "secrets": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/staging/it-automotive/svc_opportunity",
+                    "awslogs-region": "eu-west-3",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
+        }
+    ],
+    "family": "svc_opportunity",
+    "taskRoleArn": "arn:aws:iam::489815799287:role/ecs-opportunity-task-role",
+    "executionRoleArn": "arn:aws:iam::489815799287:role/ecs-opportunity-task-role-exec",
+    "networkMode": "awsvpc",
+    "volumes": [
+        {
+            "name": "public",
+            "host": {}
+        }
+    ],
+    "placementConstraints": [],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512"
+}
