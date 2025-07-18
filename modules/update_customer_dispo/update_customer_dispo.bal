@@ -276,6 +276,6 @@ class CustomerDispoJob {
 // === WORKAROUND SERVICE (WILL BECOME A JOBS ADMIN SERVICE) ===
 service http:Service / on new http:Listener(9876) {
 resource function get health() returns string {
-       return "this is a workaround to keep the script live sothat the secheduled job can run...";
+       return "this is a workaround to keep the script live sothat the scheduled job can run...";
     }
 }
