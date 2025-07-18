@@ -19,22 +19,20 @@ configurable string boApiSecret = ?;
 
 // === SCHEDULER INITIALISATION ===
 public function createSyncFoQuotationJob() returns task:JobId|error {
-    SyncFoQuotationJob myJob = check new (fodb:credentials, teams, boApiUrl, boApiSecret);
+    SyncFoQuotationJob myJob = check new (teams, boApiUrl, boApiSecret);
     return task:scheduleJobRecurByFrequency(myJob, 300);
 }
 
 class SyncFoQuotationJob {
     *task:Job;
-    fodb:DbCredentials credentials;
     TeamsConf teams;
     map<string> headers;
     map<string> headersTeams;
     mysql:Client foDb;
     http:Client boClient;
 
-    function init(fodb:DbCredentials credentials, TeamsConf teamsConf, string boApiUrl, string boApiSecret) returns error? {
+    function init(TeamsConf teamsConf, string boApiUrl, string boApiSecret) returns error? {
         self.foDb = check fodb:getDbClient();
-        self.credentials = credentials;
         self.teams = teamsConf;
         byte[] boApiSecretBytes = boApiSecret.toBytes();
         self.headers = {
