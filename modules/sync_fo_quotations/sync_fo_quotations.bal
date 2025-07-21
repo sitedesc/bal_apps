@@ -20,6 +20,9 @@ public function createSyncFoQuotationJob() returns task:JobId|error {
     return task:scheduleJobRecurByFrequency(myJob, 300);
 }
 
+//TODO: refactor logging and teams notif code in this class: 
+// - externalize teams code in a dedicated package
+// - externalize logging code in a dedicated pkg integrating teams pkg.
 class SyncFoQuotationJob {
     *task:Job;
     TeamsConf teams;
@@ -69,43 +72,64 @@ class SyncFoQuotationJob {
                 string msgJson = (msgElem/<message>[0]/*[0]).toString();
                 // Envoyer le JSON comme corps HTTP, etc.
                 log:printDebug(msgJson);
-                json response = check self.boClient->post("/api/v1/devis/notify", msgJson,self.headers);
+                json|error response = self.boClient->post("/api/v1/devis/notify", msgJson, self.headers);
+                if response is error {
+                    check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.ERROR);
+                    var notif = self.sendTeamsNotification(
+                                        "Erreur envoi devis au BO dans job sync_fo_quotation",
+                                        string `${response.toString()}
+                                        quotation ID: ${id}
+                                        devis:
+                                        ${msgElem.toString()}`,
+                                        [{"Type d'exécution": "Tâche planifiée"}]);
+                    if notif is error {
+                        log:printError(string `Échec d'envoi  alerte Teams de l'envoi au BO du devis: {id}`, notif);
+                    }
+
+                    log:printError(string `Erreur envoi devis au BO dans job sync_fo_quotation:
+                                        ${response.toString()}
+                                        quotation ID: ${id}
+                                        devis:
+                                        ${msgElem.toString()}`, response);
+                    continue;
+                }
                 check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE);
                 log:printInfo(string `quotation message ID ${id} sent to BO.`);
             } on fail var failure {
                 var notif = self.sendTeamsNotification(
-                                        "Erreur exécution job sync_fo_quotation for a quotation", 
-                                        failure.toString() + "\n quotation: \n" + msgElem.toString(), 
+                                        "Erreur exécution job sync_fo_quotation for a quotation",
+                                        string `${failure.toString()}
+                                        devis:
+                                        ${msgElem.toString()}`,
                                         [{"Type d'exécution": "Tâche planifiée"}]);
-                check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.ERROR);
-                log:printError("Erreur exécution job sync_fo_quotation for quotation:\n" + msgElem.toString(), failure);
+                log:printError("Erreur exécution job sync_fo_quotation for quotation:" + msgElem.toString(), failure);
                 if notif is error {
                     log:printError("Échec d'envoi Teams", notif);
                 }
             }
-       }
-   }
-
-// === TEAMS NOTIF ===
-function sendTeamsNotification(string title, string description, map<string>[] list) returns error? {
-    http:Client teamsClient = check new (self.teams.webhookUrl);
-    json payload = {
-        title: title,
-        description: description,
-        channel_id: self.teams.channelId,
-        list: []
-    };
-
-    // Envoi réel de la notification via POST
-    http:Response response = check teamsClient->post("", payload, self.headersTeams);
-    int statusCode = response.statusCode;
-    if (statusCode != 200) {
-        string content = check response.getTextPayload();
-        log:printError("Échec de notification Teams. Code: " + statusCode.toString() + ", Message: " + content);
-    } else {
-        log:printInfo("Notification Teams envoyée avec succès.");
+        }
     }
-}
+
+    // === TEAMS NOTIF ===
+    function sendTeamsNotification(string title, string description, map<string>[] list) returns error? {
+        http:Client teamsClient = check new (self.teams.webhookUrl);
+        json payload = {
+            title: title,
+            description: description,
+            channel_id: self.teams.channelId,
+            list: []
+        };
+
+        // Envoi réel de la notification via POST
+        http:Response response = check teamsClient->post("", payload, self.headersTeams);
+        int statusCode = response.statusCode;
+        if (statusCode != 200) {
+            string content = check response.getTextPayload();
+            log:printError("Échec de notification Teams. Code: " + statusCode.toString() + ", Message: " + content);
+        } else {
+            log:printInfo("Notification Teams envoyée avec succès.");
+        }
+    }
 
 }
 
