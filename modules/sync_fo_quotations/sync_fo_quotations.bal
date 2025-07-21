@@ -1,17 +1,14 @@
 import ballerina/http;
 import ballerina/log;
 import ballerina/task;
-import cosmobilis/fo_db as fodb;
-import ballerinax/mysql;
 
+import cosmobilis/fo_db as fodb;
 
 type TeamsConf record {
     string webhookUrl;
     string channelId;
     string apiKey;
 };
-
-
 
 configurable TeamsConf teams = ?;
 configurable string boApiUrl = ?;
@@ -28,11 +25,9 @@ class SyncFoQuotationJob {
     TeamsConf teams;
     map<string> headers;
     map<string> headersTeams;
-    mysql:Client foDb;
     http:Client boClient;
 
     function init(TeamsConf teamsConf, string boApiUrl, string boApiSecret) returns error? {
-        self.foDb = check fodb:getDbClient();
         self.teams = teamsConf;
         byte[] boApiSecretBytes = boApiSecret.toBytes();
         self.headers = {
@@ -65,41 +60,58 @@ class SyncFoQuotationJob {
     }
 
     function scheduledRun() returns error? {
-        fodb:Quotation[] quotations = check fodb:getQuotations(self.foDb);
-        foreach fodb:Quotation quotation in quotations {
-            log:printDebug(quotation.toString());
-            json response = check self.boClient->post("/api/v1/devis/notify", quotation.content,self.headers);
-            _ = check fodb:setQuotationState(self.foDb, quotation, fodb:SYNC_STATE.DONE);
-        }
+        xml messageList = check fodb:getQuotationMsgs();
+        foreach xml msgElem in messageList/* {
+            do {
+                log:printDebug(msgElem.toString());
+                int id = check int:fromString((msgElem/<id>[0]/*[0]).toString());
+                log:printDebug(string `${id}`);
+                string msgJson = (msgElem/<message>[0]/*[0]).toString();
+                // Envoyer le JSON comme corps HTTP, etc.
+                log:printDebug(msgJson);
+                json response = check self.boClient->post("/api/v1/devis/notify", msgJson,self.headers);
+                check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE);
+                log:printInfo(string `quotation message ID ${id} sent to BO.`);
+            } on fail var failure {
+                var notif = self.sendTeamsNotification(
+                                        "Erreur exécution job sync_fo_quotation for a quotation", 
+                                        failure.toString() + "\n quotation: \n" + msgElem.toString(), 
+                                        [{"Type d'exécution": "Tâche planifiée"}]);
+                check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.ERROR);
+                log:printError("Erreur exécution job sync_fo_quotation for quotation:\n" + msgElem.toString(), failure);
+                if notif is error {
+                    log:printError("Échec d'envoi Teams", notif);
+                }
+            }
+       }
+   }
+
+// === TEAMS NOTIF ===
+function sendTeamsNotification(string title, string description, map<string>[] list) returns error? {
+    http:Client teamsClient = check new (self.teams.webhookUrl);
+    json payload = {
+        title: title,
+        description: description,
+        channel_id: self.teams.channelId,
+        list: []
+    };
+
+    // Envoi réel de la notification via POST
+    http:Response response = check teamsClient->post("", payload, self.headersTeams);
+    int statusCode = response.statusCode;
+    if (statusCode != 200) {
+        string content = check response.getTextPayload();
+        log:printError("Échec de notification Teams. Code: " + statusCode.toString() + ", Message: " + content);
+    } else {
+        log:printInfo("Notification Teams envoyée avec succès.");
     }
-
-
-    // === TEAMS NOTIF ===
-    function sendTeamsNotification(string title, string description, map<string>[] list) returns error? {
-        http:Client teamsClient = check new (self.teams.webhookUrl);
-        json payload = {
-            title: title,
-            description: description,
-            channel_id: self.teams.channelId,
-            list: []
-        };
-
-        // Envoi réel de la notification via POST
-        http:Response response = check teamsClient->post("", payload, self.headersTeams);
-        int statusCode = response.statusCode;
-        if (statusCode != 200) {
-            string content = check response.getTextPayload();
-            log:printError("Échec de notification Teams. Code: " + statusCode.toString() + ", Message: " + content);
-        } else {
-            log:printInfo("Notification Teams envoyée avec succès.");
-        }
-    }
+}
 
 }
 
 // === WORKAROUND SERVICE (WILL BECOME A JOBS ADMIN SERVICE) ===
 service http:Service / on new http:Listener(9876) {
-resource function get health() returns string {
-       return "this is a workaround to keep the script live sothat the scheduled job can run...";
+    resource function get health() returns string {
+        return "this is a workaround to keep the script live sothat the scheduled job can run...";
     }
 }

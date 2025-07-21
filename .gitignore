@@ -1,0 +1,2 @@
+# ignore secret conf files
+Secrets.*.toml
