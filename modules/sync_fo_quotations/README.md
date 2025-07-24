@@ -15,7 +15,7 @@ Ce composant a été créé pour le ticket EA-437: il transmet les nouveaux devi
 
 <<<<
 
-\# comment this line in prod environnement<br>
+\# reco: comment this line in prod environnement<br>
 ballerina.log.level = "DEBUG"
 
 boApiUrl = "REPLACEME"<br>
