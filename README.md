@@ -138,3 +138,20 @@ Dans l'exemple de crontab ci-dessus:
   * redémarrer ainsi l'app/module évite d'éventuel pb de conso croissante de ressources système sur le long terme, et garantit aussi qu'on maintient le star/stop d'une app dans le temps pour éviter le syndrome bien connus des vieux site web: "ne pas stoper le serveur sous peine qu'il ne redémarre pas!"
   * enfin le fichier de log est rester tous les trois mois... on peut aussi mettre en place un mécanisme d'archivage plus sophistiqué si besoin...
 
+## Architecture d'exécution et mutualisation
+
+Pour des raison évidente d'optimisation des ressource/performances, on utilise Ballerina tel que ses concepteur l'ont prévu:
+* on ne lance pas des apps ou modules indépendemment les uns des autres car cela induit autant d'exécution d'instances de ballerina que d'apps et modules, ce qui est consommateur de ressource alors que ballerina permet de tout exécuter dans une seule instance;
+* il existe trois type d'exécution:
+  * des services: en ballerina c'est un objet "service",
+  * des tâches plannifiés ou jobs: en ballerina ce sont des objet Job du package task,
+  * des script manuel: en ballerina c'est une fonction main() dans un script;
+* ces trois élement du langage ne sont que des déclencheur (ou triggers) du type d'exécution correspondant: ils n'ont pas vocation à contenir de l'algorithmique d'exécution, juste à appeler les "points d'entrée" (objet, fonction...) qui contiennent/aggègent l'algorithmique d'exécution; 
+* les apps sont faites pour :
+  * aggréger l'ensemble des triggers d'exécution des services, tâches plannifiées, et script manuel qui doivent s'exécuter pour une (ou plusieurs) plateforme(s) cible(s);
+  * dépendre des élément de code qui contiennent les points d'entrées qui doivent être appelées dans ces trigger;
+  * si ces points d'entrées contiennent une algorithmique executées par plusieurs apps, alors ils doivent être dans un package partagé, sinon dans des script de l'app;
+* donc on respecte cette règle de mutualisation systématique dans ce monorepo ballerina:
+  * s'il faut, pour une nouvelle plateforme cible, exécuter trois jobs d'une app A, et deux services d'une app B:
+    * on ne déploie pas, ni n'exécute indépendement les apps A et B dans la plateforme cible (= double conso de ressources), mais:
+    * on mutualise les points d'entrée des trois jobs et des deux services dans des packages réutilisables, on refactor les apps A et B pour qu'elles en dépendent, et on crée la nouvelle app C qui en dépend également.
