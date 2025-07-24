@@ -37,6 +37,8 @@ Puis lancer le script à la racine du repo de publication local des packages:
 ```
 ./local_publish.sh
 ```
+_(NB: pour publier un seul package: cd dans son répertoire, puis : bal pack; bal push --repository local)_
+
 Puis, pour utiliser my_package_name dans une app, rajouter sa dépendance dans le fichier Ballerina.toml de l'app:
 ```
 [[dependency]]
@@ -93,3 +95,46 @@ dryRunNotify = true
 Ce préfixe permet donc d'utiliser deux packages qui ont des noms de variables identiques... et on voit donc à cette occasion qu'une app doit définir les valeur de conf de ces packages, donc : il faut décrire dans le README des packages (mais aussi des apps), comment les variables de conf du package/de l'app doivent être définies.
 
 NB: les variables secretes doivent aussi être décrites dans les README.
+
+## Lancement d'une app
+
+Si l'app (ou le module) est constitué d'un seul script exécuté à la main: cd dans son repertoire puis "bal run".
+
+Si cela ne convient pas, se référer à [la CLI Ballerina](https://ballerina.io/learn/cli-commands/) qui indique les diverses manière de compiler/exécuter un script.
+
+Dans la cas de services et/ou jobs planifiés (donc des exécution qui ne rendent pas la main), il est recommandé de lancer l'app/module avec le script run_app.sh qui permet:
+
+* une gestion simple du start/stop de l'app/module via la crontab,
+* une gestion basique des logs:
+
+Exemple:
+
+```
+## stops ballerina services app every day at 01:12
+12 1 * * * /home/ubuntu/bal_apps/stop_ballerina_app.sh sync_fo_quotations.jar >> /home/ubuntu/bal_apps_logs/sync_fo_quotations.log 2>&1
+## starts ballerina services app every day at 01:15 : this daily start/stop avoids potential long term growing ressources consumption
+15 1 * * * nohup /home/ubuntu/bal_apps/run_app.sh /home/ubuntu /home/ubuntu/bal_apps/modules/sync_fo_quotations /home/ubuntu/bal_apps_logs/sync_fo_quotations.log >> /home/ubuntu//bal_apps_logs/sync_fo_quotations.log 2>&1 &
+## reset log file every 3 month
+3 0 1 1,4,7,10 * rm -f /home/ubuntu/bal_apps_logs/sync_fo_quotations.log
+```
+
+Dans l'exemple de crontab ci-dessus:
+* ce repo est déployé dans /home/ubuntu/bal_apps,
+* le module lancé est sync_fo_quotations,
+* il est lancé toutes les nuit à 01:15 via la commande:
+```
+15 1 * * * nohup /home/ubuntu/bal_apps/run_app.sh /home/ubuntu /home/ubuntu/bal_apps/modules/sync_fo_quotations /home/ubuntu/bal_apps_logs/sync_fo_quotations.log >> /home/ubuntu//bal_apps_logs/sync_fo_quotations.log 2>&1 &
+```
+* cette commande:
+  * lance le module via le script run_app.sh qui prend en paramètre:
+    * le repertoire du compte linux executant l'app : /home/ubuntu dans cet exemple,
+    * le repertoire du module à lancer: /home/ubuntu/bal_apps/modules/sync_fo_quotations,
+    * le fichier de log dans lequel les sorties standard et erreur de ce module sont redirigées,
+* et les sorties standard et erreur de cette commande sont aussi redirigées dans ce même fichier,
+* NB: cette commande est lancée avec nohup et en backgound vie le &, pour ne pas bloquer la crontab;
+* l'app/module est stopé toutes les nuits à 01:12 via le script stop_ballerina_app.sh
+  * ce script prend en paramètre l'archive jar de l'app/module: sync_fo_quotations.jar,
+  * en effet: cette archive est le résultat de la compilation ballerina de l'app/module, et c'est elle qui est exécutée par la JVM (ou "java") intégrée à ballerina => ballerina intègre la commande java "jps" (utilisées dans ce script) qui permet de stoper l'exécution d'une app/module à partir de son jar;
+  * redémarrer ainsi l'app/module évite d'éventuel pb de conso croissante de ressources système sur le long terme, et garantit aussi qu'on maintient le star/stop d'une app dans le temps pour éviter le syndrome bien connus des vieux site web: "ne pas stoper le serveur sous peine qu'il ne redémarre pas!"
+  * enfin le fichier de log est rester tous les trois mois... on peut aussi mettre en place un mécanisme d'archivage plus sophistiqué si besoin...
+

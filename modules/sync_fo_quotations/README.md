@@ -12,10 +12,6 @@ Ce composant a été créé pour le ticket EA-437: il transmet les nouveaux devi
 * Pré-requis: avoir installé Ballerina,
 * cloner ce repo et se mettre sur la branche correspondant à l'environnement,
 * copier/coller le template de configuration ci-dessous dans un fichier Config.toml à la racine du module et remplacer les valeur REPLACEME par les bonnes valeur (demander aux "bonnes personnes" ces valeur si besoin),
-* exécuter la procédure de déploiement du composant intègré [fo_db](../../modules/fo_db/README.md),
-* lancer "bal build" dedans pour vérifier que le projet compile bien,
-* pour lancer le job, depuis son clone lancer: bal run
-
 
 <<<<
 
@@ -37,3 +33,21 @@ password = "REPLACEME"<br>
 database = "REPLACEME"
 
 >>>>
+* ajouter dans le fichier ~/.profile du compte bal_apps (= fichier exécuté à chaque ouverture de session du compte linux qui exécute une app ou un module bal_apps):
+```
+# set PATH of fo_db if it is there
+if [ -d "$HOME/<path to bal_apps>/modules/sync_fo_quotations/bin" ] ; then
+    PATH="$HOME/<path to bal_apps>/modules/sync_fo_quotations/bin:$PATH"
+fi
+```
+* puis exécuter dans une console:
+```
+source ~/.profile
+```
+* exécuter la procédure de déploiement du composant intègré [fo_db](../../modules/fo_db/README.md),
+
+* lancer "bal build" à la racine de ce module pour vérifier que le projet compile bien,
+* pour lancer le job: bal run
+
+
+

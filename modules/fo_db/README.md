@@ -20,12 +20,14 @@ user = "REPLACEME"<br>
 password = "REPLACEME"<br>
 database = "REPLACEME"    
 ```
-* ajouter dans le fichier ~/.profile du compte bal_apps (= fichier exécuté à chaque ouverture de session du compte linux qui exécute une app ou un module bal_apps)
+* ajouter dans le fichier ~/.profile du compte bal_apps (= fichier exécuté à chaque ouverture de session du compte linux qui exécute une app ou un module bal_apps):
 ```
-PATH="<path to modules dir>/fo_db/bin:$PATH  
+# set PATH of fo_db if it is there
+if [ -d "$HOME/<path to bal_apps>/modules/fo_db/bin" ] ; then
+    PATH="$HOME/<path to bal_apps>/modules/fo_db/bin:$PATH"
+fi
 ```
 * puis exécuter dans une console:
 ```
 source ~/.profile
 ```
-* déployer les procédures stockées: exécuter le script sql dans le repertoire psql.

@@ -1,5 +1,7 @@
 import ballerina/http;
+import ballerina/io;
 import ballerina/log;
+import ballerina/os;
 import ballerina/task;
 
 import cosmobilis/fo_db as fodb;
@@ -17,7 +19,7 @@ configurable string boApiSecret = ?;
 // === SCHEDULER INITIALISATION ===
 public function createSyncFoQuotationJob() returns task:JobId|error {
     SyncFoQuotationJob myJob = check new (teams, boApiUrl, boApiSecret);
-    return task:scheduleJobRecurByFrequency(myJob, 300);
+    return task:scheduleJobRecurByFrequency(myJob, 180);
 }
 
 //TODO: refactor logging and teams notif code in this class: 
@@ -45,68 +47,87 @@ class SyncFoQuotationJob {
 
     // === SCHEDULED EXECUTION FUNCTIONS ===
     public function execute() {
-        do {
-            log:printInfo("⏱️ Job planifié : exécution de scheduledRun()");
-            var result = self.scheduledRun();
-            if result is error {
-                string msg = "❌ scheduledRun() a échoué : " + result.message();
-                log:printError(msg, result);
-                // Envoi d'une notification Teams en cas d'erreur
-                var notif = self.sendTeamsNotification("Erreur exécution job sync_fo_quotation", msg, [{"Type d'exécution": "Tâche planifiée"}]);
-                if notif is error {
-                    log:printError("Échec d'envoi Teams", notif);
+        lock {
+            do {
+                log:printInfo("⏱️ Job planifié : exécution de scheduledRun()");
+                var result = self.scheduledRun();
+                if result is error {
+                    string msg = "❌ scheduledRun() a échoué : " + result.message();
+                    log:printError(msg, result);
+                    // Envoi d'une notification Teams en cas d'erreur
+                    var notif = self.sendTeamsNotification("Erreur exécution job sync_fo_quotation", msg, [{"Type d'exécution": "Tâche planifiée"}]);
+                    if notif is error {
+                        log:printError("Échec d'envoi Teams", notif);
+                    }
                 }
+            } on fail var failure {
+                log:printError("Unmanaged error", failure);
             }
-        } on fail var failure {
-            log:printError("Unmanaged error", failure);
         }
     }
 
     function scheduledRun() returns error? {
         xml messageList = check fodb:getQuotationMsgs();
-        foreach xml msgElem in messageList/* {
-            do {
-                log:printDebug(msgElem.toString());
-                int id = check int:fromString((msgElem/<id>[0]/*[0]).toString());
-                log:printDebug(string `${id}`);
-                string msgJson = (msgElem/<message>[0]/*[0]).toString();
-                // Envoyer le JSON comme corps HTTP, etc.
-                log:printDebug(msgJson);
-                json|error response = self.boClient->post("/api/v1/devis/notify", msgJson, self.headers);
-                if response is error {
-                    check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.ERROR);
-                    var notif = self.sendTeamsNotification(
-                                        "Erreur envoi devis au BO dans job sync_fo_quotation",
-                                        string `${response.toString()}
-                                        quotation ID: ${id}
-                                        devis:
-                                        ${msgElem.toString()}`,
+        while (messageList/*).length() > 0 {
+            foreach xml msgElem in messageList/* {
+                do {
+                    log:printDebug(msgElem.toString());
+                    string id = check (msgElem/<id>[0]/*[0]).toString();
+                    if id.length() <= 0 {
+                        continue;
+                    }
+                    log:printDebug(string `${id}`);
+                    string msgJson = (msgElem/<message>[0]/*[0]).toString();
+                    _ = check io:fileWriteString("/tmp/quotation.json", msgJson);
+                    // Envoyer le JSON comme corps HTTP, etc.
+                    log:printDebug(msgJson);
+
+                    string curlCmd = string `curl -X POST ${boApiUrl}/api/v1/devis/notify \
+  -u ${boApiSecret} \
+  -H "Content-Type: application/json" \
+  --data @/tmp/quotation.json`;
+                    _ = check io:fileWriteString("/tmp/curl_post_quotation", curlCmd);
+                    os:Process process = check os:exec({
+                                                           value: "runSh.sh",
+                                                           arguments: ["/tmp/curl_post_quotation"]
+                                                       });
+                    _ = check process.waitForExit();
+
+                    string stdout = check string:fromBytes(check process.output());
+                    int|error devisId = int:fromString(stdout);
+                    if devisId is error {
+                        var notif = self.sendTeamsNotification(
+                                        "Erreur exécution job sync_fo_quotation for a quotation",
+                                        string `The upload of the quotation message : ID " + id + ", did not return the id of the created quotation, but returned: ${stdout}
+                                        `,
                                         [{"Type d'exécution": "Tâche planifiée"}]);
-                    if notif is error {
-                        log:printError(string `Échec d'envoi  alerte Teams de l'envoi au BO du devis: {id}`, notif);
+                        log:printError("The upload of the quotation message : ID " + id + ", did not return the id of the created quotation, but returned:" + stdout);
+                        check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.ERROR, stdout);
+                        if notif is error {
+                            log:printError("Échec d'envoi Teams", notif);
+                        }
+
+                        continue;
                     }
 
-                    log:printError(string `Erreur envoi devis au BO dans job sync_fo_quotation:
-                                        ${response.toString()}
-                                        quotation ID: ${id}
-                                        devis:
-                                        ${msgElem.toString()}`, response);
-                    continue;
-                }
-                check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE);
-                log:printInfo(string `quotation message ID ${id} sent to BO.`);
-            } on fail var failure {
-                var notif = self.sendTeamsNotification(
+                    log:printInfo("Quotation submission response:" + stdout);
+
+                    check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE, stdout);
+                    log:printInfo(string `quotation message ID ${id} sent to BO.`);
+                } on fail var failure {
+                    var notif = self.sendTeamsNotification(
                                         "Erreur exécution job sync_fo_quotation for a quotation",
                                         string `${failure.toString()}
                                         devis:
                                         ${msgElem.toString()}`,
                                         [{"Type d'exécution": "Tâche planifiée"}]);
-                log:printError("Erreur exécution job sync_fo_quotation for quotation:" + msgElem.toString(), failure);
-                if notif is error {
-                    log:printError("Échec d'envoi Teams", notif);
+                    log:printError("Erreur exécution job sync_fo_quotation for quotation:" + msgElem.toString(), failure);
+                    if notif is error {
+                        log:printError("Échec d'envoi Teams", notif);
+                    }
                 }
             }
+            messageList = check fodb:getQuotationMsgs();
         }
     }
 
