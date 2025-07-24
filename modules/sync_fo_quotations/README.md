@@ -35,7 +35,7 @@ database = "REPLACEME"
 >>>>
 * ajouter dans le fichier ~/.profile du compte bal_apps (= fichier exécuté à chaque ouverture de session du compte linux qui exécute une app ou un module bal_apps):
 ```
-# set PATH of fo_db if it is there
+# set PATH of sync_fo_quotations if it is there
 if [ -d "$HOME/<path to bal_apps>/modules/sync_fo_quotations/bin" ] ; then
     PATH="$HOME/<path to bal_apps>/modules/sync_fo_quotations/bin:$PATH"
 fi
