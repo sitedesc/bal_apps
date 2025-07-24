@@ -155,3 +155,4 @@ Pour des raison évidente d'optimisation des ressource/performances, on utilise 
   * s'il faut, pour une nouvelle plateforme cible, exécuter trois jobs d'une app A, et deux services d'une app B:
     * on ne déploie pas, ni n'exécute indépendement les apps A et B dans la plateforme cible (= double conso de ressources), mais:
     * on mutualise les points d'entrée des trois jobs et des deux services dans des packages réutilisables, on refactor les apps A et B pour qu'elles en dépendent, et on crée la nouvelle app C qui en dépend également.
+* _NB: les script manuel impliquent forcément un lancment (ponctuel) d'une instance ballerina dédiée à leur execution: on peut les exécuter soit via une app soit directement depuis un module._
