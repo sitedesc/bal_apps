@@ -70,7 +70,7 @@ on peut gérer ce fichier par environnement comme ceci:
 Ce script:
 - concatène le fichier à la racine de ce repo Config.shared.&lt;env&gt;.toml au fichier Config.app.&lt;env&gt;.toml de l'app/du module et créer le fichier Config.toml de l'app/du module avec ces contenus concaténés.<br>
 _(NB: le 3eme paramètre doit valoir apps pour une app et modules pour un module);_
-- s'il existe un fichier à la racine de ce repo Secrets.shared.&lt;env&gt;, il le concatène aussi;
+
 - s'il existe un fichier à la racine de ce repo Secrets.shared.&lt;env&gt;.toml, il le concatène aussi;
 - s'il existe un fichier Secrets.app.&lt;env&gt;.toml dans l'app/le module, il le concatène aussi.
 
