@@ -78,7 +78,6 @@ Les fichier de conf "shared" permettent de gérer de variables de configuration 
 
 NB: une variable de conf myConfVar dans le fichier Config.toml d'un module, doit être préfixée par le nom du module dans le Config.toml d'une app qui utilise ce module.<br>
 
-NB: si une variable de conf est définie dans le Config.toml, mais n'est pas utilisée, Ballerina petera une erreur et ne compilera pas l'app/le module. Il faut donc supprimer du Config.toml les éventuelles variables récupérées automatiquement de shared, mais non utilisées.
 
 Exemple: le module update_customer_dispo définit une variable de type record définie comme ceci:
 ```
@@ -95,6 +94,8 @@ dryRunNotify = true
 Ce préfixe permet donc d'utiliser deux packages qui ont des noms de variables identiques... et on voit donc à cette occasion qu'une app doit définir les valeur de conf de ces packages, donc : il faut décrire dans le README des packages (mais aussi des apps), comment les variables de conf du package/de l'app doivent être définies.
 
 NB: les variables secretes doivent aussi être décrites dans les README.
+
+NB: si une variable de conf est définie dans le Config.toml, mais n'est pas utilisée dans le code, Ballerina petera une erreur et ne compilera pas l'app/le module. Il faut donc supprimer du Config.toml les éventuelles variables récupérées automatiquement de shared, mais non utilisées.
 
 ## Lancement d'une app
 
