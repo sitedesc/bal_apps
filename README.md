@@ -54,6 +54,8 @@ NB: les versions doivent concorder:
 
 ## Déploiement d'une app
 
+Pré-requis: avoir déployé Ballerina: voir la section dédiée plus bas.
+
 Une app se déploie en clonant ce repo dans l'environnement cible.<br>
 NB: un module est également déployable via un tel clonage: on peut donc exécuter les commandes consoles, tâches planifiées et services d'un module en mode standalone (c'est à dire non intégrés dans une app).
 
@@ -157,3 +159,85 @@ Pour des raison évidente d'optimisation des ressource/performances, on utilise 
     * on ne déploie pas, ni n'exécute indépendement les apps A et B dans la plateforme cible (= double conso de ressources), mais:
     * on mutualise les points d'entrée des trois jobs et des deux services dans des packages réutilisables, on refactor les apps A et B pour qu'elles en dépendent, et on crée la nouvelle app C qui en dépend également.
 * _NB: les script manuel impliquent forcément un lancment (ponctuel) d'une instance ballerina dédiée à leur execution: on peut les exécuter soit via une app soit directement depuis un module._
+
+
+## Déploiement de Ballerina
+
+### Déploiement initiale
+
+Sur un poste de dev effectuer voir [cette doc](https://ballerina.io/downloads/installation-options/). L'option d'install debian sur un poste Ubuntu est recommandée, mais attention:
+
+**Ballerina ne propose pas encore de package fonctionnant sur un OS (linux à minima), avec un processeur ARM (comme la VM AWS du BO EliteAuto).**
+
+Il faut faire cette procédure pour un ubuntu avec processeur ARM:
+
+* l'installer via son archive zip dont le lien de téléchargement est dispo dans [cette section](https://ballerina.io/downloads/installation-options/#install-via-the-ballerina-language-zip-file):
+* exemple à date de dernière mise à jour de cette procédure:
+  * wget https://dist.ballerina.io/downloads/2201.12.7/ballerina-2201.12.7-swan-lake.zip
+* la dézipper dans un repertoire:
+  * unzip ballerina-2201.12.7-swan-lake.zip -d distrib
+* ajouter dans ~/.profile son repertoire bin dans le PATH:
+```
+## ballerina
+if [ -d "$HOME/bal/distrib/ballerina-2201.12.7-swan-lake/bin" ] ; then
+    PATH="$HOME/bal/distrib/ballerina-2201.12.7-swan-lake/bin:$PATH"
+fi
+```
+* puis installer sdkman pour gérer la version de java compatible avec Ballerina:
+```
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+```
+* vérifier qu'il fonctionne
+```
+sdk version
+SDKMAN!
+script: 5.19.0
+native: 0.7.4 (linux aarch64)
+
+```
+* installer la version java compatible avec la version Ballerina déployée qui est indiquée dans [cette section](https://ballerina.io/downloads/installation-options/#install-via-the-ballerina-language-zip-file):
+* exemple si c'est la 21: lancer:
+```
+sdk list java
+```
+  * et chercher une version 21.0.x-tem (= Temurin JDK 21.0.x), puis l'installer et en faire la version par défaut (pour le compte linux courant seulement):
+```
+sdk install java 21.0.7-tem
+sdk default java 21.0.7-tem
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+```
+* puis la vérifier via:
+```
+java -version
+openjdk version "21.0.7" 2025-04-15 LTS
+OpenJDK Runtime Environment Temurin-21.0.7+6 (build 21.0.7+6-LTS)
+OpenJDK 64-Bit Server VM Temurin-21.0.7+6 (build 21.0.7+6-LTS, mixed mode, sharing)
+```
+* ... et si ça n'y est pas déjà, rajouter cela dans le ~/.profile:
+```
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+```
+* puis le recharger:
+```
+source ~/.profile
+```
+
+### Mise à jour
+
+Ballerina propose une commande "bal dist update" pour cela, mais idem que pour le déploiement initial: elle ne fonctionne pas encore pour les os ARM (linux à minima).
+
+Mais il est relativement simple de le faire à la main:
+* télécharger la distrib zip de la nouvelle version dont le lien de téléchargement est dispo dans [cette section](https://ballerina.io/downloads/installation-options/#install-via-the-ballerina-language-zip-file);
+* cd dans le repertoire oû la précédente version a été installée (cf section "Déploiement initial" ci-avant);
+* mettre à jour dans ~/.profile son repertoire bin dans le PATH:
+```
+## ballerina
+if [ -d "$HOME/bal/distrib/ballerina-XXXX.XX.X-XXX/bin" ] ; then
+    PATH="$HOME/bal/distrib/ballerina-XXXX.XX.X-XXX/bin:$PATH"
+fi
+```
+* puis le recharger:
+```
+source ~/.profile
+```
