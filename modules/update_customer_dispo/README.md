@@ -47,7 +47,7 @@ Ce composant a été créé pour le ticket EA-432, et permet de mettre à jour l
 
 
   
-* copier/coller le template de configuration ci-dessous dans un fichier Config.toml à la racine du repo et remplacer les valeur REPLACEME par les bonnes valeur (demander aux "bonnes personnes" ces valeur si besoin),
+* copier/coller le template de configuration ci-dessous dans un fichier Config.toml à la racine du repo et remplacer les valeur REPLACEME par les bonnes valeur (pour les conf des composant intégrés: voir leur README, si besoin demander aux "bonnes personnes"),
 
 
 
@@ -98,6 +98,9 @@ Ce composant a été créé pour le ticket EA-432, et permet de mettre à jour l
     dryRun = true
     dryRunNotify = true
     
+    [job_patch.conf]
+    port = REPLACEME
+
     [teams]
     webhookUrl = "REPLACEME"
     channelId = "REPLACEME"

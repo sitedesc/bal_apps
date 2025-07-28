@@ -321,6 +321,18 @@ modules = [
 
 [[package]]
 org = "cosmobilis"
+name = "job_patch"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "http"},
+	{org = "ballerinai", name = "observe"}
+]
+modules = [
+	{org = "cosmobilis", packageName = "job_patch", moduleName = "job_patch"}
+]
+
+[[package]]
+org = "cosmobilis"
 name = "update_customer_dispo"
 version = "0.1.0"
 dependencies = [
@@ -330,7 +342,8 @@ dependencies = [
 	{org = "ballerina", name = "lang.runtime"},
 	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "task"},
-	{org = "ballerinai", name = "observe"}
+	{org = "ballerinai", name = "observe"},
+	{org = "cosmobilis", name = "job_patch"}
 ]
 modules = [
 	{org = "cosmobilis", packageName = "update_customer_dispo", moduleName = "update_customer_dispo"}

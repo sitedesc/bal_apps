@@ -12,13 +12,18 @@ type TeamsConf record {
     string apiKey;
 };
 
+type Conf record {
+string boApiUrl;
+string boApiSecret;
+};
+
 configurable TeamsConf teams = ?;
-configurable string boApiUrl = ?;
-configurable string boApiSecret = ?;
+configurable Conf conf = ?;
+
 
 // === SCHEDULER INITIALISATION ===
 public function createSyncFoQuotationJob() returns task:JobId|error {
-    SyncFoQuotationJob myJob = check new (teams, boApiUrl, boApiSecret);
+    SyncFoQuotationJob myJob = check new (teams, conf.boApiUrl, conf.boApiSecret);
     return task:scheduleJobRecurByFrequency(myJob, 180);
 }
 
@@ -82,8 +87,8 @@ class SyncFoQuotationJob {
                     // Envoyer le JSON comme corps HTTP, etc.
                     log:printDebug(msgJson);
 
-                    string curlCmd = string `curl -X POST ${boApiUrl}/api/v1/devis/notify \
-  -u ${boApiSecret} \
+                    string curlCmd = string `curl -X POST ${conf.boApiUrl}/api/v1/devis/notify \
+  -u ${conf.boApiSecret} \
   -H "Content-Type: application/json" \
   --data @/tmp/quotation.json`;
                     _ = check io:fileWriteString("/tmp/curl_post_quotation", curlCmd);
@@ -152,11 +157,4 @@ class SyncFoQuotationJob {
         }
     }
 
-}
-
-// === WORKAROUND SERVICE (WILL BECOME A JOBS ADMIN SERVICE) ===
-service http:Service / on new http:Listener(9876) {
-    resource function get health() returns string {
-        return "this is a workaround to keep the script live sothat the scheduled job can run...";
-    }
 }

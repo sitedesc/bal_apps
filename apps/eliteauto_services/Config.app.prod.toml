@@ -1,0 +1,14 @@
+
+[ballerina.log]
+# reco: comment this line in prod environnement
+level = "DEBUG"
+
+[job_patch.conf]
+port = 9988
+
+[update_customer_dispo.customerDispo]
+dryRun = false
+dryRunNotify = false
+
+[zero_km.websocket]
+port = 21003

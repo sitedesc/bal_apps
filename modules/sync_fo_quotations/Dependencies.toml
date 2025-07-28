@@ -331,6 +331,18 @@ modules = [
 
 [[package]]
 org = "cosmobilis"
+name = "job_patch"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "http"},
+	{org = "ballerinai", name = "observe"}
+]
+modules = [
+	{org = "cosmobilis", packageName = "job_patch", moduleName = "job_patch"}
+]
+
+[[package]]
+org = "cosmobilis"
 name = "sync_fo_quotations"
 version = "0.1.0"
 dependencies = [
@@ -340,7 +352,8 @@ dependencies = [
 	{org = "ballerina", name = "os"},
 	{org = "ballerina", name = "task"},
 	{org = "ballerinai", name = "observe"},
-	{org = "cosmobilis", name = "fo_db"}
+	{org = "cosmobilis", name = "fo_db"},
+	{org = "cosmobilis", name = "job_patch"}
 ]
 modules = [
 	{org = "cosmobilis", packageName = "sync_fo_quotations", moduleName = "sync_fo_quotations"}

@@ -12,8 +12,27 @@ org = "cosmobilis"
 name = "update_customer_dispo"
 version = "0.1.0"
 repository = "local"
+
+[[dependency]]
+org = "cosmobilis"
+name = "sync_fo_quotations"
+version = "0.1.0"
+repository = "local"
+
 [[dependency]]
 org = "cosmobilis"
 name = "zero_km"
+version = "0.1.0"
+repository = "local"
+
+[[dependency]]
+org = "cosmobilis"
+name = "fo_db"
+version = "0.1.0"
+repository = "local"
+
+[[dependency]]
+org = "cosmobilis"
+name = "job_patch"
 version = "0.1.0"
 repository = "local"

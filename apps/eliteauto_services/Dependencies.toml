@@ -292,26 +292,6 @@ dependencies = [
 ]
 
 [[package]]
-org = "ballerina"
-name = "websocket"
-version = "2.14.0"
-dependencies = [
-	{org = "ballerina", name = "auth"},
-	{org = "ballerina", name = "constraint"},
-	{org = "ballerina", name = "http"},
-	{org = "ballerina", name = "io"},
-	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "jwt"},
-	{org = "ballerina", name = "lang.array"},
-	{org = "ballerina", name = "lang.runtime"},
-	{org = "ballerina", name = "lang.string"},
-	{org = "ballerina", name = "lang.value"},
-	{org = "ballerina", name = "log"},
-	{org = "ballerina", name = "oauth2"},
-	{org = "ballerina", name = "time"}
-]
-
-[[package]]
 org = "ballerinai"
 name = "observe"
 version = "0.0.0"
@@ -330,11 +310,52 @@ version = "0.1.0"
 dependencies = [
 	{org = "ballerina", name = "task"},
 	{org = "ballerinai", name = "observe"},
-	{org = "cosmobilis", name = "update_customer_dispo"},
-	{org = "cosmobilis", name = "zero_km"}
+	{org = "cosmobilis", name = "job_patch"},
+	{org = "cosmobilis", name = "sync_fo_quotations"},
+	{org = "cosmobilis", name = "update_customer_dispo"}
 ]
 modules = [
 	{org = "cosmobilis", packageName = "eliteauto_services", moduleName = "eliteauto_services"}
+]
+
+[[package]]
+org = "cosmobilis"
+name = "fo_db"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "os"},
+	{org = "ballerinai", name = "observe"}
+]
+
+[[package]]
+org = "cosmobilis"
+name = "job_patch"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "http"},
+	{org = "ballerinai", name = "observe"}
+]
+modules = [
+	{org = "cosmobilis", packageName = "job_patch", moduleName = "job_patch"}
+]
+
+[[package]]
+org = "cosmobilis"
+name = "sync_fo_quotations"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "os"},
+	{org = "ballerina", name = "task"},
+	{org = "ballerinai", name = "observe"},
+	{org = "cosmobilis", name = "fo_db"},
+	{org = "cosmobilis", name = "job_patch"}
+]
+modules = [
+	{org = "cosmobilis", packageName = "sync_fo_quotations", moduleName = "sync_fo_quotations"}
 ]
 
 [[package]]
@@ -348,24 +369,10 @@ dependencies = [
 	{org = "ballerina", name = "lang.runtime"},
 	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "task"},
-	{org = "ballerinai", name = "observe"}
+	{org = "ballerinai", name = "observe"},
+	{org = "cosmobilis", name = "job_patch"}
 ]
 modules = [
 	{org = "cosmobilis", packageName = "update_customer_dispo", moduleName = "update_customer_dispo"}
-]
-
-[[package]]
-org = "cosmobilis"
-name = "zero_km"
-version = "0.1.0"
-dependencies = [
-	{org = "ballerina", name = "http"},
-	{org = "ballerina", name = "log"},
-	{org = "ballerina", name = "task"},
-	{org = "ballerina", name = "websocket"},
-	{org = "ballerinai", name = "observe"}
-]
-modules = [
-	{org = "cosmobilis", packageName = "zero_km", moduleName = "zero_km"}
 ]
 

@@ -86,20 +86,22 @@ class CustomerDispoJob {
 
     // === SCHEDULED EXECUTION FUNCTIONS ===
     public function execute() {
-        do {
-            log:printInfo("⏱️ Job planifié : exécution de scheduledRun()");
-            var result = self.scheduledRun();
-            if result is error {
-                string msg = "❌ scheduledRun() a échoué : " + result.message();
-                log:printError(msg, result);
-                // Envoi d'une notification Teams en cas d'erreur
-                var notif = self.sendTeamsNotification("Erreur exécution customerDispo", msg, [{"Type d'exécution": "Tâche planifiée"}]);
-                if notif is error {
-                    log:printError("Échec d'envoi Teams", notif);
+        lock {
+            do {
+                log:printInfo("⏱️ Job planifié : exécution de scheduledRun()");
+                var result = self.scheduledRun();
+                if result is error {
+                    string msg = "❌ scheduledRun() a échoué : " + result.message();
+                    log:printError(msg, result);
+                    // Envoi d'une notification Teams en cas d'erreur
+                    var notif = self.sendTeamsNotification("Erreur exécution customerDispo", msg, [{"Type d'exécution": "Tâche planifiée"}]);
+                    if notif is error {
+                        log:printError("Échec d'envoi Teams", notif);
+                    }
                 }
+            } on fail var failure {
+                log:printError("Unmanaged error", failure);
             }
-        } on fail var failure {
-            log:printError("Unmanaged error", failure);
         }
     }
 
@@ -271,11 +273,4 @@ class CustomerDispoJob {
         }
     }
 
-}
-
-// === WORKAROUND SERVICE (WILL BECOME A JOBS ADMIN SERVICE) ===
-service http:Service / on new http:Listener(9876) {
-resource function get health() returns string {
-       return "this is a workaround to keep the script live sothat the scheduled job can run...";
-    }
 }

@@ -69,7 +69,7 @@ on peut gérer ce fichier par environnement comme ceci:
 ```
 ./generate_config.sh <app_or_module_name> <env> modules|apps
 ```
-Ce script:
+Ce script (qui sert surtout pour initialiser ou ré-initialiser la conf d'une app/module):
 - concatène le fichier à la racine de ce repo Config.shared.&lt;env&gt;.toml au fichier Config.app.&lt;env&gt;.toml de l'app/du module et créer le fichier Config.toml de l'app/du module avec ces contenus concaténés.<br>
 _(NB: le 3eme paramètre doit valoir apps pour une app et modules pour un module);_
 
@@ -77,6 +77,24 @@ _(NB: le 3eme paramètre doit valoir apps pour une app et modules pour un module
 - s'il existe un fichier Secrets.app.&lt;env&gt;.toml dans l'app/le module, il le concatène aussi.
 
 Les fichier de conf "shared" permettent de gérer de variables de configuration communes à toutes les apps/modules par environnement, et éviter ainsi les duplication de variables de conf.
+Ce mécanisme  induit une contrainte, mais qui est aussi une pratique structurante recomandée dans la doc ballerina:
+* on ne peut pas définir de manière safe, des variables de conf de type simple comme:
+```
+myConfVar = "myVaue"
+```
+* car lorsqu'on agglomère de telles variables avec des variables de type record comme cela:
+```
+[conf]
+myVar = "myVaue"
+```
+* cela produit potentiellement un fichier de conf final comme cela:
+```
+[conf]
+myVar = "myVaue"
+
+myConfVar = "myVaue"
+```
+* et alors myConfVar est compris comme un field du record conf et la compile du code (qui contient des occurences "myConfVar") plante.
 
 NB: une variable de conf myConfVar dans le fichier Config.toml d'un module, doit être préfixée par le nom du module dans le Config.toml d'une app qui utilise ce module.<br>
 
@@ -165,7 +183,7 @@ Pour des raison évidente d'optimisation des ressource/performances, on utilise 
 
 ### Déploiement initiale
 
-Sur un poste de dev effectuer voir [cette doc](https://ballerina.io/downloads/installation-options/). L'option d'install debian sur un poste Ubuntu est recommandée, mais attention:
+Sur un poste de dev voir [cette doc](https://ballerina.io/downloads/installation-options/). L'option d'install debian sur un poste Ubuntu est recommandée, mais attention:
 
 **Ballerina ne propose pas encore de package fonctionnant sur un OS (linux à minima), avec un processeur ARM (comme la VM AWS du BO EliteAuto).**
 

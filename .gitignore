@@ -1,2 +1,7 @@
 # ignore secret conf files
 Secrets.*.toml
+*.vscode
+.idea
+target
+tmp
+.devcontainer.json
