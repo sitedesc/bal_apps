@@ -96,12 +96,13 @@ class SyncFoQuotationJob {
                     string stdout = check string:fromBytes(check process.output());
                     int|error devisId = int:fromString(stdout);
                     if devisId is error {
+                        string description = string `The upload of the quotation message : ID ${id}, did not return the id of the created quotation, but returned: ${stdout}
+                                        `;
                         var notif = self.sendTeamsNotification(
                                         "Erreur exécution job sync_fo_quotation for a quotation",
-                                        string `The upload of the quotation message : ID " + id + ", did not return the id of the created quotation, but returned: ${stdout}
-                                        `,
+                                        description,
                                         [{"Type d'exécution": "Tâche planifiée"}]);
-                        log:printError("The upload of the quotation message : ID " + id + ", did not return the id of the created quotation, but returned:" + stdout);
+                        log:printError(description);
                         check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.ERROR, stdout);
                         if notif is error {
                             log:printError("Échec d'envoi Teams", notif);
