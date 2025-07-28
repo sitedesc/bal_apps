@@ -1,0 +1,7 @@
+
+[ballerina.log]
+# reco: comment this line in prod environnement
+level = "DEBUG"
+
+[mockConf]
+port = 9876

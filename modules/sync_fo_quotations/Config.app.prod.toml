@@ -1,3 +1,7 @@
 
+[ballerina.log]
 # reco: comment this line in prod environnement
-ballerina.log.level = "DEBUG"
+level = "DEBUG"
+
+[job_patch.conf]
+port = 9988

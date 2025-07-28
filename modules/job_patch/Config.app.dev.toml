@@ -1,0 +1,7 @@
+
+# reco: comment this line in prod environnement
+[ballerina.log]
+level = "DEBUG"
+
+[conf]
+port = 9988

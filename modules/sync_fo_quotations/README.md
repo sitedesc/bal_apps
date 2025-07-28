@@ -11,28 +11,32 @@ Ce composant a été créé pour le ticket EA-437: il transmet les nouveaux devi
 
 * Pré-requis: avoir installé Ballerina,
 * cloner ce repo et se mettre sur la branche correspondant à l'environnement,
-* copier/coller le template de configuration ci-dessous dans un fichier Config.toml à la racine du module et remplacer les valeur REPLACEME par les bonnes valeur (demander aux "bonnes personnes" ces valeur si besoin),
+* copier/coller le template de configuration ci-dessous dans un fichier Config.toml à la racine du module et remplacer les valeur REPLACEME par les bonnes valeur (voir les README des composant intégrés et/ou demander aux "bonnes personnes" ces valeur si besoin),
 
-<<<<
-
+```
 \# reco: comment this line in prod environnement<br>
 ballerina.log.level = "DEBUG"
 
-boApiUrl = "REPLACEME"<br>
+[conf]
+# in dev and preprod the url should be equal the one of a running /modules/mock service and the secret : "unused:unused"
+boApiUrl = "REPLACEME"
 boApiSecret = "REPLACEME"
 
-[teams]<br>
-webhookUrl = "REPLACEME"<br>
-channelId = "REPLACEME"<br>
+[job_patch.conf]
+port = REPLACEME
+
+[teams]
+webhookUrl = "REPLACEME"
+channelId = "REPLACEME"
 apiKey = "REPLACEME"
 
-[fo_db.credentials]<br>
-host = "REPLACEME"<br>
-user = "REPLACEME"<br>
-password = "REPLACEME"<br>
+[fo_db.credentials]
+host = "REPLACEME"
+user = "REPLACEME"
+password = "REPLACEME"
 database = "REPLACEME"
+```
 
->>>>
 * ajouter dans le fichier ~/.profile du compte bal_apps (= fichier exécuté à chaque ouverture de session du compte linux qui exécute une app ou un module bal_apps):
 ```
 # set PATH of sync_fo_quotations if it is there
