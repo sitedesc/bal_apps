@@ -22,7 +22,19 @@ public record {
     2 ERROR;
 } SYNC_STATE = {TODO: 0, DONE: 1, ERROR: 2};
 
+isolated function getQuotationSelect(string etat) returns string {
+    return string `SELECT CONCAT('<itn_bo_message><id>',id,'</id><message><![CDATA[', message,']]></message></itn_bo_message>') FROM itn_bo_message WHERE etat = ${etat} AND created_at >= '2025-07-10' limit 1`;
+}
+
+public isolated function getQuotationMsgsInError() returns xml|error {
+    return execQuotationSelect(getQuotationSelect("2"));
+}
+
 public isolated function getQuotationMsgs() returns xml|error {
+    return execQuotationSelect(getQuotationSelect("0"));
+}
+
+isolated function execQuotationSelect(string query) returns xml|error {
 
     //mysql standard version
     //Quotation[] quotations = [];
@@ -37,7 +49,6 @@ public isolated function getQuotationMsgs() returns xml|error {
 
     //mysql 5.1 version using fosql mariadb client alias with credentials and 
     //sp_get_quotations stored procedure returning results in json
-    string query = "SELECT CONCAT('<itn_bo_message><id>',id,'</id><message><![CDATA[', message,']]></message></itn_bo_message>') FROM itn_bo_message WHERE etat = 0 AND created_at >= '2025-07-10' limit 1";
     os:Process process = check os:exec({
                                            value: "exec_sql.sh",
                                            arguments: [credentials.user, credentials.password, credentials.host, 

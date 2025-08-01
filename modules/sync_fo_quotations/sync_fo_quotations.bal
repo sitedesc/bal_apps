@@ -179,6 +179,42 @@ class SyncFoQuotationJob {
             id = "";
             messageList = check fodb:getQuotationMsgs();
         }
+
+
+        messageList = check fodb:getQuotationMsgsInError();
+        id = "";
+        while (messageList/*).length() > 0 {
+            foreach xml msgElem in messageList/* {
+                do {
+                    log:printDebug(msgElem.toString());
+                    id =  (msgElem/<id>[0]/*[0]).toString();
+                    if id.length() <= 0 {
+                        continue;
+                    }
+                    log:printDebug(string `${id}`);
+                    string msgJson = (msgElem/<message>[0]/*[0]).toString();
+                    json msg = check jsondata:parseString(msgJson);
+                    string numero = (check jsondata:read(msg, `$.reference`)).toString();
+                    if numero is "" {
+                        string description = string `cannot process a quotation in error: ID ${id} because it has no reference.`;
+                        log:printError(description);
+                        id = "";
+                        continue;
+                    }
+                    bodb:QuotationCriterias criterias = {numero: numero};
+                    if check bodb:existQuotations(criterias) {
+                        check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE, "a quotation with numero equal to the message reference already exists.");
+                        id = "";
+                        continue;
+                    }
+                } on fail var failure {
+                    log:printError("Erreur exécution job sync_fo_quotation for quotation in error:" + msgElem.toString(), failure);
+                    id = "";
+                }
+            }
+            id = "";
+            messageList = check fodb:getQuotationMsgs();
+        }
     }
 
     // === TEAMS NOTIF ===
