@@ -208,12 +208,13 @@ class SyncFoQuotationJob {
                         continue;
                     }
                 } on fail var failure {
-                    log:printError("Erreur exécution job sync_fo_quotation for quotation in error:" + msgElem.toString(), failure);
+                    log:printError("Erreur job sync_fo_quotation for quotation in error:" + msgElem.toString(), failure);
+                    check fodb:setQuotationMsgState(id, 3, failure.toString());
                     id = "";
                 }
             }
             id = "";
-            messageList = check fodb:getQuotationMsgs();
+            messageList = check fodb:getQuotationMsgsInError();
         }
     }
 
