@@ -33,6 +33,12 @@ repository = "local"
 
 [[dependency]]
 org = "cosmobilis"
+name = "bo_db"
+version = "0.1.0"
+repository = "local"
+
+[[dependency]]
+org = "cosmobilis"
 name = "job_patch"
 version = "0.1.0"
 repository = "local"

@@ -1,0 +1,15 @@
+[package]
+org = "cosmobilis"
+name = "bo_db"
+version = "0.1.0"
+distribution = "2201.12.7"
+
+[build-options]
+observabilityIncluded = true
+
+[[platform.java21.dependency]]
+groupId = "mysql"
+artifactId = "mysql-connector-java"
+version = "9.0.0"
+path = "./lib/mysql-connector-j-9.0.0.jar"
+graalvmCompatible = true

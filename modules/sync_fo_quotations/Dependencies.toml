@@ -55,6 +55,9 @@ dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.object"}
 ]
+modules = [
+	{org = "ballerina", packageName = "data.jsondata", moduleName = "data.jsondata"}
+]
 
 [[package]]
 org = "ballerina"
@@ -234,7 +237,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "oauth2"
-version = "2.14.0"
+version = "2.14.1"
 dependencies = [
 	{org = "ballerina", name = "cache"},
 	{org = "ballerina", name = "crypto"},
@@ -262,6 +265,26 @@ dependencies = [
 ]
 modules = [
 	{org = "ballerina", packageName = "os", moduleName = "os"}
+]
+
+[[package]]
+org = "ballerina"
+name = "random"
+version = "1.7.0"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "time"}
+]
+
+[[package]]
+org = "ballerina"
+name = "sql"
+version = "1.16.0"
+dependencies = [
+	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.object"},
+	{org = "ballerina", name = "time"}
 ]
 
 [[package]]
@@ -317,6 +340,45 @@ modules = [
 ]
 
 [[package]]
+org = "ballerinax"
+name = "cdc"
+version = "1.0.3"
+dependencies = [
+	{org = "ballerina", name = "crypto"},
+	{org = "ballerina", name = "data.jsondata"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerinai", name = "observe"}
+]
+
+[[package]]
+org = "ballerinax"
+name = "mysql"
+version = "1.16.1"
+dependencies = [
+	{org = "ballerina", name = "crypto"},
+	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "random"},
+	{org = "ballerina", name = "sql"},
+	{org = "ballerina", name = "time"},
+	{org = "ballerinax", name = "cdc"}
+]
+
+[[package]]
+org = "cosmobilis"
+name = "bo_db"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "sql"},
+	{org = "ballerinai", name = "observe"},
+	{org = "ballerinax", name = "mysql"}
+]
+modules = [
+	{org = "cosmobilis", packageName = "bo_db", moduleName = "bo_db"}
+]
+
+[[package]]
 org = "cosmobilis"
 name = "fo_db"
 version = "0.1.0"
@@ -346,12 +408,14 @@ org = "cosmobilis"
 name = "sync_fo_quotations"
 version = "0.1.0"
 dependencies = [
+	{org = "ballerina", name = "data.jsondata"},
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "os"},
 	{org = "ballerina", name = "task"},
 	{org = "ballerinai", name = "observe"},
+	{org = "cosmobilis", name = "bo_db"},
 	{org = "cosmobilis", name = "fo_db"},
 	{org = "cosmobilis", name = "job_patch"}
 ]

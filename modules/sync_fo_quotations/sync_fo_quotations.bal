@@ -1,9 +1,11 @@
+import ballerina/data.jsondata;
 import ballerina/http;
 import ballerina/io;
 import ballerina/log;
 import ballerina/os;
 import ballerina/task;
 
+import cosmobilis/bo_db as bodb;
 import cosmobilis/fo_db as fodb;
 
 type TeamsConf record {
@@ -13,13 +15,12 @@ type TeamsConf record {
 };
 
 type Conf record {
-string boApiUrl;
-string boApiSecret;
+    string boApiUrl;
+    string boApiSecret;
 };
 
 configurable TeamsConf teams = ?;
 configurable Conf conf = ?;
-
 
 // === SCHEDULER INITIALISATION ===
 public function createSyncFoQuotationJob() returns task:JobId|error {
@@ -73,16 +74,34 @@ class SyncFoQuotationJob {
 
     function scheduledRun() returns error? {
         xml messageList = check fodb:getQuotationMsgs();
+        string id = "";
         while (messageList/*).length() > 0 {
             foreach xml msgElem in messageList/* {
                 do {
                     log:printDebug(msgElem.toString());
-                    string id = check (msgElem/<id>[0]/*[0]).toString();
+                    id =  (msgElem/<id>[0]/*[0]).toString();
                     if id.length() <= 0 {
                         continue;
                     }
                     log:printDebug(string `${id}`);
                     string msgJson = (msgElem/<message>[0]/*[0]).toString();
+                    json msg = check jsondata:parseString(msgJson);
+                    string numero = (check jsondata:read(msg, `$.reference`)).toString();
+                    if numero is "" {
+                        string description = string `cannot process a quotation : ID ${id} because it has no reference.`;
+                        _ = check self.sendTeamsNotification(
+                                        "Erreur exécution job sync_fo_quotation for a quotation",
+                                        description,
+                                        [{"Type d'exécution": "Tâche planifiée"}]);
+                        log:printError(description);
+                        check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.ERROR, description);
+                        continue;
+                    }
+                    bodb:QuotationCriterias criterias = {numero: numero};
+                    if check bodb:existQuotations(criterias) {
+                        check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE, "a quotation with numero equal to the message reference already exists.");
+                        continue;
+                    }
                     _ = check io:fileWriteString("/tmp/quotation.json", msgJson);
                     // Envoyer le JSON comme corps HTTP, etc.
                     log:printDebug(msgJson);
@@ -99,7 +118,14 @@ class SyncFoQuotationJob {
                     _ = check process.waitForExit();
 
                     string stdout = check string:fromBytes(check process.output());
-                    int|error devisId = int:fromString(stdout);
+                    int|error devisId = error("No devisId retrieved");
+                    if containsKeywords(stdout, "504", "Time-out") {
+                        if check bodb:existQuotations(criterias) {
+                            check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE, "couldn't retrieve quotation number because of quotation upload timeout.");
+                            continue;
+                        }
+                    }
+                    devisId = int:fromString(stdout);
                     if devisId is error {
                         string description = string `The upload of the quotation message : ID ${id}, did not return the id of the created quotation, but returned: ${stdout}
                                         `;
@@ -121,16 +147,25 @@ class SyncFoQuotationJob {
                     check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE, stdout);
                     log:printInfo(string `quotation message ID ${id} sent to BO.`);
                 } on fail var failure {
+                    string title = id.length() > 0 ? string `Erreur exécution job sync_fo_quotation for quotation : ID ${id}`
+                        : "Erreur exécution job sync_fo_quotation for a quotation";
+                    if id.length() > 0 {
+                        check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.ERROR, failure.toString());
+                    }
                     var notif = self.sendTeamsNotification(
-                                        "Erreur exécution job sync_fo_quotation for a quotation",
+                                        title,
                                         string `${failure.toString()}
                                         devis:
                                         ${msgElem.toString()}`,
                                         [{"Type d'exécution": "Tâche planifiée"}]);
                     log:printError("Erreur exécution job sync_fo_quotation for quotation:" + msgElem.toString(), failure);
                     if notif is error {
-                        log:printError("Échec d'envoi Teams", notif);
+                        log:printError(`Teams notification send error:
+                        ${notif.toString()}
+                        while trying to send message: 
+                        ${failure.toString()}`);
                     }
+                    if id.length() <= 0 {continue;}
                 }
             }
             messageList = check fodb:getQuotationMsgs();
@@ -158,4 +193,15 @@ class SyncFoQuotationJob {
         }
     }
 
+}
+
+isolated function containsKeywords(string input, string keyword1, string keyword2) returns boolean {
+    string lowerInput = string:toLowerAscii(input);
+    string lowerKeyword1 = string:toLowerAscii(keyword1);
+    string lowerKeyword2 = string:toLowerAscii(keyword2);
+
+    boolean hasKeyword1 = string:includes(lowerInput, lowerKeyword1);
+    boolean hasKeyword2 = string:includes(lowerInput, lowerKeyword2);
+
+    return hasKeyword1 && hasKeyword2;
 }
