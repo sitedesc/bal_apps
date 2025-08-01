@@ -95,11 +95,13 @@ class SyncFoQuotationJob {
                                         [{"Type d'exécution": "Tâche planifiée"}]);
                         log:printError(description);
                         check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.ERROR, description);
+                        id = "";
                         continue;
                     }
                     bodb:QuotationCriterias criterias = {numero: numero};
                     if check bodb:existQuotations(criterias) {
                         check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE, "a quotation with numero equal to the message reference already exists.");
+                        id = "";
                         continue;
                     }
                     _ = check io:fileWriteString("/tmp/quotation.json", msgJson);
@@ -122,6 +124,7 @@ class SyncFoQuotationJob {
                     if containsKeywords(stdout, "504", "Time-out") {
                         if check bodb:existQuotations(criterias) {
                             check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE, "couldn't retrieve quotation number because of quotation upload timeout.");
+                            id = "";
                             continue;
                         }
                     }
@@ -138,7 +141,7 @@ class SyncFoQuotationJob {
                         if notif is error {
                             log:printError("Échec d'envoi Teams", notif);
                         }
-
+                        id = "";
                         continue;
                     }
 
@@ -146,6 +149,7 @@ class SyncFoQuotationJob {
 
                     check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE, stdout);
                     log:printInfo(string `quotation message ID ${id} sent to BO.`);
+                    id = "";
                 } on fail var failure {
                     string title = id.length() > 0 ? string `Erreur exécution job sync_fo_quotation for quotation : ID ${id}`
                         : "Erreur exécution job sync_fo_quotation for a quotation";
@@ -165,9 +169,14 @@ class SyncFoQuotationJob {
                         while trying to send message: 
                         ${failure.toString()}`);
                     }
-                    if id.length() <= 0 {continue;}
+                    if id.length() <= 0 {
+                        continue;
+                    } else {
+                        id = "";
+                    }
                 }
             }
+            id = "";
             messageList = check fodb:getQuotationMsgs();
         }
     }
