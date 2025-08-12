@@ -1,5 +1,6 @@
 import ballerina/log;
 import ballerina/os;
+import ballerina/io;
 
 public type DbCredentials record {
     string host;
@@ -54,9 +55,16 @@ isolated function execQuotationSelect(string query) returns xml|error {
                                            arguments: [credentials.user, credentials.password, credentials.host, 
                                                        credentials.database, query]
                                        });
-    _ = check process.waitForExit();
+    
+
+    log:printDebug("before waitForExit");
+    int status = check process.waitForExit();
+    log:printDebug("after waitForExit");
+    string stderr = check string:fromBytes(check process.output(io:stderr));
     string stdout = check string:fromBytes(check process.output());
-    string xmlDocStr = "<itn_bo_messages>" + stdout + "</itn_bo_messages>";
+    log:printDebug(stderr);
+    string content = check io:fileReadString(stdout);
+    string xmlDocStr = "<itn_bo_messages>" + content + "</itn_bo_messages>";
     string:RegExp r = re `\\\\u`;
     xmlDocStr = r.replaceAll(xmlDocStr,"\\u");
     string:RegExp r1 = re `\\\\"`;
