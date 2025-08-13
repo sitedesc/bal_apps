@@ -80,11 +80,6 @@ Ce composant a été créé pour le ticket EA-432, et permet de mettre à jour l
 
 
 
-  
-
-
-
-
 <<<<
 
 
@@ -92,7 +87,8 @@ Ce composant a été créé pour le ticket EA-432, et permet de mettre à jour l
     [algolia]
     appId = "REPLACEME"
     apiKey = "REPLACEME"
-    indexName = "REPLACEME"
+    ## order in indexNames is important as values from (or calculated from) a previous index may be used in a next one
+    indexNames = ["REPLACEME_BY_OFFERS_INDEX", "REPLACEME_BY_LOYERS_INDEX"]
     
     [customerDispo]
     dryRun = true
