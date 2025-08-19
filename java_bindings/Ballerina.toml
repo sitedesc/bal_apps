@@ -1,0 +1,13 @@
+
+[package]
+org = "cosmobilis"
+name = "java_bindings"
+version = "0.1.0"
+distribution = "2201.12.7"
+
+[build-options]
+observabilityIncluded = true
+
+[[package.modules]]
+name = "java_bindings.java.time"
+export = true
