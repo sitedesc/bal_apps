@@ -50,7 +50,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "data.jsondata"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.object"}
@@ -73,7 +73,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.14.2"
+version = "2.14.3"
 dependencies = [
 	{org = "ballerina", name = "auth"},
 	{org = "ballerina", name = "cache"},
@@ -278,6 +278,15 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
+name = "regex"
+version = "1.3.2"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.string"}
+]
+
+[[package]]
+org = "ballerina"
 name = "sql"
 version = "1.16.0"
 dependencies = [
@@ -374,6 +383,37 @@ dependencies = [
 	{org = "ballerinai", name = "observe"},
 	{org = "ballerinax", name = "mysql"}
 ]
+
+[[package]]
+org = "cosmobilis"
+name = "check_disk_space"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "os"},
+	{org = "ballerina", name = "task"},
+	{org = "ballerinai", name = "observe"},
+	{org = "cosmobilis", name = "job_patch"},
+	{org = "cosmobilis", name = "teams"},
+	{org = "cosmobilis", name = "time"}
+]
+modules = [
+	{org = "cosmobilis", packageName = "check_disk_space", moduleName = "check_disk_space"}
+]
+
+[[package]]
+org = "cosmobilis"
+name = "eliteauto_services"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "task"},
+	{org = "ballerinai", name = "observe"},
+	{org = "cosmobilis", name = "check_disk_space"},
+	{org = "cosmobilis", name = "job_patch"},
+	{org = "cosmobilis", name = "sync_fo_quotations"},
+	{org = "cosmobilis", name = "update_customer_dispo"}
+]
 modules = [
 	{org = "cosmobilis", packageName = "bo_db", moduleName = "bo_db"}
 ]
@@ -383,8 +423,21 @@ org = "cosmobilis"
 name = "fo_db"
 version = "0.1.0"
 dependencies = [
+	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "os"},
+	{org = "ballerinai", name = "observe"},
+	{org = "ballerinax", name = "mysql"}
+]
+
+[[package]]
+org = "cosmobilis"
+name = "java_bindings"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "time"},
 	{org = "ballerinai", name = "observe"}
 ]
 modules = [
@@ -421,5 +474,45 @@ dependencies = [
 ]
 modules = [
 	{org = "cosmobilis", packageName = "sync_fo_quotations", moduleName = "sync_fo_quotations"}
+]
+
+[[package]]
+org = "cosmobilis"
+name = "teams"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "regex"},
+	{org = "ballerinai", name = "observe"}
+]
+
+[[package]]
+org = "cosmobilis"
+name = "time"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "time"},
+	{org = "ballerinai", name = "observe"},
+	{org = "cosmobilis", name = "java_bindings"}
+]
+
+[[package]]
+org = "cosmobilis"
+name = "update_customer_dispo"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "file"},
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "lang.runtime"},
+	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "task"},
+	{org = "ballerinai", name = "observe"},
+	{org = "cosmobilis", name = "job_patch"}
+]
+modules = [
+	{org = "cosmobilis", packageName = "update_customer_dispo", moduleName = "update_customer_dispo"}
 ]
 

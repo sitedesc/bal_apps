@@ -12,7 +12,7 @@ Cette librairie a été créé pour le ticket EA-438, afin de gérer les accès 
 * cloner ce repo et se mettre sur la branche correspondant à l'environnement,
 * remplacer les REPLACEME dans le block Config.toml ci-dessous (NB: pour une bdd dans un docker local, sauf si on sait vraiment ce qu'on fait, mettre 127.0.0.1 et pas localhost);
 ```
-[bo_db.credentials]<br>
+[bo_db.conf]
 host = "REPLACEME"
 user = "REPLACEME"
 password = "REPLACEME"

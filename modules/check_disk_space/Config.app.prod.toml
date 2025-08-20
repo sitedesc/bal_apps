@@ -1,0 +1,13 @@
+
+[conf]
+server = "ELITEAUTO BO"
+hour = 16
+minutes = 0
+seconds = 0
+
+[ballerina.log]
+# reco: comment this line in prod environnement
+level = "DEBUG"
+
+[job_patch.conf]
+port = 9988
