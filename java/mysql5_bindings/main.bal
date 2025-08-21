@@ -3,7 +3,7 @@ import ballerina/log;
 configurable Conf conf = ?;
 
 public function main() returns error? {
-    Client 'client = check connect(conf);
+    final Client 'client = check connect(conf);
     log:printInfo("✅ Connexion établie");
 
     // Table de test

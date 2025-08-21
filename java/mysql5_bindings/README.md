@@ -39,6 +39,13 @@ Pour générer une nouvelle version de ce client:
 * la compiler en lançant dans ce projet build.sh,
 * recopier l'archive mysql5_wrapper_java.jar générée par ce build à la racine du projet, dans mysql5_bindings/lib,
 * recopier également tous les .jar présent dans mysql5_wrapper_java/lib, dans mysql5_bindings/lib,
+* dans ce module, lancer la (re-) génération de la class wrapper ballerina:
+```
+bal bindgen --classpath ./lib/mysql5_wrapper_java.jar cosmobilis.mysql5.DatabaseWrapper
+## appliquer ce patch à bindgen qui rajoute "isolated" au fonction qui doivent l'être
+bin/patch_bindgen.sh
+## NB: si on des erreur genre "cannot execute non-isolated function in isolated function" avec cette nouvelle version: rajouter dans ce script l'ajout de "isolated" aux function qui doivent l'être
+```
 * configurer si besoin la connexion à la db pour test dans Config.toml,
 * modifier si besoin main.bal pour tester les changement de cette nouvelles version, puis exécuter ce main:
 ```

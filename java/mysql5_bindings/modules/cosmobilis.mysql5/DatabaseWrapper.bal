@@ -16,7 +16,7 @@ public distinct class DatabaseWrapper {
     # The init function of the Ballerina class mapping the `cosmobilis.mysql5.DatabaseWrapper` Java class.
     #
     # + obj - The `handle` value containing the Java reference of the object.
-    public function init(handle obj) {
+    public isolated function init(handle obj) {
         self.jObj = obj;
     }
 
@@ -50,7 +50,7 @@ public distinct class DatabaseWrapper {
     #
     # + arg0 - The `string` value required to map with the Java method parameter.
     # + return - The `string` or the `javasql:SQLException` value returning from the Java mapping.
-    public function executeQueryAsJson(string arg0) returns string|javasql:SQLException {
+    public isolated function executeQueryAsJson(string arg0) returns string|javasql:SQLException {
         handle|error externalObj = cosmobilis_mysql5_DatabaseWrapper_executeQueryAsJson(self.jObj, java:fromString(arg0));
         if (externalObj is error) {
             javasql:SQLException e = error javasql:SQLException(javasql:SQLEXCEPTION, externalObj, message = externalObj.message());
@@ -64,7 +64,7 @@ public distinct class DatabaseWrapper {
     #
     # + arg0 - The `string` value required to map with the Java method parameter.
     # + return - The `int` or the `javasql:SQLException` value returning from the Java mapping.
-    public function executeUpdate(string arg0) returns int|javasql:SQLException {
+    public isolated function executeUpdate(string arg0) returns int|javasql:SQLException {
         int|error externalObj = cosmobilis_mysql5_DatabaseWrapper_executeUpdate(self.jObj, java:fromString(arg0));
         if (externalObj is error) {
             javasql:SQLException e = error javasql:SQLException(javasql:SQLEXCEPTION, externalObj, message = externalObj.message());
@@ -144,7 +144,7 @@ public distinct class DatabaseWrapper {
 # + arg1 - The `string` value required to map with the Java constructor parameter.
 # + arg2 - The `string` value required to map with the Java constructor parameter.
 # + return - The new `DatabaseWrapper` class or `javasql:SQLException` error generated.
-public function newDatabaseWrapper1(string arg0, string arg1, string arg2) returns DatabaseWrapper|javasql:SQLException {
+public isolated function newDatabaseWrapper1(string arg0, string arg1, string arg2) returns DatabaseWrapper|javasql:SQLException {
     handle|error externalObj = cosmobilis_mysql5_DatabaseWrapper_newDatabaseWrapper1(java:fromString(arg0), java:fromString(arg1), java:fromString(arg2));
     if (externalObj is error) {
         javasql:SQLException e = error javasql:SQLException(javasql:SQLEXCEPTION, externalObj, message = externalObj.message());
@@ -155,8 +155,25 @@ public function newDatabaseWrapper1(string arg0, string arg1, string arg2) retur
     }
 }
 
+# The function that maps to the `closePool` method of `cosmobilis.mysql5.DatabaseWrapper`.
+#
+# + return - The `javasql:SQLException` value returning from the Java mapping.
+public function DatabaseWrapper_closePool() returns javasql:SQLException? {
+    error|() externalObj = cosmobilis_mysql5_DatabaseWrapper_closePool();
+    if (externalObj is error) {
+        javasql:SQLException e = error javasql:SQLException(javasql:SQLEXCEPTION, externalObj, message = externalObj.message());
+        return e;
+    }
+}
+
 function cosmobilis_mysql5_DatabaseWrapper_close(handle receiver) returns error? = @java:Method {
     name: "close",
+    'class: "cosmobilis.mysql5.DatabaseWrapper",
+    paramTypes: []
+} external;
+
+function cosmobilis_mysql5_DatabaseWrapper_closePool() returns error? = @java:Method {
+    name: "closePool",
     'class: "cosmobilis.mysql5.DatabaseWrapper",
     paramTypes: []
 } external;
@@ -167,13 +184,13 @@ function cosmobilis_mysql5_DatabaseWrapper_equals(handle receiver, handle arg0) 
     paramTypes: ["java.lang.Object"]
 } external;
 
-function cosmobilis_mysql5_DatabaseWrapper_executeQueryAsJson(handle receiver, handle arg0) returns handle|error = @java:Method {
+isolated function cosmobilis_mysql5_DatabaseWrapper_executeQueryAsJson(handle receiver, handle arg0) returns handle|error = @java:Method {
     name: "executeQueryAsJson",
     'class: "cosmobilis.mysql5.DatabaseWrapper",
     paramTypes: ["java.lang.String"]
 } external;
 
-function cosmobilis_mysql5_DatabaseWrapper_executeUpdate(handle receiver, handle arg0) returns int|error = @java:Method {
+isolated function cosmobilis_mysql5_DatabaseWrapper_executeUpdate(handle receiver, handle arg0) returns int|error = @java:Method {
     name: "executeUpdate",
     'class: "cosmobilis.mysql5.DatabaseWrapper",
     paramTypes: ["java.lang.String"]
@@ -221,7 +238,7 @@ function cosmobilis_mysql5_DatabaseWrapper_wait3(handle receiver, int arg0, int 
     paramTypes: ["long", "int"]
 } external;
 
-function cosmobilis_mysql5_DatabaseWrapper_newDatabaseWrapper1(handle arg0, handle arg1, handle arg2) returns handle|error = @java:Constructor {
+isolated function cosmobilis_mysql5_DatabaseWrapper_newDatabaseWrapper1(handle arg0, handle arg1, handle arg2) returns handle|error = @java:Constructor {
     'class: "cosmobilis.mysql5.DatabaseWrapper",
     paramTypes: ["java.lang.String", "java.lang.String", "java.lang.String"]
 } external;

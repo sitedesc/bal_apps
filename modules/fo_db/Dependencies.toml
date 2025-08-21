@@ -52,18 +52,6 @@ dependencies = [
 ]
 
 [[package]]
-org = "ballerina"
-name = "os"
-version = "1.10.0"
-dependencies = [
-	{org = "ballerina", name = "io"},
-	{org = "ballerina", name = "jballerina.java"}
-]
-modules = [
-	{org = "ballerina", packageName = "os", moduleName = "os"}
-]
-
-[[package]]
 org = "ballerinai"
 name = "observe"
 version = "0.0.0"
@@ -81,10 +69,28 @@ name = "fo_db"
 version = "0.1.0"
 dependencies = [
 	{org = "ballerina", name = "log"},
-	{org = "ballerina", name = "os"},
-	{org = "ballerinai", name = "observe"}
+	{org = "ballerinai", name = "observe"},
+	{org = "cosmobilis", name = "mysql5_bindings"}
 ]
 modules = [
 	{org = "cosmobilis", packageName = "fo_db", moduleName = "fo_db"}
+]
+
+[[package]]
+org = "cosmobilis"
+name = "mysql5_bindings"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.value"},
+	{org = "ballerina", name = "log"},
+	{org = "ballerinai", name = "observe"}
+]
+modules = [
+	{org = "cosmobilis", packageName = "mysql5_bindings", moduleName = "mysql5_bindings"},
+	{org = "cosmobilis", packageName = "mysql5_bindings", moduleName = "mysql5_bindings.cosmobilis.mysql5"},
+	{org = "cosmobilis", packageName = "mysql5_bindings", moduleName = "mysql5_bindings.java.lang"},
+	{org = "cosmobilis", packageName = "mysql5_bindings", moduleName = "mysql5_bindings.java.sql"},
+	{org = "cosmobilis", packageName = "mysql5_bindings", moduleName = "mysql5_bindings.java.util"}
 ]
 
