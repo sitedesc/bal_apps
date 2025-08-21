@@ -8,48 +8,27 @@ Ce composant a été créé pour le ticket EA-440 : il détecte les offres bloqu
 
 ### Déploiement et configuration
 
-* Pré-requis: avoir installé Ballerina,
+* Pré-requis: avoir installé Ballerina,  
 * cloner ce repo et se mettre sur la branche correspondant à l'environnement,
-* copier/coller le template de configuration ci-dessous dans un fichier Config.toml à la racine du module et remplacer les valeur REPLACEME par les bonnes valeur (voir les README des composant intégrés et/ou demander aux "bonnes personnes" ces valeur si besoin),
-
+* remplacer les REPLACEME dans le block Config.toml ci-dessous
 ```
-\# reco: comment this line in prod environnement<br>
-ballerina.log.level = "DEBUG"
-
-[conf]
-# in dev and preprod the url should be equal the one of a running /modules/mock service and the secret : "unused:unused"
-boApiUrl = "REPLACEME"
-boApiSecret = "REPLACEME"
+[ballerina.log]
+level = "DEBUG"
 
 [job_patch.conf]
-port = REPLACEME
+port = 9988
 
-[teams]
-webhookUrl = "REPLACEME"
-channelId = "REPLACEME"
-apiKey = "REPLACEME"
-
-[fo_db.credentials]
+[bo_db.conf]
 host = "REPLACEME"
 user = "REPLACEME"
 password = "REPLACEME"
 database = "REPLACEME"
+ 
+[teams.conf]
+webhookUrl = "REPLACEME"
+channelId = "REPLACEME"
+apiKey = "REPLACEME"
 ```
+_Si on ne sait pas oû trouver les valeur, demander aux "gens qui savent"._
 
-* ajouter dans le fichier ~/.profile du compte bal_apps (= fichier exécuté à chaque ouverture de session du compte linux qui exécute une app ou un module bal_apps):
-```
-# set PATH of check_funding_offers if it is there
-if [ -d "$HOME/<path to bal_apps>/modules/check_funding_offers/bin" ] ; then
-    PATH="$HOME/<path to bal_apps>/modules/check_funding_offers/bin:$PATH"
-fi
-```
-* puis exécuter dans une console:
-```
-source ~/.profile
-```
-
-* lancer "bal build" à la racine de ce module pour vérifier que le projet compile bien,
-* pour lancer le job: bal run
-
-
-
+* exécuter les procédures de déploiement et configuration des README des composant intégrés : ces composant sont déclarés dans les section "dependency" du fichier Ballerina.toml.

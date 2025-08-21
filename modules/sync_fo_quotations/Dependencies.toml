@@ -73,7 +73,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.14.3"
+version = "2.14.4"
 dependencies = [
 	{org = "ballerina", name = "auth"},
 	{org = "ballerina", name = "cache"},
@@ -386,8 +386,7 @@ dependencies = [
 	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "os"},
-	{org = "ballerinai", name = "observe"},
-	{org = "ballerinax", name = "mysql"}
+	{org = "ballerinai", name = "observe"}
 ]
 modules = [
 	{org = "cosmobilis", packageName = "fo_db", moduleName = "fo_db"}
