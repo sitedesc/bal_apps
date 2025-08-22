@@ -124,7 +124,7 @@ public isolated function getPendingFundingOffers() returns json[]|error {
                 DATEDIFF(NOW(), v.update_at) AS nb_jours_attente
 
             FROM veh_json_partenaire v
-                    JOIN eliteauto_prod.offre o ON o.id = v.offre
+                    JOIN offre o ON o.id = v.offre
             WHERE v.etat = 12
         ) AS sq;
     `;

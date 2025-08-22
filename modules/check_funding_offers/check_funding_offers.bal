@@ -69,18 +69,18 @@ class CheckFundingOffersJob {
 
             detailsMessage += string `
             **🔸 OFFRE #${idOffre}**
-            • **ID Carshop:** ${idCarshop}
-            • **Nom:** ${nom}
-            • **Type:** ${typee}
-            • **Publiée:** ${publiee}
-            • **Date création:** ${dateCreation}
-            • **Dernière MAJ:** ${dateMaj}
-            • **Nature:** ${natureId} (${libelleNature})
-            • **Jours d'attente:** ${nbJoursAttente}
-            • **URL Carshop:** ${urlCarshop}
-            • **URL Site:** ${urlSite}
+            • ID Carshop: ${idCarshop}
+            • Nom: ${nom}
+            • Type: ${typee}
+            • Publiée: ${publiee}
+            • Date création: ${dateCreation}
+            • Dernière MAJ: ${dateMaj}
+            • Nature: ${natureId} (${libelleNature})
+            • Jours d'attente: ${nbJoursAttente}
+            • URL Carshop: ${urlCarshop}
+            • URL Site: ${urlSite}
 
-            ----------
+            -------------------------
             `;
         }
 
