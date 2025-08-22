@@ -68,7 +68,7 @@ class CheckFundingOffersJob {
             string nbJoursAttente = (check jsondata:read(offer, `$.nb_jours_attente`)).toString();
 
             detailsMessage += string `
-            **🔸 OFFRE #${idOffre}**
+            **🔸 OFFRE #${idOffre}
             • ID Carshop: ${idCarshop}
             • Nom: ${nom}
             • Type: ${typee}
