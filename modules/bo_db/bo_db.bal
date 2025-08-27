@@ -158,27 +158,27 @@ public isolated function getPendingFundingOffers() returns json[]|error {
 }
 
 // Fonction principale pour synchroniser la table de suivi
-public isolated function syncBlockedOffersTracking() returns error? {
+isolated function syncBlockedOffersTracking() returns error? {
     // 1. Créer la table si elle n'existe pas
     check createBlockedOffersTrackingTable();
     
-    // 2. Ajouter les nouvelles offres bloquées
+    // 2. Mettre à jour les jours d'attente pour celles toujours bloquées
+    check updateBlockedOffersWaitingDays();
+
+    // 3. Ajouter les nouvelles offres bloquées
     sql:ParameterizedQuery newBlockedOffersQuery = `
         SELECT v.id, v.offre
         FROM veh_json_partenaire v
         WHERE v.etat = 12
         AND v.offre NOT IN (SELECT id_offre FROM blocked_offers_tracking)
     `;
-    
+
     stream<record {int id; int offre;}, error?> newOffersStream = dbClient->query(newBlockedOffersQuery);
     check from record {int id; int offre;} row in newOffersStream
         do {
             check addBlockedOfferToTracking(row.id, row.offre);
         };
-    
-    // 3. Mettre à jour les jours d'attente
-    check updateBlockedOffersWaitingDays();
-    
+
     // 4. Supprimer les offres débloquées
     check removeUnblockedOffers();
     
@@ -186,7 +186,7 @@ public isolated function syncBlockedOffersTracking() returns error? {
 }
 
 // Créer la table de suivi si elle n'existe pas
-public isolated function createBlockedOffersTrackingTable() returns error? {
+isolated function createBlockedOffersTrackingTable() returns error? {
     sql:ParameterizedQuery createTableQuery = `
         CREATE TABLE IF NOT EXISTS blocked_offers_tracking (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -205,7 +205,7 @@ public isolated function createBlockedOffersTrackingTable() returns error? {
 }
 
 // Ajouter une nouvelle offre bloquée au suivi
-public isolated function addBlockedOfferToTracking(int idVehJsonPartenaire, int idOffre) returns error? {
+isolated function addBlockedOfferToTracking(int idVehJsonPartenaire, int idOffre) returns error? {
     sql:ParameterizedQuery insertQuery = `
         INSERT INTO blocked_offers_tracking (id_veh_json_partenaire, id_offre, nb_jours_attente)
         VALUES (${idVehJsonPartenaire}, ${idOffre}, 0)
@@ -220,7 +220,7 @@ public isolated function addBlockedOfferToTracking(int idVehJsonPartenaire, int 
 }
 
 // Mettre à jour le nombre de jours d'attente pour toutes les offres suivies
-public isolated function updateBlockedOffersWaitingDays() returns error? {
+isolated function updateBlockedOffersWaitingDays() returns error? {
     // Incrémentation quotidienne (+1 jour à chaque exécution)
     sql:ParameterizedQuery updateQuery = `
         UPDATE blocked_offers_tracking bot
@@ -237,7 +237,7 @@ public isolated function updateBlockedOffersWaitingDays() returns error? {
 }
 
 // Supprimer les offres qui ne sont plus bloquées (état != 12)
-public isolated function removeUnblockedOffers() returns error? {
+isolated function removeUnblockedOffers() returns error? {
     sql:ParameterizedQuery deleteQuery = `
         DELETE bot FROM blocked_offers_tracking bot
         JOIN veh_json_partenaire v ON v.id = bot.id_veh_json_partenaire
