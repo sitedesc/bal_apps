@@ -20,6 +20,16 @@ type VehJsonPartenaireRow record {
         int etat?;
 };
 
+// Nouveau type pour la table de suivi des offres bloquées
+public type BlockedOfferRow record {
+    int id?;
+    int id_veh_json_partenaire?;
+    int id_offre?;
+    int nb_jours_attente?;
+    string date_creation?;
+    string date_maj?;
+};
+
 public configurable Conf conf = ?;
 
 final mysql:Client dbClient = check new (conf.host, conf.user, conf.password, conf.database, conf.port);
@@ -41,7 +51,9 @@ public isolated function existQuotations(QuotationCriterias criterias) returns b
 }
 
 public isolated function getPendingFundingOffers() returns json[]|error {
-
+    // Synchroniser d'abord la table de suivi
+    check syncBlockedOffersTracking();
+    
     sql:ParameterizedQuery query = `
     SELECT
         sq.id_offre,
@@ -59,10 +71,12 @@ public isolated function getPendingFundingOffers() returns json[]|error {
         sq.date_derniere_mise_a_jour,
         sq.id_nature,
         sq.libelle_nature,
-        sq.nb_jours_attente
+        sq.nb_jours_attente,
+        sq.id_veh_json_partenaire
     FROM (
             SELECT
                 v.offre AS id_offre,
+                v.id AS id_veh_json_partenaire,
                 o.nom,
                 o.is_stock AS c_est_du_stock,
                 o.nature AS id_nature,
@@ -121,12 +135,14 @@ public isolated function getPendingFundingOffers() returns json[]|error {
                 CONCAT('https://car-shop.webapp4you.eu/service/vo/visualisation?i_veh_id=',
                         JSON_UNQUOTE(JSON_EXTRACT(v.json, '$.sIDCrypte'))) AS url_carshop,
                 CONCAT('https://www.elite-auto.fr/devis/',offre) as url_site,
-                DATEDIFF(NOW(), v.update_at) AS nb_jours_attente
+                bot.nb_jours_attente
 
             FROM veh_json_partenaire v
                     JOIN offre o ON o.id = v.offre
+                    JOIN blocked_offers_tracking bot ON bot.id_offre = v.offre
             WHERE v.etat = 12
-        ) AS sq;
+        ) AS sq
+    ORDER BY sq.nb_jours_attente DESC, sq.date_creation ASC;
     `;
 
     stream<VehJsonPartenaireRow, error?> resultStream = dbClient->query(query);
@@ -139,4 +155,95 @@ public isolated function getPendingFundingOffers() returns json[]|error {
         };
     log:printInfo("Nombre total de lignes : " + count.toString());
     return results;
+}
+
+// Fonction principale pour synchroniser la table de suivi
+public isolated function syncBlockedOffersTracking() returns error? {
+    // 1. Créer la table si elle n'existe pas
+    check createBlockedOffersTrackingTable();
+    
+    // 2. Ajouter les nouvelles offres bloquées
+    sql:ParameterizedQuery newBlockedOffersQuery = `
+        SELECT v.id, v.offre
+        FROM veh_json_partenaire v
+        WHERE v.etat = 12
+        AND v.offre NOT IN (SELECT id_offre FROM blocked_offers_tracking)
+    `;
+    
+    stream<record {int id; int offre;}, error?> newOffersStream = dbClient->query(newBlockedOffersQuery);
+    check from record {int id; int offre;} row in newOffersStream
+        do {
+            check addBlockedOfferToTracking(row.id, row.offre);
+        };
+    
+    // 3. Mettre à jour les jours d'attente
+    check updateBlockedOffersWaitingDays();
+    
+    // 4. Supprimer les offres débloquées
+    check removeUnblockedOffers();
+    
+    return;
+}
+
+// Créer la table de suivi si elle n'existe pas
+public isolated function createBlockedOffersTrackingTable() returns error? {
+    sql:ParameterizedQuery createTableQuery = `
+        CREATE TABLE IF NOT EXISTS blocked_offers_tracking (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            id_veh_json_partenaire INT NOT NULL,
+            id_offre INT NOT NULL,
+            nb_jours_attente INT DEFAULT 0,
+            date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            date_maj TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_offre (id_offre),
+            INDEX idx_etat_12 (id_veh_json_partenaire, id_offre)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `;
+    
+    sql:ExecutionResult _ = check dbClient->execute(createTableQuery);
+    return;
+}
+
+// Ajouter une nouvelle offre bloquée au suivi
+public isolated function addBlockedOfferToTracking(int idVehJsonPartenaire, int idOffre) returns error? {
+    sql:ParameterizedQuery insertQuery = `
+        INSERT INTO blocked_offers_tracking (id_veh_json_partenaire, id_offre, nb_jours_attente)
+        VALUES (${idVehJsonPartenaire}, ${idOffre}, 0)
+        ON DUPLICATE KEY UPDATE 
+            id_veh_json_partenaire = VALUES(id_veh_json_partenaire),
+            nb_jours_attente = 0,
+            date_maj = CURRENT_TIMESTAMP
+    `;
+    
+    sql:ExecutionResult _ = check dbClient->execute(insertQuery);
+    return;
+}
+
+// Mettre à jour le nombre de jours d'attente pour toutes les offres suivies
+public isolated function updateBlockedOffersWaitingDays() returns error? {
+    // Incrémentation quotidienne (+1 jour à chaque exécution)
+    sql:ParameterizedQuery updateQuery = `
+        UPDATE blocked_offers_tracking bot
+        SET bot.nb_jours_attente = bot.nb_jours_attente + 1
+        WHERE EXISTS (
+            SELECT 1 FROM veh_json_partenaire v 
+            WHERE v.id = bot.id_veh_json_partenaire 
+            AND v.etat = 12
+        )
+    `;
+    
+    sql:ExecutionResult _ = check dbClient->execute(updateQuery);
+    return;
+}
+
+// Supprimer les offres qui ne sont plus bloquées (état != 12)
+public isolated function removeUnblockedOffers() returns error? {
+    sql:ParameterizedQuery deleteQuery = `
+        DELETE bot FROM blocked_offers_tracking bot
+        JOIN veh_json_partenaire v ON v.id = bot.id_veh_json_partenaire
+        WHERE v.etat != 12
+    `;
+    
+    sql:ExecutionResult _ = check dbClient->execute(deleteQuery);
+    return;
 }
