@@ -8,3 +8,11 @@ Cette service app execute des composant backend de la plateforme EliteAuto:
 ### Déploiement et configuration
 
 Exécuter les déploiement et configurations décrit dans les README des composant de cette app.
+Les jobs sont tous activés par défaut.
+Si l'on veut en désactiver certains, les ajouter dans les disabledJobs comme ceci:
+```
+[conf]
+## disables sync_fo_quotation and update_customer_dispo module/jobs:
+disabledJobs = ["SyncFoQuotationJob", "UpdateCustomerDispoJob"]
+```
+(voir la liste de tous les jobs dans main.bal)
