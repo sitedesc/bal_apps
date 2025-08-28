@@ -425,10 +425,9 @@ org = "cosmobilis"
 name = "fo_db"
 version = "0.1.0"
 dependencies = [
-	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "log"},
-	{org = "ballerina", name = "os"},
-	{org = "ballerinai", name = "observe"}
+	{org = "ballerinai", name = "observe"},
+	{org = "cosmobilis", name = "mysql5_bindings"}
 ]
 
 [[package]]
@@ -456,14 +455,23 @@ modules = [
 
 [[package]]
 org = "cosmobilis"
+name = "mysql5_bindings"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.value"},
+	{org = "ballerina", name = "log"},
+	{org = "ballerinai", name = "observe"}
+]
+
+[[package]]
+org = "cosmobilis"
 name = "sync_fo_quotations"
 version = "0.1.0"
 dependencies = [
 	{org = "ballerina", name = "data.jsondata"},
 	{org = "ballerina", name = "http"},
-	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "log"},
-	{org = "ballerina", name = "os"},
 	{org = "ballerina", name = "task"},
 	{org = "ballerinai", name = "observe"},
 	{org = "cosmobilis", name = "bo_db"},
