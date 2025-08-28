@@ -6,13 +6,18 @@ import cosmobilis/update_customer_dispo as ucd;
 import cosmobilis/sync_fo_quotations as sfq;
 import cosmobilis/check_disk_space as cds;
 
+type Conf record {
+string[] disabledJobs;
+};
+configurable Conf conf = {disabledJobs: []};
+
 public function main() returns error? {
     job_patch:runJobPatch();
-    map<task:JobId> _ = {
+    map<task:JobId|()> _ = {
         // zero km job is not requested in prod yet: uncomment it to test it
-        //"ZeroKmJob": check zk:createZeroKmJob(),
-        "CustomerDispoJob": check ucd:createCustomerDispoJob(),
-        "SyncFoQuotationJob": check sfq:createSyncFoQuotationJob(),
-        "CheckDiskSpaceJob": check cds:createCheckDiskSpaceJob()
+        //"ZeroKmJob": conf.disabledJobs.indexOf("ZeroKmJob") is () ? check zk:createZeroKmJob() : (),
+        "UpdateCustomerDispoJob": conf.disabledJobs.indexOf("UpdateCustomerDispoJob") is () ? check ucd:createCustomerDispoJob() : (),
+        "SyncFoQuotationJob": conf.disabledJobs.indexOf("SyncFoQuotationJob") is () ? check sfq:createSyncFoQuotationJob() : (),
+        "CheckDiskSpaceJob": conf.disabledJobs.indexOf("CheckDiskSpaceJob") is () ? check cds:createCheckDiskSpaceJob() : ()
     };
 }
