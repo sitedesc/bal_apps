@@ -48,16 +48,18 @@ class CheckFundingOffersJob {
         }
 
         string title = "🚨 Offres en attente de financement détectées";
-        string description = string `${offers.length()} offre(s) bloquée(s) nécessitent une attention`;
-        
-        // Construire le message de détails
-        string detailsMessage = self.buildDetailsMessage(offers);
-        
-        // Message à envoyer
-        string fullMessage = detailsMessage;
-        
-        // Envoi de la notification Teams
-        check teams:sendTeamsNotification(title, description, fullMessage);
+        int totalOffers = offers.length();
+        int chunkSize = 10; // taille de lot
+
+        json[][] chunks = self.chunkOffers(offers, chunkSize);
+        int totalChunks = chunks.length();
+        int batchIndex = 1;
+        foreach json[] chunk in chunks {
+            string description = string `${totalOffers} offre(s) bloquée(s) nécessitent une attention — lot ${batchIndex.toString()}/${totalChunks.toString()}`;
+            string detailsMessage = self.buildDetailsMessage(chunk);
+            check teams:sendTeamsNotification(title, description, detailsMessage);
+            batchIndex = batchIndex + 1;
+        }
 
         // Logs locaux désactivés
         // log:printInfo("[LOCAL TEST] Titre: " + title);
@@ -128,5 +130,25 @@ class CheckFundingOffersJob {
         }
              
         return detailsMessage;
+    }
+
+    // Découper la liste d'offres en lots de taille fixe
+    private function chunkOffers(json[] offers, int size) returns json[][] {
+        json[][] result = [];
+        json[] current = [];
+        int count = 0;
+        foreach var offer in offers {
+            current.push(offer);
+            count = count + 1;
+            if (count == size) {
+                result.push(current);
+                current = [];
+                count = 0;
+            }
+        }
+        if (current.length() > 0) {
+            result.push(current);
+        }
+        return result;
     }
 }
