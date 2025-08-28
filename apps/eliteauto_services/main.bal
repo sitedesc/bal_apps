@@ -20,6 +20,6 @@ public function main() returns error? {
         "UpdateCustomerDispoJob": conf.disabledJobs.indexOf("UpdateCustomerDispoJob") is () ? check ucd:createCustomerDispoJob() : (),
         "SyncFoQuotationJob": conf.disabledJobs.indexOf("SyncFoQuotationJob") is () ? check sfq:createSyncFoQuotationJob() : (),
         "CheckDiskSpaceJob": conf.disabledJobs.indexOf("CheckDiskSpaceJob") is () ? check cds:createCheckDiskSpaceJob() : (),
-        "CheckFundingOffersJob": conf.disabledJobs.indexOf("CheckDiskSpaceJob") is () ? check cfo:createCheckFundingOffersJob() : ()
+        "CheckFundingOffersJob": conf.disabledJobs.indexOf("CheckFundingOffersJob") is () ? check cfo:createCheckFundingOffersJob() : ()
     };
 }
