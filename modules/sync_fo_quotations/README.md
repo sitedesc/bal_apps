@@ -22,24 +22,9 @@ ballerina.log.level = "DEBUG"
 # in dev and preprod the url should be equal the one of a running /modules/mock service and the secret : "unused:unused"
 boApiUrl = "REPLACEME"
 boApiSecret = "REPLACEME"
-
-[job_patch.conf]
-port = REPLACEME
-
-[teams]
-webhookUrl = "REPLACEME"
-channelId = "REPLACEME"
-apiKey = "REPLACEME"
-
-[fo_db.credentials]
-host = "REPLACEME"
-user = "REPLACEME"
-password = "REPLACEME"
-database = "REPLACEME"
 ```
 
-* exécuter les procédures de déploiement des composant intègré [fo_db](../../modules/fo_db/README.md), ... ces composant sont indiqués dans les section Dependency du fichier Ballerina.toml,
-
+* exécuter les procédures de déploiement des composant intègrés [fo_db](../../modules/fo_db/README.md), ... ces composant sont indiqués dans les section Dependency du fichier Ballerina.toml,
 * lancer "bal build" à la racine de ce module pour vérifier que le projet compile bien,
 * pour lancer le job: bal run
 
