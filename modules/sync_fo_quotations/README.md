@@ -24,8 +24,7 @@ boApiUrl = "REPLACEME"
 boApiSecret = "REPLACEME"
 ```
 
-* exécuter les procédures de déploiement des composant intègré [fo_db](../../modules/fo_db/README.md), ... ces composant sont indiqués dans les section Dependency du fichier Ballerina.toml,
-
+* exécuter les procédures de déploiement des composant intègrés [fo_db](../../modules/fo_db/README.md), ... ces composant sont indiqués dans les section Dependency du fichier Ballerina.toml,
 * lancer "bal build" à la racine de ce module pour vérifier que le projet compile bien,
 * pour lancer le job: bal run
 

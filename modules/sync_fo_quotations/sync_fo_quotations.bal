@@ -16,7 +16,8 @@ type TeamsConf record {
 
 type Conf record {
     string boApiUrl;
-    string boApiSecret;
+    string boApiUserName;
+    string boApiPassword;
 };
 
 configurable TeamsConf teams = ?;
@@ -33,7 +34,7 @@ type BoApiError record {
 
 // === SCHEDULER INITIALISATION ===
 public function createSyncFoQuotationJob() returns task:JobId|error {
-    SyncFoQuotationJob myJob = check new (teams, conf.boApiUrl, conf.boApiSecret);
+    SyncFoQuotationJob myJob = check new (teams);
     return task:scheduleJobRecurByFrequency(myJob, 180);
 }
 
@@ -43,21 +44,21 @@ public function createSyncFoQuotationJob() returns task:JobId|error {
 class SyncFoQuotationJob {
     *task:Job;
     TeamsConf teams;
-    map<string> headers;
     map<string> headersTeams;
     http:Client boClient;
 
-    function init(TeamsConf teamsConf, string boApiUrl, string boApiSecret) returns error? {
+    function init(TeamsConf teamsConf) returns error? {
         self.teams = teamsConf;
-        byte[] boApiSecretBytes = boApiSecret.toBytes();
-        self.headers = {
-            "Authorization": boApiSecretBytes.toBase64(),
-            "Content-Type": "application/json"
-        };
         self.headersTeams = {
             "x-api-key": self.teams.apiKey
         };
-        self.boClient = check new (boApiUrl, {timeout: 180});
+        self.boClient = check new (conf.boApiUrl, {
+        auth: {
+            username: conf.boApiUserName,
+            password: conf.boApiPassword
+        },
+        timeout: 180
+    });
     }
 
     // === SCHEDULED EXECUTION FUNCTIONS ===
