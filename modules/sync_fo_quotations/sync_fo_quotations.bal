@@ -1,8 +1,8 @@
 import ballerina/data.jsondata;
 import ballerina/http;
-import ballerina/io;
+//import ballerina/io;
 import ballerina/log;
-import ballerina/os;
+//import ballerina/os;
 import ballerina/task;
 
 import cosmobilis/bo_db as bodb;
@@ -21,6 +21,15 @@ type Conf record {
 
 configurable TeamsConf teams = ?;
 configurable Conf conf = ?;
+
+type BoApiErrorDetail record {
+    int code;
+    string message;
+};
+
+type BoApiError record {
+    BoApiErrorDetail 'error;
+};
 
 // === SCHEDULER INITIALISATION ===
 public function createSyncFoQuotationJob() returns task:JobId|error {
@@ -79,7 +88,7 @@ class SyncFoQuotationJob {
             foreach xml msgElem in messageList/* {
                 do {
                     log:printDebug(msgElem.toString());
-                    id =  (msgElem/<id>[0]/*[0]).toString();
+                    id = (msgElem/<id>[0]/*[0]).toString();
                     if id.length() <= 0 {
                         continue;
                     }
@@ -104,52 +113,114 @@ class SyncFoQuotationJob {
                         id = "";
                         continue;
                     }
-                    _ = check io:fileWriteString("/tmp/quotation.json", msgJson);
-                    // Envoyer le JSON comme corps HTTP, etc.
-                    log:printDebug(msgJson);
 
-                    string curlCmd = string `curl -X POST ${conf.boApiUrl}/api/v1/devis/notify \
-  -u ${conf.boApiSecret} \
-  -H "Content-Type: application/json" \
-  --data @/tmp/quotation.json`;
-                    _ = check io:fileWriteString("/tmp/curl_post_quotation", curlCmd);
-                    os:Process process = check os:exec({
-                                                           value: "runSh.sh",
-                                                           arguments: ["/tmp/curl_post_quotation"]
-                                                       });
-                    _ = check process.waitForExit();
-
-                    string stdout = check string:fromBytes(check process.output());
-                    int|error devisId = error("No devisId retrieved");
-                    if containsKeywords(stdout, "504", "Time-out") {
-                        if check bodb:existQuotations(criterias) {
-                            check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE, "couldn't retrieve quotation number because of quotation upload timeout.");
-                            id = "";
-                            continue;
+                    // Envoi du POST vers /notify
+                    http:Response response = check self.boClient->post("/api/v1/devis/notify", msg);
+                    string body = check response.getTextPayload();
+                    json|error converted = body.fromJsonString();
+                    if (converted is error) {
+                        
+                        if containsKeywords(body, "504", "Time-out") {
+                            if check bodb:existQuotations(criterias) {
+                                check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE, "couldn't retrieve quotation number because of quotation upload timeout.");
+                                id = "";
+                                continue;
+                            }
                         }
-                    }
-                    devisId = int:fromString(stdout);
-                    if devisId is error {
-                        string description = string `The upload of the quotation message : ID ${id}, did not return the id of the created quotation, but returned: ${stdout}
+
+                        string description = string `The upload of the quotation message : ID ${id}, did not return the id of the created quotation, but returned: ${body}
                                         `;
                         var notif = self.sendTeamsNotification(
                                         "Erreur exécution job sync_fo_quotation for a quotation",
                                         description,
                                         [{"Type d'exécution": "Tâche planifiée"}]);
                         log:printError(description);
-                        check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.ERROR, stdout);
+                        check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.ERROR, body);
                         if notif is error {
                             log:printError("Échec d'envoi Teams", notif);
                         }
                         id = "";
                         continue;
+                    } else {
+                        int|error intValue = converted.cloneWithType();
+                        BoApiError|error errorValue = converted.cloneWithType();
+                        if !(intValue is error) {
+                            log:printInfo("Quotation submission response:" + body);
+                            check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE, body);
+                            log:printInfo(string `quotation message ID ${id} sent to BO.`);
+                            id = "";
+                        } else if !(errorValue is error) && errorValue.'error.code == 504 {
+                            if check bodb:existQuotations(criterias) {
+                                check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE, "couldn't retrieve quotation number because of quotation upload timeout.");
+                                id = "";
+                                continue;
+                            }
+                        } else {
+                            string description = string `The upload of the quotation message : ID ${id}, did not return the id of the created quotation, but returned: ${body}
+                                        `;
+                            var notif = self.sendTeamsNotification(
+                                        "Erreur exécution job sync_fo_quotation for a quotation",
+                                        description,
+                                        [{"Type d'exécution": "Tâche planifiée"}]);
+                            log:printError(description);
+                            check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.ERROR, body);
+                            if notif is error {
+                                log:printError("Échec d'envoi Teams", notif);
+                            }
+                            id = "";
+                            continue;
+                        }
                     }
 
-                    log:printInfo("Quotation submission response:" + stdout);
+                    // Envoi du POST vers /notify
+                    //                     _ = check io:fileWriteString("/tmp/quotation.json", msgJson);
+                    //                     // Envoyer le JSON comme corps HTTP, etc.
+                    //                     log:printDebug(msgJson);
 
-                    check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE, stdout);
-                    log:printInfo(string `quotation message ID ${id} sent to BO.`);
-                    id = "";
+                    //                     string curlCmd = string `curl -X POST ${conf.boApiUrl}/api/v1/devis/notify \
+                    //   -u ${conf.boApiSecret} \
+                    //   -H "Content-Type: application/json" \
+                    //   --data @/tmp/quotation.json`;
+                    //                     _ = check io:fileWriteString("/tmp/curl_post_quotation", curlCmd);
+                    //                     os:Process process = check os:exec({
+                    //                                                            value: "runSh.sh",
+                    //                                                            arguments: ["/tmp/curl_post_quotation"]
+                    //                                                        });
+                    //                     _ = check process.waitForExit();
+
+                    //                     string stdout = check string:fromBytes(check process.output());
+
+                    //                     int|error devisId = error("No devisId retrieved");
+                    //                     if containsKeywords(stdout, "504", "Time-out") {
+                    //                         if check bodb:existQuotations(criterias) {
+                    //                             check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE, "couldn't retrieve quotation number because of quotation upload timeout.");
+                    //                             id = "";
+                    //                             continue;
+                    //                         }
+                    //                     }
+                    //                     devisId = int:fromString(stdout);
+                    //                     if devisId is error {
+                    //                         string description = string `The upload of the quotation message : ID ${id}, did not return the id of the created quotation, but returned: ${stdout}
+                    //                                         `;
+                    //                         var notif = self.sendTeamsNotification(
+                    //                                         "Erreur exécution job sync_fo_quotation for a quotation",
+                    //                                         description,
+                    //                                         [{"Type d'exécution": "Tâche planifiée"}]);
+                    //                         log:printError(description);
+                    //                         check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.ERROR, stdout);
+                    //                         if notif is error {
+                    //                             log:printError("Échec d'envoi Teams", notif);
+                    //                         }
+                    //                         id = "";
+                    //                         continue;
+                    //                     }
+
+                    //                     log:printInfo("Quotation submission response:" + stdout);
+
+                    //                     check fodb:setQuotationMsgState(id, fodb:SYNC_STATE.DONE, stdout);
+                    //                     log:printInfo(string `quotation message ID ${id} sent to BO.`);
+                    //                     id = "";
+
                 } on fail var failure {
                     string title = id.length() > 0 ? string `Erreur exécution job sync_fo_quotation for quotation : ID ${id}`
                         : "Erreur exécution job sync_fo_quotation for a quotation";
@@ -180,14 +251,13 @@ class SyncFoQuotationJob {
             messageList = check fodb:getQuotationMsgs();
         }
 
-
         messageList = check fodb:getQuotationMsgsInError();
         id = "";
         while (messageList/*).length() > 0 {
             foreach xml msgElem in messageList/* {
                 do {
                     log:printDebug(msgElem.toString());
-                    id =  (msgElem/<id>[0]/*[0]).toString();
+                    id = (msgElem/<id>[0]/*[0]).toString();
                     if id.length() <= 0 {
                         continue;
                     }
