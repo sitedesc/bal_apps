@@ -19,7 +19,7 @@ public type Client record {|
 
 // Construit l'URL JDBC
 isolated function urlOf(Conf c) returns string =>
-    string `jdbc:mysql://${c.host}:${c.port}/${c.database}`;
+    string `jdbc:mysql://${c.host}:${c.port}/${c.database}?useSSL=false&autoReconnect=true&characterEncoding=UTF-8`;
 
 // Ouvre la connexion et retourne notre Client
 public isolated function connect(Conf conf) returns Client|error {
