@@ -45,18 +45,25 @@ public class DatabaseWrapper {
     }
 
     // Récupère une connexion avec timeout
-    private Connection borrowConnection() throws SQLException {
-        try {
-            Connection conn = pool.poll(TIMEOUT_SEC, TimeUnit.SECONDS);
-            if (conn == null || conn.isClosed()) {
-                throw new SQLException("Aucune connexion disponible après " + TIMEOUT_SEC + "s");
-            }
-            return conn;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new SQLException("Interrompu en attendant une connexion", e);
+private Connection borrowConnection() throws SQLException {
+    try {
+        Connection conn = pool.poll(TIMEOUT_SEC, TimeUnit.SECONDS);
+        if (conn == null) {
+            throw new SQLException("Aucune connexion disponible après " + TIMEOUT_SEC + "s");
         }
+
+        // Vérifie si la connexion est encore valide
+        if (conn.isClosed() || !conn.isValid(10)) {  // 2s timeout pour test
+            // recrée une connexion
+            conn = DriverManager.getConnection(url, user, password);
+        }
+
+        return conn;
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new SQLException("Interrompu en attendant une connexion", e);
     }
+}
 
     // Remet une connexion dans le pool
     private void returnConnection(Connection conn) {
