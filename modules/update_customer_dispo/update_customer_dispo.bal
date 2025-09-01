@@ -68,7 +68,7 @@ class CustomerDispoJob {
     string algoliaUrl;
     map<string> headers;
     map<string> headersTeams;
-    map<int?> loyers={};
+    map<int?> loyers = {};
 
     function init(AlgoliaConf algoliaConf, TeamsConf teamsConf, CustomerDispoConf dispoConf) {
         self.algolia = algoliaConf;
@@ -172,13 +172,15 @@ class CustomerDispoJob {
     // === CUSTOMER DISPO BUSNESS LOGIC FUNTION ===
     public function updateCustomerDispo(http:Client algoliaClient, string indexName) returns error? {
         string cursor = "";
+        json browseBody = {};
         boolean hasMore = true;
         int totalUpdated = 0;
-
         while hasMore {
             string url = "/1/indexes/" + indexName + "/browse";
             if cursor != "" {
-                url += "?cursor=" + cursor;
+                browseBody = {
+                    cursor: cursor
+                };
             }
 
             int browseAttempts = 0;
@@ -186,7 +188,7 @@ class CustomerDispoJob {
             http:Response|error res = error("init");
             // Retry loop pour browse
             while browseAttempts < maxBrowseRetries {
-                res = algoliaClient->get(url, self.headers);
+                res = algoliaClient->post(url, browseBody, self.headers);
                 if res is error || res.statusCode >= 400 {
                     browseAttempts += 1;
                     runtime:sleep(5);
@@ -200,12 +202,12 @@ class CustomerDispoJob {
             }
             map<json> body = check (check res.getJsonPayload()).cloneWithType();
 
-            json[] hits=[];
+            json[] hits = [];
             if body["hits"] is json[] {
                 hits = check body["hits"].cloneWithType();
                 log:printInfo("retrieved " + hits.length().toString() + " offers in index " + indexName + "...");
             } else {
-                log:printInfo("did no retrieve any hit int this reponse of index " + indexName + ":" + body.toString() );
+                log:printInfo("did no retrieve any hit int this reponse of index " + indexName + ":" + body.toString());
             }
             string cursorVal = "";
             if body["cursor"] is string {
@@ -233,8 +235,8 @@ class CustomerDispoJob {
                     if hit["disponibiliteForFO"] is string {
                         dispo = check hit["disponibiliteForFO"].cloneWithType();
                     }
-                    if hit["loyers"] is json[] && (<json[]> hit["loyers"]).length() > 0 {
-                        foreach json item in <json[]> hit["loyers"] {
+                    if hit["loyers"] is json[] && (<json[]>hit["loyers"]).length() > 0 {
+                        foreach json item in <json[]>hit["loyers"] {
                             map<json> loyerDatas = check item.cloneWithType();
                             string idLoyer = (check loyerDatas["id"].cloneWithType(int)).toString();
                             self.loyers[idLoyer] = nature;
@@ -251,7 +253,7 @@ class CustomerDispoJob {
                 }
 
                 if nature is () {
-                   log:printInfo(`no nature value for object ${id} of ${indexName}.`);
+                    log:printInfo(`no nature value for object ${id} of ${indexName}.`);
                 } else {
                     log:printDebug(`nature value is ${nature} for object ${id} of ${indexName}.`);
                 }
