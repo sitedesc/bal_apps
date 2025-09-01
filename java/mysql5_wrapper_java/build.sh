@@ -3,6 +3,7 @@ set -e
 
 BASE_DIR=$(dirname "$0")
 SRC_DIR="$BASE_DIR/src/main/java"
+RES_DIR="$BASE_DIR/src/main/resources"
 LIB_DIR="$BASE_DIR/lib"
 BUILD_DIR="$BASE_DIR/build"
 
@@ -12,6 +13,11 @@ mkdir -p "$BUILD_DIR"
 
 # Compilation avec les libs MySQL + JSON
 javac -cp "$LIB_DIR/*" -d "$BUILD_DIR" $(find "$SRC_DIR" -name "*.java")
+
+# Copier les ressources (ex: logging.properties) dans le build
+if [ -d "$RES_DIR" ]; then
+    cp -r "$RES_DIR"/* "$BUILD_DIR"/
+fi
 
 # Création du jar
 jar cf "$BASE_DIR/mysql5_wrapper_java.jar" -C "$BUILD_DIR" .
