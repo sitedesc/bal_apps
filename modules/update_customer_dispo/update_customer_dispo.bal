@@ -108,7 +108,7 @@ class CustomerDispoJob {
     }
 
     function scheduledRun() returns error? {
-        http:Client algoliaClient = check new (self.algoliaUrl);
+        http:Client algoliaClient = check new (self.algoliaUrl, {timeout: 180});
 
         foreach string indexName in self.algolia.indexNames {
             string? lastRun = check getLastRunTimestamp(indexName);
