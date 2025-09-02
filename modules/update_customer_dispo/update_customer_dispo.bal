@@ -35,9 +35,9 @@ const string STATE_FILE_SUFFIX = "last_customerDispo_update.txt";
 
 // === STATE FILE ===
 
-function getLastRunTimestamp(string indexName) returns string?|error {
+function getLastRunTimestamp() returns string?|error {
     boolean readable = false;
-    string stateFile = indexName + "_" + STATE_FILE_SUFFIX;
+    string stateFile = STATE_FILE_SUFFIX;
     do {
         readable = check file:test(stateFile, file:EXISTS) && check file:test(stateFile, file:READABLE);
     } on fail {
@@ -49,8 +49,8 @@ function getLastRunTimestamp(string indexName) returns string?|error {
     return ();
 }
 
-function saveTimestamp(string ts, string indexName) returns error? {
-    string stateFile = indexName + "_" + STATE_FILE_SUFFIX;
+function saveTimestamp(string ts) returns error? {
+    string stateFile = STATE_FILE_SUFFIX;
     check io:fileWriteString(stateFile, ts);
 }
 
@@ -111,43 +111,43 @@ class CustomerDispoJob {
     function scheduledRun() returns error? {
         http:Client algoliaClient = check new (self.algoliaUrl, {timeout: 180});
 
-        foreach string indexName in self.algolia.indexNames {
-            string? lastRun = check getLastRunTimestamp(indexName);
-            log:printInfo("Last run timestamp of " + indexName + ": " + (lastRun ?: "none"));
+        string? lastRun = check getLastRunTimestamp();
+        log:printInfo("Last run timestamp: " + (lastRun ?: "none"));
 
-            map<json> logData = check algoliaClient->get("/1/logs?length=" + BATCH_SIZE.toString() + "&type=update", self.headers);
-            //map<json> logData = check (check logRes.getJsonPayload()).cloneWithType();
-            json logsJson = logData["logs"];
-            string? latestMoveTimestamp = ();
-            if logsJson is json[] {
-                map<json>[] logs = check logsJson.cloneWithType();
-                foreach map<json> logEntry in logs {
-                    (string|error)? queryString = logEntry["query_body"].cloneWithType();
-                    (json|error)? query = ();
-                    if queryString is string {
-                        query = queryString.fromJsonString();
+        map<json> logData = check algoliaClient->get("/1/logs?length=" + BATCH_SIZE.toString() + "&type=update", self.headers);
+        //map<json> logData = check (check logRes.getJsonPayload()).cloneWithType();
+        json logsJson = logData["logs"];
+        string? latestMoveTimestamp = ();
+        if logsJson is json[] {
+            map<json>[] logs = check logsJson.cloneWithType();
+            foreach map<json> logEntry in logs {
+                (string|error)? queryString = logEntry["query_body"].cloneWithType();
+                (json|error)? query = ();
+                if queryString is string {
+                    query = queryString.fromJsonString();
+                }
+                if query is map<json> && query["operation"] is string && query["operation"] == "move"
+                    && query["destination"] is string && self.algolia.indexNames.indexOf(<string>query["destination"]) != ()
+                {
+                    string ts = "";
+                    if logEntry["timestamp"] is string {
+                        ts = check logEntry["timestamp"].cloneWithType();
                     }
-                    if query is map<json> && query["operation"] is string && query["operation"] == "move"
-                    && query["destination"] is string && query["destination"] == indexName
-                    {
-                        string ts = "";
-                        if logEntry["timestamp"] is string {
-                            ts = check logEntry["timestamp"].cloneWithType();
-                        }
-                        if latestMoveTimestamp is () || ts > latestMoveTimestamp {
-                            latestMoveTimestamp = ts;
-                        }
+                    if latestMoveTimestamp is () || ts > latestMoveTimestamp {
+                        latestMoveTimestamp = ts;
                     }
                 }
+            }
 
-                if latestMoveTimestamp is () {
-                    log:printInfo("No move detected for index " + indexName + ".");
-                    return;
-                }
+            if latestMoveTimestamp is () {
+                log:printInfo("No move detected.");
+                return;
+            }
 
-                log:printInfo("Latest move detected  for index " + indexName + " at: " + latestMoveTimestamp);
+            log:printInfo("Latest move detected at: " + latestMoveTimestamp);
 
-                if lastRun is () || latestMoveTimestamp > lastRun {
+            if lastRun is () || latestMoveTimestamp > lastRun {
+                foreach string indexName in self.algolia.indexNames {
                     log:printInfo("Triggering customerDispo update  for index " + indexName + " (dryRun=" + self.customerDispo.dryRun.toString() + ")...");
                     var result = self.updateCustomerDispo(algoliaClient, indexName);
                     if (result is error) {
@@ -159,14 +159,14 @@ class CustomerDispoJob {
                         log:printInfo("Mise à jour customerDispo dans index " + indexName + " effectuée avec succès.");
                     }
                     if !self.customerDispo.dryRun {
-                        check saveTimestamp(latestMoveTimestamp, indexName);
+                        check saveTimestamp(latestMoveTimestamp);
                     }
-                } else {
-                    log:printInfo("No update needed for index " + indexName + ".");
                 }
             } else {
-                return error("Expected logs to be an array");
+                log:printInfo("No update needed for.");
             }
+        } else {
+            return error("Expected logs to be an array");
         }
     }
 
@@ -192,10 +192,13 @@ class CustomerDispoJob {
                 res = algoliaClient->post(url, browseBody, self.headers);
                 if res is error || res.statusCode >= 400 {
                     browseAttempts += 1;
+                    error? theError = (res is error) ? res : ();
+                    json resContent = res.ensureType(json) is error ? () : check res.ensureType(json);
+                    log:printWarn("browse post request error: ", theError, response = resContent);
+                    log:printWarn("re-trying browse post request...");
                     runtime:sleep(5);
-                    continue;
                 } else {
-                    browseAttempts = maxBrowseRetries;
+                    break;
                 }
             }
             if res is error {
@@ -206,7 +209,7 @@ class CustomerDispoJob {
             json[] hits = [];
             if body["hits"] is json[] {
                 hits = check body["hits"].cloneWithType();
-                log:printInfo("retrieved " + hits.length().toString() + " offers in index " + indexName + "...");
+                log:printInfo("retrieved " + hits.length().toString() + " objects in index " + indexName + "...");
             } else {
                 log:printInfo("did no retrieve any hit int this reponse of index " + indexName + ":" + body.toString());
             }
@@ -263,10 +266,10 @@ class CustomerDispoJob {
                 }
 
                 if indexName.indexOf("OFFERS") > 0 && nature is () {
-                    log:printInfo(`no nature value for offer ${id} of ${indexName}.`);
+                    log:printInfo(`no nature value for offer ${id} of index ${indexName}.`);
                 } else {
                     self.offers[id] = nature;
-                    log:printDebug(`nature value is ${nature} for object ${id} of ${indexName}.`);
+                    //log:printDebug(`nature value is ${nature} for object ${id} of ${indexName}.`);
                 }
 
                 string customerDispoValue = (nature != 1 && nature != 5 && dispo == "en stock") ? "disponible" : dispo;
