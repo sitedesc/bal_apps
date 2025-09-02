@@ -69,6 +69,7 @@ class CustomerDispoJob {
     map<string> headers;
     map<string> headersTeams;
     map<int?> loyers = {};
+    map<int?> offers = {};
 
     function init(AlgoliaConf algoliaConf, TeamsConf teamsConf, CustomerDispoConf dispoConf) {
         self.algolia = algoliaConf;
@@ -150,7 +151,7 @@ class CustomerDispoJob {
                     log:printInfo("Triggering customerDispo update  for index " + indexName + " (dryRun=" + self.customerDispo.dryRun.toString() + ")...");
                     var result = self.updateCustomerDispo(algoliaClient, indexName);
                     if (result is error) {
-                        string errMsg = "Erreur lors de l'update customerDispo: " + result.message() + "dans l'index " + indexName;
+                        string errMsg = "Erreur lors de l'update customerDispo: " + result.message() + " dans l'index " + indexName;
                         log:printError(errMsg);
                         // Envoi de notification Teams pour l'erreur
                         check self.sendTeamsNotification("Erreur Update customerDispo", errMsg, [{"Algolia index": indexName}]);
@@ -223,6 +224,7 @@ class CustomerDispoJob {
                 string id = "";
                 int? nature = ();
                 string dispo = "";
+                int? offreId = ();
 
                 if hit is map<json>
                 {
@@ -242,19 +244,28 @@ class CustomerDispoJob {
                             self.loyers[idLoyer] = nature;
                         }
                     }
+                    if hit["offreId"] is int {
+                        offreId = check hit["offreId"].cloneWithType();
+                    }
+
                 }
+
                 if id == "" || dispo == "" { // for update test on a single offre, add this condition with a proper offer id: || id != "240314"
                     continue;
                 }
 
                 // this gets nature of the offer from a previously processed index if not present in the currently processed index
+                if indexName.indexOf("LOYERS") > 0 && nature is () && offreId is int {
+                    nature = self.offers[offreId.toString()];
+                }
                 if indexName.indexOf("LOYERS") > 0 && nature is () && self.loyers[id] is int {
                     nature = self.loyers[id];
                 }
 
-                if nature is () {
-                    log:printInfo(`no nature value for object ${id} of ${indexName}.`);
+                if indexName.indexOf("OFFERS") > 0 && nature is () {
+                    log:printInfo(`no nature value for offer ${id} of ${indexName}.`);
                 } else {
+                    self.offers[id] = nature;
                     log:printDebug(`nature value is ${nature} for object ${id} of ${indexName}.`);
                 }
 
