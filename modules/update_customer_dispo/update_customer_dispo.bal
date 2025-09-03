@@ -31,6 +31,7 @@ configurable TeamsConf teams = ?;
 configurable CustomerDispoConf customerDispo = ?;
 
 const int BATCH_SIZE = 10000;
+const int UPDATES_BATCH_SIZE = 50000;
 const string STATE_FILE_SUFFIX = "last_customerDispo_update.txt";
 
 // === STATE FILE ===
@@ -56,13 +57,14 @@ function saveTimestamp(string ts) returns error? {
 
 // === SCHEDULER INITIALISATION ===
 public function createCustomerDispoJob() returns task:JobId|error {
-    CustomerDispoJob myJob = new (algolia, teams, customerDispo);
+    CustomerDispoJob myJob = check new (algolia, teams, customerDispo);
     return task:scheduleJobRecurByFrequency(myJob, 300);
 }
 
 class CustomerDispoJob {
     *task:Job;
     AlgoliaConf algolia;
+    http:Client algoliaClient;
     TeamsConf teams;
     CustomerDispoConf customerDispo;
     string algoliaUrl;
@@ -71,11 +73,13 @@ class CustomerDispoJob {
     map<int?> loyers = {};
     map<int?> offers = {};
 
-    function init(AlgoliaConf algoliaConf, TeamsConf teamsConf, CustomerDispoConf dispoConf) {
+    function init(AlgoliaConf algoliaConf, TeamsConf teamsConf, CustomerDispoConf dispoConf) returns error? {
         self.algolia = algoliaConf;
         self.teams = teamsConf;
         self.customerDispo = dispoConf;
         self.algoliaUrl = "https://" + self.algolia.appId + "-dsn.algolia.net";
+        self.algoliaClient = check new (self.algoliaUrl, {timeout: 180});
+
         self.headers = {
             "X-Algolia-API-Key": self.algolia.apiKey,
             "X-Algolia-Application-Id": self.algolia.appId,
@@ -91,7 +95,7 @@ class CustomerDispoJob {
     public function execute() {
         lock {
             do {
-                log:printInfo("⏱️ Job planifié : exécution de scheduledRun()");
+                log:printInfo("⏱️  Job planifié : exécution de scheduledRun()");
                 var result = self.scheduledRun();
                 if result is error {
                     string msg = "❌ scheduledRun() a échoué : " + result.message();
@@ -109,12 +113,13 @@ class CustomerDispoJob {
     }
 
     function scheduledRun() returns error? {
-        http:Client algoliaClient = check new (self.algoliaUrl, {timeout: 180});
+        //client is recreated as it is considered, from prod feedbacks, safer in case of client idle socket expiration scenarios...
+        self.algoliaClient = check new (self.algoliaUrl, {timeout: 180});
 
         string? lastRun = check getLastRunTimestamp();
         log:printInfo("Last run timestamp: " + (lastRun ?: "none"));
 
-        map<json> logData = check algoliaClient->get("/1/logs?length=" + BATCH_SIZE.toString() + "&type=update", self.headers);
+        map<json> logData = check self.algoliaClient->get("/1/logs?length=" + BATCH_SIZE.toString() + "&type=update", self.headers);
         //map<json> logData = check (check logRes.getJsonPayload()).cloneWithType();
         json logsJson = logData["logs"];
         string? latestMoveTimestamp = ();
@@ -149,7 +154,7 @@ class CustomerDispoJob {
             if lastRun is () || latestMoveTimestamp > lastRun {
                 foreach string indexName in self.algolia.indexNames {
                     log:printInfo("Triggering customerDispo update  for index " + indexName + " (dryRun=" + self.customerDispo.dryRun.toString() + ")...");
-                    var result = self.updateCustomerDispo(algoliaClient, indexName);
+                    var result = self.updateCustomerDispo(indexName);
                     if (result is error) {
                         string errMsg = "Erreur lors de l'update customerDispo: " + result.message() + " dans l'index " + indexName;
                         log:printError(errMsg);
@@ -171,16 +176,24 @@ class CustomerDispoJob {
     }
 
     // === CUSTOMER DISPO BUSNESS LOGIC FUNTION ===
-    public function updateCustomerDispo(http:Client algoliaClient, string indexName) returns error? {
+    public function updateCustomerDispo(string indexName) returns error? {
         string cursor = "";
         json browseBody = {};
         boolean hasMore = true;
         int totalUpdated = 0;
+        json[] updates = [];
         while hasMore {
             string url = "/1/indexes/" + indexName + "/browse";
             if cursor != "" {
                 browseBody = {
-                    cursor: cursor
+                    cursor: cursor,
+                    attributesToRetrieve: [
+                        "objectID",
+                        "nature",
+                        "disponibiliteForFO",
+                        "loyers",
+                        "offreId"
+                    ]
                 };
             }
 
@@ -189,7 +202,7 @@ class CustomerDispoJob {
             http:Response|error res = error("init");
             // Retry loop pour browse
             while browseAttempts < maxBrowseRetries {
-                res = algoliaClient->post(url, browseBody, self.headers);
+                res = self.algoliaClient->post(url, browseBody, self.headers);
                 if res is error || res.statusCode >= 400 {
                     browseAttempts += 1;
                     error? theError = (res is error) ? res : ();
@@ -201,10 +214,44 @@ class CustomerDispoJob {
                     break;
                 }
             }
+
             if res is error {
                 return error(res.message());
             }
-            map<json> body = check (check res.getJsonPayload()).cloneWithType();
+
+            //this polling of getting the response pload has been added from feedbacks of prod
+            //errors retrieving it after having processed 475000 loyer records...
+            //maybe a simpler stream response processing is possible but too few examples found about it...
+            browseAttempts = 0;
+            map<json>|error & readonly pload = {};
+            boolean refreshClient = false;
+            while browseAttempts < maxBrowseRetries {
+                http:Response res1;
+                if refreshClient {
+                    //prod feedbacks: re-creating this client fixed the bug, only re-running the post did not fix it.
+                    self.algoliaClient = check new (self.algoliaUrl, {timeout: 180});
+                    res1 = check self.algoliaClient->post(url, browseBody, self.headers);
+                    refreshClient = false;
+
+                } else {
+                    res1 = res;
+                }
+                json|http:ClientError basicPload = res1.getJsonPayload();
+                if (basicPload is json) {
+                    pload = basicPload.cloneWithType();
+                }
+                if basicPload is http:ClientError || pload is error {
+                    browseAttempts += 1;
+                    error? theError = basicPload is http:ClientError ? basicPload : <error>pload;
+                    log:printWarn("result getJsonPayload error: ", theError);
+                    log:printWarn("re-trying result getJsonPayload...");
+                    refreshClient = true;
+                    runtime:sleep(5);
+                } else {
+                    break;
+                }
+            }
+            map<json> body = check pload.cloneReadOnly();
 
             json[] hits = [];
             if body["hits"] is json[] {
@@ -220,8 +267,6 @@ class CustomerDispoJob {
             log:printInfo("cursor value is: " + cursorVal);
             cursor = cursorVal;
             hasMore = cursor != "null" && cursor.length() > 0;
-
-            json[] updates = [];
 
             foreach json hit in hits {
                 string id = "";
@@ -254,6 +299,7 @@ class CustomerDispoJob {
                 }
 
                 if id == "" || dispo == "" { // for update test on a single offre, add this condition with a proper offer id: || id != "240314"
+                    log:printDebug(`id or dispo empty for object ${hit} of ${indexName}.`);
                     continue;
                 }
 
@@ -267,7 +313,7 @@ class CustomerDispoJob {
 
                 if indexName.indexOf("OFFERS") > 0 && nature is () {
                     log:printInfo(`no nature value for offer ${id} of index ${indexName}.`);
-                } else {
+                } else if indexName.indexOf("OFFERS") > 0 {
                     self.offers[id] = nature;
                     //log:printDebug(`nature value is ${nature} for object ${id} of ${indexName}.`);
                 }
@@ -284,19 +330,22 @@ class CustomerDispoJob {
                 updates.push(update);
             }
 
-            if updates.length() > 0 {
+            if (updates.length() >= UPDATES_BATCH_SIZE) || (!hasMore && updates.length() > 0) {
                 if !self.customerDispo.dryRun {
                     json batchPayload = {requests: updates};
-                    http:Response|error response = algoliaClient->post("/1/indexes/" + indexName + "/batch", batchPayload, self.headers);
+                    http:Response|error response = self.algoliaClient->post("/1/indexes/" + indexName + "/batch", batchPayload, self.headers);
                     if response is error {
                         string errMsg = "Erreur lors de l'update customerDispo: " + response.message() + "dans l'index " + indexName;
                         log:printError(errMsg);
                         // Envoi de notification Teams pour l'erreur
                         check self.sendTeamsNotification("Erreur Update customerDispo", errMsg, [{"Algolia index": indexName}]);
+                    } else {
+                        log:printInfo("Updated " + updates.length().toString() + " records in index " + indexName + ".");
+                        updates = [];
                     }
-                    log:printInfo("Updated " + updates.length().toString() + " records in index " + indexName + ".");
                 } else {
                     log:printInfo("Dry-run: simulated update of " + updates.length().toString() + " records in index " + indexName + ".");
+                    updates = [];
                 }
                 totalUpdated += updates.length();
             }
@@ -334,3 +383,4 @@ class CustomerDispoJob {
     }
 
 }
+
