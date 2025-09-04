@@ -182,6 +182,7 @@ class CustomerDispoJob {
         boolean hasMore = true;
         int totalUpdated = 0;
         json[] updates = [];
+        json[] deletes = [];
         while hasMore {
             string url = "/1/indexes/" + indexName + "/browse";
             if cursor != "" {
@@ -299,7 +300,17 @@ class CustomerDispoJob {
                 }
 
                 if id == "" || dispo == "" { // for update test on a single offre, add this condition with a proper offer id: || id != "240314"
-                    log:printDebug(`id or dispo empty for object ${hit} of ${indexName}.`);
+                    if indexName.indexOf("LOYERS") > 0 && offreId is () {
+                        json delete = {
+                            action: "deleteObject",
+                            body: {
+                                objectID: id
+                            }
+                        };
+                        deletes.push(delete);
+                    } else {
+                        log:printDebug(`id or dispo empty for object ${hit} of ${indexName}.`);
+                    }
                     continue;
                 }
 
@@ -351,6 +362,25 @@ class CustomerDispoJob {
             }
 
             runtime:sleep(1);
+        }
+
+        if deletes.length() > 0 {
+            json deletePayload = {requests: deletes};
+            if !self.customerDispo.dryRun {
+                http:Response|error response = self.algoliaClient->post("/1/indexes/" + indexName + "/batch", deletePayload, self.headers);
+                if response is error {
+                    string errMsg = "Erreur lors du delete de record: " + response.message() + "dans l'index " + indexName;
+                    log:printError(errMsg);
+                    // Envoi de notification Teams pour l'erreur
+                    check self.sendTeamsNotification("Erreur Delete records", errMsg, [{"Algolia index": indexName}]);
+                } else {
+                    log:printInfo("Deleted " + deletes.length().toString() + " records in index " + indexName + ".");
+                    deletes = [];
+                }
+            } else {
+                log:printInfo("Dry-run: simulated delete of " + deletes.length().toString() + " records in index " + indexName + ".");
+                deletes = [];
+            }
         }
 
         log:printInfo("customerDispo update finished for index " + indexName + ".");
