@@ -70,7 +70,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.14.4"
+version = "2.14.5"
 dependencies = [
 	{org = "ballerina", name = "auth"},
 	{org = "ballerina", name = "cache"},
@@ -202,7 +202,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "log"
-version = "2.12.0"
+version = "2.13.0"
 dependencies = [
 	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -358,6 +358,37 @@ dependencies = [
 ]
 
 [[package]]
+org = "ballerinax"
+name = "postgresql"
+version = "1.16.1"
+dependencies = [
+	{org = "ballerina", name = "crypto"},
+	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "sql"},
+	{org = "ballerina", name = "time"},
+	{org = "ballerinax", name = "cdc"}
+]
+
+[[package]]
+org = "cosmobilis"
+name = "algolia"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "task"},
+	{org = "ballerina", name = "uuid"},
+	{org = "ballerinai", name = "observe"},
+	{org = "cosmobilis", name = "job_patch"},
+	{org = "cosmobilis", name = "postgres_db"},
+	{org = "cosmobilis", name = "time"}
+]
+modules = [
+	{org = "cosmobilis", packageName = "algolia", moduleName = "algolia"}
+]
+
+[[package]]
 org = "cosmobilis"
 name = "bo_db"
 version = "0.1.0"
@@ -410,6 +441,7 @@ version = "0.1.0"
 dependencies = [
 	{org = "ballerina", name = "task"},
 	{org = "ballerinai", name = "observe"},
+	{org = "cosmobilis", name = "algolia"},
 	{org = "cosmobilis", name = "check_disk_space"},
 	{org = "cosmobilis", name = "check_funding_offers"},
 	{org = "cosmobilis", name = "job_patch"},
@@ -462,6 +494,16 @@ dependencies = [
 	{org = "ballerina", name = "lang.value"},
 	{org = "ballerina", name = "log"},
 	{org = "ballerinai", name = "observe"}
+]
+
+[[package]]
+org = "cosmobilis"
+name = "postgres_db"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "sql"},
+	{org = "ballerinai", name = "observe"},
+	{org = "ballerinax", name = "postgresql"}
 ]
 
 [[package]]
