@@ -78,3 +78,15 @@ org = "cosmobilis"
 name = "mysql5_bindings"
 version = "0.1.0"
 repository = "local"
+
+[[dependency]]
+org = "cosmobilis"
+name = "algolia"
+version = "0.1.0"
+repository = "local"
+
+[[dependency]]
+org = "cosmobilis"
+name = "postgres_db"
+version = "0.1.0"
+repository = "local"

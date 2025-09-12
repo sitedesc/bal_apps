@@ -1,5 +1,5 @@
 target
 generated
 Config.toml
-tmp
+tmp/
 /responses/localhost.json
