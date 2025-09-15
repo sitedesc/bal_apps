@@ -41,8 +41,8 @@ class AlgoliaIndexJob {
                 }
 
                 //Indexation start notification
-                string startMsg = string `${<string>conf.indexNames["offres"]} and ${<string>conf.indexNames["loyers"]} indexes update started...`;
-                if teams:sendTeamsNotification(startMsg, "", [{"Type d'exécution": "Tâche planifiée"}]) is error {
+                string startMsg = string `${<string>conf.indexNames["offres"]} and ${<string>conf.indexNames["loyers"]}`;
+                if teams:sendTeamsNotification(startMsg, "indexes update started...", [{"Type d'exécution": "Tâche planifiée"}]) is error {
                     log:printError(string `Teams indexation start notification failed.`);
                 } else {
                     log:printInfo(startMsg);
@@ -57,8 +57,8 @@ class AlgoliaIndexJob {
                 check self.moveIndex(tmpLoyerIndex, <string> conf.indexNames["loyers"]);
 
                 //Indexation end notification
-                string endMsg = string `${<string>conf.indexNames["offres"]} and ${<string>conf.indexNames["loyers"]} indexes update completed.`;
-                if teams:sendTeamsNotification(endMsg, "", [{"Type d'exécution": "Tâche planifiée"}]) is error {
+                string endMsg = string `${<string>conf.indexNames["offres"]} and ${<string>conf.indexNames["loyers"]}`;
+                if teams:sendTeamsNotification(endMsg, "indexes update completed.", [{"Type d'exécution": "Tâche planifiée"}]) is error {
                     log:printError(string `Teams indexation completion notification failed.`);
                 } else {
                     log:printInfo(endMsg);
