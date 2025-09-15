@@ -43,6 +43,9 @@ class CheckFundingOffersJob {
         json[] offers = check bodb:getPendingFundingOffers();
 
         if offers.length() == 0 {
+            string title = "✅ Aucune offre bloquée détectée";
+            string description = "Aucune offre en attente de financement à signaler";
+            check teams:sendTeamsNotification(title, description, "Rien à signaler pour aujourd'hui");
             log:printInfo("Aucune offre bloquée à signaler.");
             return;
         }
