@@ -1,0 +1,17 @@
+[package]
+org = "cosmobilis"
+name = "postgres_db"
+version = "0.1.0"
+distribution = "2201.12.7"
+
+[build-options]
+observabilityIncluded = true
+
+[dependencies]
+"ballerinax/postgresql" = "1.16.1"
+
+[[platform.java21.dependency]]
+groupId = "org.postgresql"
+artifactId = "postgresql"
+version = "42.7.7"
+graalvmCompatible = true
