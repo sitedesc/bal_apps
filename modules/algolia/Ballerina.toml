@@ -30,3 +30,9 @@ org = "cosmobilis"
 name = "java_bindings"
 version = "0.1.0"
 repository = "local"
+
+[[dependency]]
+org = "cosmobilis"
+name = "teams"
+version = "0.1.0"
+repository = "local"

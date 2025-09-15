@@ -4,6 +4,7 @@ import ballerina/task;
 import ballerina/uuid;
 
 import cosmobilis/postgres_db as db;
+import cosmobilis/teams;
 import cosmobilis/time as c_time;
 
 type Conf record {
@@ -34,22 +35,43 @@ class AlgoliaIndexJob {
     public function execute() {
         lock {
             do {
+
                 if conf.dryRun {
                     log:printInfo("Mode DRY RUN activé - L'index temporaire ne remplacera PAS l'index master.");
                 }
-                // Indexation des Offres
-                _ = check self.indexEntity("offres", conf.indexNames["offres"]);
-                // Indexation des Loyers
-                _ = check self.indexEntity("loyers", conf.indexNames["loyers"]);
-                log:printInfo("Indexation terminée avec succès.");
+
+                //Indexation start notification
+                string startMsg = string `${<string>conf.indexNames["offres"]} and ${<string>conf.indexNames["loyers"]} indexes update started...`;
+                if teams:sendTeamsNotification(startMsg, "", [{"Type d'exécution": "Tâche planifiée"}]) is error {
+                    log:printError(string `Teams indexation start notification failed.`);
+                } else {
+                    log:printInfo(startMsg);
+                }
+
+                // Indexation des Offres dans nouvel index temporaire
+                string tmpOfferIndex = check self.indexEntity("offres", conf.indexNames["offres"]);
+                // Indexation des Loyers dans nouvel index temporaire
+                string tmpLoyerIndex = check self.indexEntity("loyers", conf.indexNames["loyers"]);
+                // Remplacement des index master par les nouveaux index temporaires
+                check self.moveIndex(tmpOfferIndex, <string> conf.indexNames["offres"]);
+                check self.moveIndex(tmpLoyerIndex, <string> conf.indexNames["loyers"]);
+
+                //Indexation end notification
+                string endMsg = string `${<string>conf.indexNames["offres"]} and ${<string>conf.indexNames["loyers"]} indexes update completed.`;
+                if teams:sendTeamsNotification(endMsg, "", [{"Type d'exécution": "Tâche planifiée"}]) is error {
+                    log:printError(string `Teams indexation completion notification failed.`);
+                } else {
+                    log:printInfo(endMsg);
+                }
+
             } on fail var failure {
                 log:printError("Unmanaged error", failure);
             }
         }
     }
 
-    // Fonction pour indexer une entité avec pagination par lots de 100 records
-    function indexEntity(string entityName, string? srcIndex) returns error? {
+    // Fonction pour indexer une entité avec pagination par lots de 1000 records
+    function indexEntity(string entityName, string? srcIndex) returns string|error {
         log:printDebug(`indexEntity params: ${entityName}, ${srcIndex}`);
         if srcIndex is () {
             return error(string `No target index given to index ${entityName}`);
@@ -71,7 +93,7 @@ class AlgoliaIndexJob {
             return error("Entité inconnue : " + entityName);
         }
 
-        // Tableau pour stocker les lots de 100 records
+        // Tableau pour stocker les lots de 1000 records
         json[] batch = [];
         int batchSize = 1000;
         int batchCount = 0;
@@ -81,6 +103,7 @@ class AlgoliaIndexJob {
             do {
                 // Conversion de la ligne en JSON
                 db:Offre|db:Loyer 'record = check row.toJson().cloneWithType();
+                //ajout de champ calculés
                 self.addCalculatedFields('record);
                 log:printDebug(`pushing in batch record: ${'record.toJsonString()}`);
                 json addObject = {
@@ -104,9 +127,7 @@ class AlgoliaIndexJob {
             check self.saveObjects(tmpIndex, batch);
             log:printInfo(string `Indexed batch ${batchCount + 1} (${batch.length()} records) into ${tmpIndex}`);
         }
-
-        // Remplacement de l'index source par l'index temporaire
-        check self.moveIndex(tmpIndex, srcIndex);
+        return tmpIndex;
     }
 
     function copySettingsAndRules(string srcIndex, string tmpIndex) returns error? {
