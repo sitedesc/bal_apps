@@ -382,6 +382,7 @@ dependencies = [
 	{org = "ballerinai", name = "observe"},
 	{org = "cosmobilis", name = "job_patch"},
 	{org = "cosmobilis", name = "postgres_db"},
+	{org = "cosmobilis", name = "teams"},
 	{org = "cosmobilis", name = "time"}
 ]
 modules = [
