@@ -45,7 +45,7 @@ class AlgoliaIndexJob {
                 if teams:sendTeamsNotification(startMsg, "indexes update started...", [{"Type d'exécution": "Tâche planifiée"}]) is error {
                     log:printError(string `Teams indexation start notification failed.`);
                 } else {
-                    log:printInfo(startMsg);
+                    log:printInfo(startMsg + ": indexes update started...");
                 }
 
                 // Indexation des Offres dans nouvel index temporaire
@@ -61,7 +61,7 @@ class AlgoliaIndexJob {
                 if teams:sendTeamsNotification(endMsg, "indexes update completed.", [{"Type d'exécution": "Tâche planifiée"}]) is error {
                     log:printError(string `Teams indexation completion notification failed.`);
                 } else {
-                    log:printInfo(endMsg);
+                    log:printInfo(endMsg + ": indexes update completed.");
                 }
 
             } on fail var failure {
