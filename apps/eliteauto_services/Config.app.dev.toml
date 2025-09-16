@@ -3,6 +3,10 @@
 # reco: comment this line in prod environnement
 level = "DEBUG"
 
+[[ballerina.log.modules]]
+name = "cosmobilis/algolia"
+level = "INFO"
+
 [job_patch.conf]
 port = 9988
 
