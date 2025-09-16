@@ -1,19 +1,16 @@
 import ballerina/http;
 import ballerina/log;
 import ballerina/task;
+import ballerina/time;
 import ballerina/uuid;
 
 import cosmobilis/postgres_db as db;
 import cosmobilis/teams;
-import cosmobilis/time as c_time;
 
 type Conf record {
     string appId;
     string apiKey;
     map<string> indexNames;
-    int hour;
-    int minutes;
-    int seconds;
     # for test: if dryRun then temporary index is created but does not replace the master index.
     boolean dryRun = true;
 };
@@ -22,11 +19,7 @@ configurable Conf conf = ?;
 
 public function createAlgoliaIndexJob() returns task:JobId|error {
     AlgoliaIndexJob myJob = new;
-    if (conf.hour < 0) {
-        return task:scheduleJobRecurByFrequency(myJob, 2 * 60 * 60);
-    } else {
-        return task:scheduleJobRecurByFrequency(myJob, 2 * 60 * 60, -1, check c_time:at(conf.hour, conf.minutes, conf.seconds));
-    }
+    return task:scheduleJobRecurByFrequency(myJob, 15*60);
 }
 
 class AlgoliaIndexJob {
@@ -34,38 +27,54 @@ class AlgoliaIndexJob {
 
     public function execute() {
         lock {
+            db:JobDates|error jobDates = db:getJobDates();
+            if jobDates is error {
+                var notif = teams:sendTeamsNotification("INDEXATION JOB DATES ERROR", jobDates.message(), [{"Type d'exécution": "Tâche planifiée"}]);
+                if notif is error {
+                    log:printError(`Teams INDEXATION JOB DATES notification ERROR: ${notif.message()}`);
+                }
+                log:printError("INDEXATION JOB DATES ERROR", jobDates);
+                return;
+            }
+            time:Utc? lastIndexation = (<db:JobDates>jobDates).last_indexation;
             do {
 
                 if conf.dryRun {
                     log:printInfo("Mode DRY RUN activé - L'index temporaire ne remplacera PAS l'index master.");
                 }
+                if (check db:isDbRefreshMoreRecent()) {
+                    _ = check db:updateLastIndexation();
 
-                //Indexation start notification
-                string startMsg = string `${<string>conf.indexNames["offres"]} and ${<string>conf.indexNames["loyers"]}`;
-                if teams:sendTeamsNotification(startMsg, "indexes update started...", [{"Type d'exécution": "Tâche planifiée"}]) is error {
-                    log:printError(string `Teams indexation start notification failed.`);
-                } else {
-                    log:printInfo(startMsg + ": indexes update started...");
+                    //Indexation start notification
+                    string startMsg = string `${<string>conf.indexNames["offres"]} and ${<string>conf.indexNames["loyers"]}`;
+                    if teams:sendTeamsNotification(startMsg, "indexes update started...", [{"Type d'exécution": "Tâche planifiée"}]) is error {
+                        log:printError(string `Teams indexation start notification failed.`);
+                    } else {
+                        log:printInfo(startMsg + ": indexes update started...");
+                    }
+
+                    // Indexation des Offres dans nouvel index temporaire
+                    string tmpOfferIndex = check self.indexEntity("offres", conf.indexNames["offres"]);
+                    // Indexation des Loyers dans nouvel index temporaire
+                    string tmpLoyerIndex = check self.indexEntity("loyers", conf.indexNames["loyers"]);
+                    // Remplacement des index master par les nouveaux index temporaires
+                    check self.moveIndex(tmpOfferIndex, <string>conf.indexNames["offres"]);
+                    check self.moveIndex(tmpLoyerIndex, <string>conf.indexNames["loyers"]);
+
+                    //Indexation end notification
+                    string endMsg = string `${<string>conf.indexNames["offres"]} and ${<string>conf.indexNames["loyers"]}`;
+                    if teams:sendTeamsNotification(endMsg, "indexes update completed.", [{"Type d'exécution": "Tâche planifiée"}]) is error {
+                        log:printError(string `Teams indexation completion notification failed.`);
+                    } else {
+                        log:printInfo(endMsg + ": indexes update completed.");
+                    }
                 }
-
-                // Indexation des Offres dans nouvel index temporaire
-                string tmpOfferIndex = check self.indexEntity("offres", conf.indexNames["offres"]);
-                // Indexation des Loyers dans nouvel index temporaire
-                string tmpLoyerIndex = check self.indexEntity("loyers", conf.indexNames["loyers"]);
-                // Remplacement des index master par les nouveaux index temporaires
-                check self.moveIndex(tmpOfferIndex, <string> conf.indexNames["offres"]);
-                check self.moveIndex(tmpLoyerIndex, <string> conf.indexNames["loyers"]);
-
-                //Indexation end notification
-                string endMsg = string `${<string>conf.indexNames["offres"]} and ${<string>conf.indexNames["loyers"]}`;
-                if teams:sendTeamsNotification(endMsg, "indexes update completed.", [{"Type d'exécution": "Tâche planifiée"}]) is error {
-                    log:printError(string `Teams indexation completion notification failed.`);
-                } else {
-                    log:printInfo(endMsg + ": indexes update completed.");
-                }
-
             } on fail var failure {
                 log:printError("Unmanaged error", failure);
+                any|error status = db:updateLastIndexation(lastIndexation);
+                if status is error {
+                    log:printError("couldn't rollback lastIndex date: ", status);
+                }
             }
         }
     }

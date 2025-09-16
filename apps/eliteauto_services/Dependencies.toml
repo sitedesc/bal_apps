@@ -378,12 +378,12 @@ dependencies = [
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "task"},
+	{org = "ballerina", name = "time"},
 	{org = "ballerina", name = "uuid"},
 	{org = "ballerinai", name = "observe"},
 	{org = "cosmobilis", name = "job_patch"},
 	{org = "cosmobilis", name = "postgres_db"},
-	{org = "cosmobilis", name = "teams"},
-	{org = "cosmobilis", name = "time"}
+	{org = "cosmobilis", name = "teams"}
 ]
 modules = [
 	{org = "cosmobilis", packageName = "algolia", moduleName = "algolia"}
@@ -503,6 +503,7 @@ name = "postgres_db"
 version = "0.1.0"
 dependencies = [
 	{org = "ballerina", name = "sql"},
+	{org = "ballerina", name = "time"},
 	{org = "ballerinai", name = "observe"},
 	{org = "ballerinax", name = "postgresql"}
 ]
