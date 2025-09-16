@@ -1,5 +1,6 @@
 import ballerina/sql;
 import ballerinax/postgresql;
+import ballerina/time;
 
 
 public type Offre record {
@@ -381,4 +382,37 @@ sql:ParameterizedQuery query = `
 
     // Exécution de la requête en mode stream
     return dbClient->query(query);
+}
+
+public type JobDates record {|
+    time:Utc? last_db_refresh;
+    time:Utc? last_indexation;
+|};
+
+public function getJobDates() returns JobDates|error {
+    JobDates jd = check dbClient->queryRow(
+        `SELECT last_db_refresh, last_indexation 
+         FROM job_dates 
+         LIMIT 1`
+    );
+    return jd;
+}
+
+public function updateLastIndexation(time:Utc? ts = time:utcNow()) returns error? {
+    _ = check dbClient->execute(
+        `UPDATE job_dates SET last_indexation = ${ts}`
+    );
+}
+
+public function isDbRefreshMoreRecent() returns boolean|error {
+    JobDates jd = check getJobDates();
+    if jd.last_db_refresh is () {
+        // Pas de last_db_refresh -> toujours false
+        return false;
+    }
+    if jd.last_indexation is () {
+        // last_indexation null -> toujours true
+        return true;
+    }
+    return jd.last_db_refresh > jd.last_indexation;
 }

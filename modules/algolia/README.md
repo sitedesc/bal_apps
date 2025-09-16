@@ -19,11 +19,6 @@ apiKey = "REPLACEME"
 indexNames = {"offres": "dev_ELITE_OFFERS", "loyers": "dev_ELITE_LOYERS"}
 ## indexNames = {"offres": "prod_ELITE_OFFERS", "loyers": "prod_ELITE_LOYERS"}
 
-## if hour is < 0 then the job runs immediately
-hour = REPLACEME
-minutes = REPLACEME
-seconds = REPLACEME
-
 # switch the proper option depending on the target env: dev/preprod: true, prod: false
 dryRun = true
 ## dryRun = false
