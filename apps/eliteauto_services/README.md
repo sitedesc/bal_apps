@@ -28,11 +28,18 @@ version = "0.1.0"
 repository = "local"
 
 ```
-Par défaut le composant se trouve dans le repertoire modules à la racine de bal_apps.
-* pour un setup initial, il faut ensuite ouvrir les README de chacun de ces composant et vérifier que leur section "Déploiement et configuration" est bien exécutée sinon l'exécuter: par exemple, en vérifiant si les section de configuration à créer dans le Config.toml de cette app, le sont bien avec les bonnes valeur etc...
+Par défaut ces composant se trouve dans le repertoire bal_apps/modules.
+* pour un setup initial, il faut ensuite ouvrir les README de chacun de ces composant et vérifier que leur section "Déploiement et configuration" est bien exécutée (sinon le faire): 
+  * si une section de variables de configuration est indiquée à créer dans le README, le vérifier sinon le faire,
+  * si le README indique de créer un repertoire ou un tunnel..., e vérifier sinon le faire,
+  * etc...
 * lorsqu'on veut déployer un changement:
+  * après avoir effectuer le process git de review/merge de la PR dans la branche cible et avoir push celle-ci, faire un git pull de celle-ci dans l'env cible,
+    * NB: le processus de compilation/run de ballerina fait que des fichier Dependencies.toml (qui jouent le rôle des composer.lock PHP) sont potentiellement régénérés,
+    * donc le clone cible peut avoir de telle fichier non commités: le supprimer en faisant un git checkout de ces fichier avant de faire le git pull,
+    * la gestion de ces fichier sera simplifiée dans une prochaine version de cette procédure,
   * identifier dans la PR, le code bal_apps qui change et notamment les changement dans les README (rappel de la reco bal_apps: tout changement de de configuration d'un composant doit être documenté dans le README du composant);
-  * effectuer les changement de conf ainsi identifiés (en base dans Config.toml, mais ça peut être aussi des changement adhoc, comme créer un repertoire ou un tunnel d'accès bdd...),
+  * effectuer les changement de conf ainsi identifiés,
   * puis lancer le local_publish.sh comme décrit dans le README bal_apps,
   * puis lancer l'app en lançant manuellemnt la commande de start de la crontab.
 
