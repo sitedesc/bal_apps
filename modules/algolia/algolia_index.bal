@@ -19,7 +19,7 @@ configurable Conf conf = ?;
 
 public function createAlgoliaIndexJob() returns task:JobId|error {
     AlgoliaIndexJob myJob = new;
-    return task:scheduleJobRecurByFrequency(myJob, 15*60);
+    return task:scheduleJobRecurByFrequency(myJob, 15 * 60);
 }
 
 class AlgoliaIndexJob {
@@ -141,7 +141,7 @@ class AlgoliaIndexJob {
 
     function copySettingsAndRules(string srcIndex, string tmpIndex) returns error? {
         log:printInfo(`in copySettingsAndRules with params ${srcIndex}, ${tmpIndex}`);
-        http:Client algoliaClient = check new ("https://" + conf.appId + "-dsn.algolia.net");
+        http:FailoverClient algoliaClient = check self.getAlgoliaClient();
         map<string> headers = {
             "X-Algolia-API-Key": conf.apiKey,
             "X-Algolia-Application-Id": conf.appId
@@ -162,7 +162,7 @@ class AlgoliaIndexJob {
 
     function saveObjects(string index, json[] objects) returns error? {
         log:printInfo(`in saveObjects...`);
-        http:Client algoliaClient = check new ("https://" + conf.appId + "-dsn.algolia.net");
+        http:FailoverClient algoliaClient = check self.getAlgoliaClient();
         map<string> headers = {
             "X-Algolia-API-Key": conf.apiKey,
             "X-Algolia-Application-Id": conf.appId,
@@ -176,7 +176,7 @@ class AlgoliaIndexJob {
     function moveIndex(string tmpIndex, string srcIndex) returns error? {
         log:printInfo(`in moveIndex with params ${tmpIndex}, ${srcIndex}`);
         if !conf.dryRun {
-            http:Client algoliaClient = check new ("https://" + conf.appId + "-dsn.algolia.net");
+            http:FailoverClient algoliaClient = check self.getAlgoliaClient();
             map<string> headers = {
                 "X-Algolia-API-Key": conf.apiKey,
                 "X-Algolia-Application-Id": conf.appId
@@ -188,6 +188,27 @@ class AlgoliaIndexJob {
             http:Response resp = check algoliaClient->post("/1/indexes/" + tmpIndex + "/operation", payload, headers);
             log:printInfo(`in moveIndex response of post route /1/indexes/${tmpIndex}/batch: status: ${resp.statusCode}, body: ${check resp.getTextPayload()}`);
         }
+    }
+
+    function getAlgoliaClient() returns http:FailoverClient|error {
+        return new ({
+            timeout: 180,
+            // d'après la litterature ballerina, ce qui est retryé via cette conf:
+            //Timeout, Connexion refusée, Autres erreurs de transport, erreurs status code 5xx
+            retryConfig: {
+                interval: 5, // délai en secondes entre 2 tentatives
+                count: 4, // nombre d’essais total max (incluant donc la tentative initiale)
+                backOffFactor: 2.0 // backoff exponentiel qui multiplie le délai à chaque tentative, donc 5s pour la 1ere, puis 2x5s pour la seonde, puis 2x2X5s pour la 3eme
+            },
+            failoverCodes: [400, 500, 502, 503, 504], // codes qui déclenchent failover, pas le retry
+            interval: 3, // délai entre 2 endpoints si failover
+            targets: [
+                {url: "https://" + conf.appId + "-dsn.algolia.net"},
+                {url: "https://" + conf.appId + "-1.algolianet.com"},
+                {url: "https://" + conf.appId + "-2.algolianet.com"},
+                {url: "https://" + conf.appId + "-3.algolianet.com"}
+            ]
+        });
     }
 
     function addCalculatedFields(db:Offre|db:Loyer 'record) {
