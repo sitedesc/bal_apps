@@ -36,12 +36,13 @@ Par défaut ces composant se trouve dans le repertoire bal_apps/modules.
 * lorsqu'on veut déployer un changement:
   * après avoir effectuer le process git de review/merge de la PR dans la branche cible et avoir push celle-ci, faire un git pull de celle-ci dans l'env cible,
     * NB: le processus de compilation/run de ballerina fait que des fichier Dependencies.toml (qui jouent le rôle des composer.lock PHP) sont potentiellement régénérés,
-    * donc le clone cible peut avoir de telle fichier non commités: les supprimer en faisant un git checkout de ces fichier avant de faire le git pull,
+    * donc le clone cible peut avoir de tel fichier non commités: si le changement que l'on déploie modifie ces fichier, les supprimer en faisant un git checkout de ces fichier avant de faire le git pull,
     * la gestion de ces fichier sera simplifiée dans une prochaine version de cette procédure,
   * identifier dans la PR, le code bal_apps qui change et notamment les changement dans les README (rappel de la reco bal_apps: tout changement de configuration d'un composant doit être documenté dans le README du composant);
   * effectuer les changement de conf ainsi identifiés,
   * puis lancer le local_publish.sh comme décrit dans le README bal_apps,
-  * puis lancer l'app en lançant manuellemnt la commande de start de la crontab.
+    * NB: pour les chgt "simples en terme de dépendances", c'est à dire qui ne modifient pas la structure de dépendances entre packages et/ou le code d'utilisation d'un package dans un autre... on peut ne republier que le/les packages modifiés via l'alias "pub" joué dans ces packages (ce README bal_apps pour cet alias),
+  * puis lancer l'app en lançant manuellement la commande de start de la crontab.
 
   #### Activation/Désactivation des jobs
 
