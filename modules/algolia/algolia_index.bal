@@ -198,9 +198,10 @@ class AlgoliaIndexJob {
             retryConfig: {
                 interval: 5, // délai en secondes entre 2 tentatives
                 count: 4, // nombre d’essais total max (incluant donc la tentative initiale)
-                backOffFactor: 2.0 // backoff exponentiel qui multiplie le délai à chaque tentative, donc 5s pour la 1ere, puis 2x5s pour la seonde, puis 2x2X5s pour la 3eme
+                backOffFactor: 2.0, // backoff exponentiel qui multiplie le délai à chaque tentative, donc 5s pour la 1ere, puis 2x5s pour la seonde, puis 2x2X5s pour la 3eme
+                statusCodes: [400, 500, 502, 503, 504] // codes qui déclenchent le retry
             },
-            failoverCodes: [400, 500, 502, 503, 504], // codes qui déclenchent failover, pas le retry
+            failoverCodes: [400, 500, 502, 503, 504], // codes qui déclenchent le failover
             interval: 3, // délai entre 2 endpoints si failover
             targets: [
                 {url: "https://" + conf.appId + "-dsn.algolia.net"},
@@ -210,6 +211,7 @@ class AlgoliaIndexJob {
             ]
         });
     }
+
 
     function addCalculatedFields(db:Offre|db:Loyer 'record) {
 
