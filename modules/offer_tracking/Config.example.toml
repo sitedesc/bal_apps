@@ -1,0 +1,26 @@
+# Configuration d'exemple pour le module de suivi des offres
+# Copiez ce fichier vers Config.toml et adaptez les valeurs
+
+[ballerina.log]
+level = "DEBUG"
+
+[job_patch.conf]
+port = 9989
+
+[bo_db.conf]
+host = "REPLACEME"
+user = "REPLACEME"
+password = "REPLACEME"
+database = "REPLACEME"
+port = 3306
+
+[teams.conf]
+webhookUrl = "REPLACEME"
+channelId = "REPLACEME"
+apiKey = "REPLACEME"
+
+[time.conf]
+# Heure d'exécution du job (02h00 du matin)
+hour = 2
+minutes = 0
+seconds = 0
