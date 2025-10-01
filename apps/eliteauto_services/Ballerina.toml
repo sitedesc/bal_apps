@@ -90,3 +90,9 @@ org = "cosmobilis"
 name = "postgres_db"
 version = "0.1.0"
 repository = "local"
+
+[[dependency]]
+org = "cosmobilis"
+name = "offer_tracking"
+version = "0.1.0"
+repository = "local"
