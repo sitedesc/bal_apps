@@ -309,7 +309,7 @@ class CustomerDispoJob {
                         };
                         deletes.push(delete);
                     } else {
-                        log:printDebug(`id or dispo empty for object ${hit} of ${indexName}.`);
+                        log:printDebug(`id or dispo empty for object ${hit.toJsonString()} of ${indexName}.`);
                     }
                     continue;
                 }
