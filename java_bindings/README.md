@@ -7,7 +7,15 @@ Ce composant a été créé pour le ticket EA-442:
 bal bindgen java.time.LocalDateTime
 
 ```
-* puis l'utiliser: voir un exemple dans main.bal.
+* puis l'utiliser: voir un exemple dans main.bal;
+* pourallerina.toml:
+```
+[[package.modules]]
+name = "java_bindings.java.time"
+export = true
+
+```
+
 
 
 ### Déploiement et configuration

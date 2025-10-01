@@ -6,6 +6,13 @@ import ballerina/uuid;
 
 import cosmobilis/postgres_db as db;
 import cosmobilis/teams;
+import cosmobilis/time as c_time;
+
+type Schedule record {
+    //frequency in seconds
+    decimal interval;
+    c_time:TimeSlot excludedTimeSlot?;
+};
 
 type Conf record {
     string appId;
@@ -13,13 +20,14 @@ type Conf record {
     map<string> indexNames;
     # for test: if dryRun then temporary index is created but does not replace the master index.
     boolean dryRun = true;
+    Schedule schedule;
 };
 
 configurable Conf conf = ?;
 
 public function createAlgoliaIndexJob() returns task:JobId|error {
     AlgoliaIndexJob myJob = new;
-    return task:scheduleJobRecurByFrequency(myJob, 15 * 60);
+    return task:scheduleJobRecurByFrequency(myJob, conf.schedule.interval);
 }
 
 class AlgoliaIndexJob {
@@ -42,6 +50,15 @@ class AlgoliaIndexJob {
                 if conf.dryRun {
                     log:printInfo("Mode DRY RUN activé - L'index temporaire ne remplacera PAS l'index master.");
                 }
+
+                if (
+                !(conf.schedule.excludedTimeSlot is ()) &&
+                c_time:between(check conf.schedule.excludedTimeSlot.cloneWithType(c_time:TimeSlot))
+                ) {
+                    log:printInfo("Indexation annulée car on est dans le créneau d'exclusion d'indexation: " + conf.schedule.excludedTimeSlot.toString());
+                    return;
+                }
+
                 if (check db:isDbRefreshMoreRecent()) {
                     _ = check db:updateLastIndexation();
 
@@ -211,7 +228,6 @@ class AlgoliaIndexJob {
             ]
         });
     }
-
 
     function addCalculatedFields(db:Offre|db:Loyer 'record) {
 
