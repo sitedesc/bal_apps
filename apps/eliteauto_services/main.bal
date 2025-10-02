@@ -6,6 +6,7 @@ import cosmobilis/update_customer_dispo as ucd;
 import cosmobilis/sync_fo_quotations as sfq;
 import cosmobilis/check_disk_space as cds;
 import cosmobilis/check_funding_offers as cfo;
+import cosmobilis/offer_tracking as ot;
 import cosmobilis/algolia as alg;
 
 type Conf record {
@@ -22,6 +23,7 @@ public function main() returns error? {
         "SyncFoQuotationJob": conf.disabledJobs.indexOf("SyncFoQuotationJob") is () ? check sfq:createSyncFoQuotationJob() : (),
         "CheckDiskSpaceJob": conf.disabledJobs.indexOf("CheckDiskSpaceJob") is () ? check cds:createCheckDiskSpaceJob() : (),
         "CheckFundingOffersJob": conf.disabledJobs.indexOf("CheckFundingOffersJob") is () ? check cfo:createCheckFundingOffersJob() : (),
+        "OfferTrackingJob": conf.disabledJobs.indexOf("OfferTrackingJob") is () ? check ot:createOfferTrackingJob() : (),
         "AlgoliaIndexJob": conf.disabledJobs.indexOf("AlgoliaIndexJob") is () ? check alg:createAlgoliaIndexJob() : ()
     };
 }

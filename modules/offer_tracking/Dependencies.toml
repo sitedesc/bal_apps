@@ -41,7 +41,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "crypto"
-version = "2.9.0"
+version = "2.9.1"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "time"}
@@ -54,6 +54,9 @@ version = "1.1.2"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.object"}
+]
+modules = [
+	{org = "ballerina", packageName = "data.jsondata", moduleName = "data.jsondata"}
 ]
 
 [[package]]
@@ -209,6 +212,9 @@ dependencies = [
 	{org = "ballerina", name = "lang.value"},
 	{org = "ballerina", name = "observe"}
 ]
+modules = [
+	{org = "ballerina", packageName = "log", moduleName = "log"}
+]
 
 [[package]]
 org = "ballerina"
@@ -300,6 +306,9 @@ version = "2.7.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
+modules = [
+	{org = "ballerina", packageName = "time", moduleName = "time"}
+]
 
 [[package]]
 org = "ballerina"
@@ -358,110 +367,19 @@ dependencies = [
 ]
 
 [[package]]
-org = "ballerinax"
-name = "postgresql"
-version = "1.16.1"
-dependencies = [
-	{org = "ballerina", name = "crypto"},
-	{org = "ballerina", name = "io"},
-	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "sql"},
-	{org = "ballerina", name = "time"},
-	{org = "ballerinax", name = "cdc"}
-]
-
-[[package]]
-org = "cosmobilis"
-name = "algolia"
-version = "0.1.0"
-dependencies = [
-	{org = "ballerina", name = "http"},
-	{org = "ballerina", name = "log"},
-	{org = "ballerina", name = "task"},
-	{org = "ballerina", name = "time"},
-	{org = "ballerina", name = "uuid"},
-	{org = "ballerinai", name = "observe"},
-	{org = "cosmobilis", name = "job_patch"},
-	{org = "cosmobilis", name = "postgres_db"},
-	{org = "cosmobilis", name = "teams"}
-]
-modules = [
-	{org = "cosmobilis", packageName = "algolia", moduleName = "algolia"}
-]
-
-[[package]]
 org = "cosmobilis"
 name = "bo_db"
 version = "0.1.0"
 dependencies = [
+	{org = "ballerina", name = "data.jsondata"},
 	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "sql"},
 	{org = "ballerina", name = "time"},
 	{org = "ballerinai", name = "observe"},
 	{org = "ballerinax", name = "mysql"}
 ]
-
-[[package]]
-org = "cosmobilis"
-name = "check_disk_space"
-version = "0.1.0"
-dependencies = [
-	{org = "ballerina", name = "io"},
-	{org = "ballerina", name = "log"},
-	{org = "ballerina", name = "os"},
-	{org = "ballerina", name = "task"},
-	{org = "ballerinai", name = "observe"},
-	{org = "cosmobilis", name = "job_patch"},
-	{org = "cosmobilis", name = "teams"},
-	{org = "cosmobilis", name = "time"}
-]
 modules = [
-	{org = "cosmobilis", packageName = "check_disk_space", moduleName = "check_disk_space"}
-]
-
-[[package]]
-org = "cosmobilis"
-name = "check_funding_offers"
-version = "0.1.0"
-dependencies = [
-	{org = "ballerina", name = "data.jsondata"},
-	{org = "ballerina", name = "log"},
-	{org = "ballerina", name = "task"},
-	{org = "ballerinai", name = "observe"},
-	{org = "cosmobilis", name = "bo_db"},
-	{org = "cosmobilis", name = "job_patch"},
-	{org = "cosmobilis", name = "teams"}
-]
-modules = [
-	{org = "cosmobilis", packageName = "check_funding_offers", moduleName = "check_funding_offers"}
-]
-
-[[package]]
-org = "cosmobilis"
-name = "eliteauto_services"
-version = "0.1.0"
-dependencies = [
-	{org = "ballerina", name = "task"},
-	{org = "ballerinai", name = "observe"},
-	{org = "cosmobilis", name = "algolia"},
-	{org = "cosmobilis", name = "check_disk_space"},
-	{org = "cosmobilis", name = "check_funding_offers"},
-	{org = "cosmobilis", name = "job_patch"},
-	{org = "cosmobilis", name = "sync_fo_quotations"},
-	{org = "cosmobilis", name = "update_customer_dispo"}
-]
-modules = [
-	{org = "cosmobilis", packageName = "eliteauto_services", moduleName = "eliteauto_services"}
-]
-
-[[package]]
-org = "cosmobilis"
-name = "fo_db"
-version = "0.1.0"
-dependencies = [
-	{org = "ballerina", name = "log"},
-	{org = "ballerinai", name = "observe"},
-	{org = "cosmobilis", name = "mysql5_bindings"}
+	{org = "cosmobilis", packageName = "bo_db", moduleName = "bo_db"}
 ]
 
 [[package]]
@@ -489,42 +407,21 @@ modules = [
 
 [[package]]
 org = "cosmobilis"
-name = "mysql5_bindings"
-version = "0.1.0"
-dependencies = [
-	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "lang.value"},
-	{org = "ballerina", name = "log"},
-	{org = "ballerinai", name = "observe"}
-]
-
-[[package]]
-org = "cosmobilis"
-name = "postgres_db"
-version = "0.1.0"
-dependencies = [
-	{org = "ballerina", name = "sql"},
-	{org = "ballerina", name = "time"},
-	{org = "ballerinai", name = "observe"},
-	{org = "ballerinax", name = "postgresql"}
-]
-
-[[package]]
-org = "cosmobilis"
-name = "sync_fo_quotations"
+name = "offer_tracking"
 version = "0.1.0"
 dependencies = [
 	{org = "ballerina", name = "data.jsondata"},
-	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "task"},
+	{org = "ballerina", name = "time"},
 	{org = "ballerinai", name = "observe"},
 	{org = "cosmobilis", name = "bo_db"},
-	{org = "cosmobilis", name = "fo_db"},
-	{org = "cosmobilis", name = "job_patch"}
+	{org = "cosmobilis", name = "job_patch"},
+	{org = "cosmobilis", name = "teams"},
+	{org = "cosmobilis", name = "time"}
 ]
 modules = [
-	{org = "cosmobilis", packageName = "sync_fo_quotations", moduleName = "sync_fo_quotations"}
+	{org = "cosmobilis", packageName = "offer_tracking", moduleName = "offer_tracking"}
 ]
 
 [[package]]
@@ -537,6 +434,9 @@ dependencies = [
 	{org = "ballerina", name = "regex"},
 	{org = "ballerinai", name = "observe"}
 ]
+modules = [
+	{org = "cosmobilis", packageName = "teams", moduleName = "teams"}
+]
 
 [[package]]
 org = "cosmobilis"
@@ -548,22 +448,7 @@ dependencies = [
 	{org = "ballerinai", name = "observe"},
 	{org = "cosmobilis", name = "java_bindings"}
 ]
-
-[[package]]
-org = "cosmobilis"
-name = "update_customer_dispo"
-version = "0.1.0"
-dependencies = [
-	{org = "ballerina", name = "file"},
-	{org = "ballerina", name = "http"},
-	{org = "ballerina", name = "io"},
-	{org = "ballerina", name = "lang.runtime"},
-	{org = "ballerina", name = "log"},
-	{org = "ballerina", name = "task"},
-	{org = "ballerinai", name = "observe"},
-	{org = "cosmobilis", name = "job_patch"}
-]
 modules = [
-	{org = "cosmobilis", packageName = "update_customer_dispo", moduleName = "update_customer_dispo"}
+	{org = "cosmobilis", packageName = "time", moduleName = "time"}
 ]
 
