@@ -19,6 +19,13 @@ apiKey = "REPLACEME"
 indexNames = {"offres": "dev_ELITE_OFFERS", "loyers": "dev_ELITE_LOYERS"}
 ## indexNames = {"offres": "prod_ELITE_OFFERS", "loyers": "prod_ELITE_LOYERS"}
 
+[conf.schedule]
+# job execution frequency interval in seconds
+interval = 900.0
+# job execution is cancelled during this time slot:
+# [<time slot start hour>, <time slot start minute>, <time slot start second>, <time slot end hour>, <time slot end minute>, <time slot end second>]
+excludedTimeSlot = [0,0,0,1,30,0]
+
 # switch the proper option depending on the target env: dev/preprod: true, prod: false
 dryRun = true
 ## dryRun = false
