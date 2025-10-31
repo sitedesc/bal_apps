@@ -8,7 +8,7 @@ bal bindgen java.time.LocalDateTime
 
 ```
 * puis l'utiliser: voir un exemple dans main.bal;
-* pourallerina.toml:
+* pour l'utiliser dans un autre package il faut ajouter dans Ballerina.toml:
 ```
 [[package.modules]]
 name = "java_bindings.java.time"
