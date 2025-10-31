@@ -24,7 +24,7 @@ configurable int port = 9090;
 @http:ServiceConfig {
     cors: {
         allowOrigins: ["*"],
-        allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowMethods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
         allowHeaders: ["Content-Type", "Authorization"]
     }
 }
