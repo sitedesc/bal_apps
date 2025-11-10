@@ -46,11 +46,11 @@ public function process(SchemedTalk[] schemedTalks, string countryCode, boolean 
 
     map<string> OFCredentials = checkUserAuth ? {} : check auths[countryCode].cloneWithType();
 
-    http:Client OFAuthClient = check new (authUrl, {timeout: 180});
-    http:Client OFSellingClient = check new (sellingUrl, {timeout: 180});
-    http:Client OFGatewayClient = check new (gatewayUrl, {timeout: 180});
-    http:Client SFClient = check new (salesforceUrl, {timeout: 180});
-    http:Client SOClient = check new (soUrl, {timeout: 180});
+    http:Client OFAuthClient = check new (authUrl, {timeout: 180,    httpVersion: "1.1"});
+    http:Client OFSellingClient = check new (sellingUrl, {timeout: 180,    httpVersion: "1.1"});
+    http:Client OFGatewayClient = check new (gatewayUrl, {timeout: 180,    httpVersion: "1.1"});
+    http:Client SFClient = check new (salesforceUrl, {timeout: 180,    httpVersion: "1.1"});
+    http:Client SOClient = check new (soUrl, {timeout: 180,    httpVersion: "1.1"});
 
     map<string> headers = {};
     map<string> userHeaders = {};
@@ -175,7 +175,9 @@ public function process(SchemedTalk[] schemedTalks, string countryCode, boolean 
             printTitle(users.description);
             UserResponse userResponse = check OFAuthClient->get(route, headers);
             prGet(authUrl + route, userResponse);
-            email = userResponse.items[0].email;
+            if (userResponse.items.length() > 0){
+              email = userResponse.items[0].email;
+            }
             played.push(users);
             response = check userResponse.cloneWithType();
         } else if (play(resolvedSchemedTalk, CreateOpportunity)) {
@@ -379,4 +381,17 @@ function processMemorize(SchemedTalk resolvedSchemedTalk, Memorize memorize, jso
             }
         }
     }
+}
+
+public function getOFCountries() returns string[]|error {
+    map<string|map<string>>|error & readonly ofAuths = jsondata:parseString(os:getEnv("OPENFLEX_TEST_AUTH"), {});
+    string[] result = [];
+    if ofAuths is map<json> {
+        foreach string key in ofAuths.keys() {
+            if key != "env" {
+                result.push(key);
+            }
+        }
+    }
+    return result;
 }

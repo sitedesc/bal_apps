@@ -1,3 +1,4 @@
+import ballerina/data.jsondata as jsondata;
 import ballerina/http;
 import ballerina/io;
 
@@ -75,6 +76,87 @@ service http:Service / on new http:Listener(port) {
             }
         }
     }
+
+    resource function get sales_persons(http:Request req, int pointOfSaleId)
+            returns json|http:Response|http:InternalServerError|error {
+        do {
+            string requestEmitterIP = getRequestEmitterIP(req);
+
+            string[] countries = check getOFCountries();
+            io:println(countries);
+            Users userRequest = {
+                pointOfSaleIds: [pointOfSaleId.toString()],
+                groupTypes: ["3"]
+            };
+            ProvidersEntities providerEntities = {};
+
+            string countryCodeOfPointOfSale = "IT";
+            int entityId = 0;
+            boolean entityFound = false;
+            foreach string countryCode in countries {
+                json|error response = process([providerEntities], countryCode);
+                match response {
+                    var e if e is error => {
+                        return e;
+                    }
+                    var foo if foo is json[] => {
+                        json|error entities = jsondata:read(foo, `$.*.items.*`);
+                        if entities is error {
+                            return entities;
+                        }
+                        if entities is json[] {
+                            foreach json entity in entities {
+                                if (entity is map<json>) {
+                                    json|error results = jsondata:read(entity, `$.pointOfSales.*.id`);
+                                    if !(results is error)
+                                    {
+                                        int[]|error pointOfSaleIds = results.cloneWithType();
+                                        if pointOfSaleIds is int[] && !(pointOfSaleIds.indexOf(pointOfSaleId) is ()) && entity["id"] is int {
+                                            entityId = <int>entity["id"];
+                                            countryCodeOfPointOfSale = countryCode;
+                                            entityFound = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if entityFound {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (entityId <= 0) {
+                http:Response res = new;
+                res.statusCode = 404;
+                res.setPayload({message: string `entity of point of sale ID ${pointOfSaleId} not found`});
+                return res;
+
+            }
+            AuthProvidersSign_in auth = {entityId: entityId.toString()};
+            SchemedTalk[] schemedTalk = [auth, userRequest];
+            json schemedTalkResponse = check process(schemedTalk, countryCodeOfPointOfSale);
+            json[] result = <json[]>check jsondata:read(schemedTalkResponse, `$.*.items.*`);
+            (map<json>)[] salesPersons = from json salesPerson in result
+                select {
+                    uri: string `${<int>check salesPerson.id}-${pointOfSaleId}`,
+                    email: <string>check salesPerson.email,
+                    name: <string>check salesPerson.name,
+                    firstname: <string>check salesPerson.firstname,
+                    deleted: <boolean>check salesPerson.deleted,
+                    defaultPointOfSaleId: <int>check salesPerson.defaultPointOfSale.id,
+                    pointOfSalesIds: from json pointOfSale in <json[]>check salesPerson.pointOfSales
+                        select check (<map<json>>pointOfSale).id,
+                    defaultEntityId: <int>check salesPerson.defaultEntity.id
+                };
+            return salesPersons;
+        } on fail var failure {
+            return failure;
+        }
+    }
+
     resource function get openapi() returns string|error {
         io:println(string `return openapi contract...`);
         return check io:fileReadString("./schemed_talk_service_openapi.yaml");
@@ -84,6 +166,7 @@ service http:Service / on new http:Listener(port) {
         io:println(string `return openapi dev contract...`);
         return check io:fileReadString("./schemed_talk_service_openapi_dev.yaml");
     }
+
     resource function get openapi_local() returns string|error {
         io:println(string `return openapi local contract...`);
         return check io:fileReadString("./schemed_talk_service_openapi_local.yaml");

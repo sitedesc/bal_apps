@@ -1,0 +1,25 @@
+
+## openflex envs
+env = "staging"
+## pathes 
+## srv_opportunity app root directory
+## docker: projectDir = "/srv/app"
+## local: projectDir = "/home/franck/dev/srv_opportunity"
+## copy the proper projectDir value (docker or local or...) in projectDir variable
+projectDir = "/home/franck/dev/bal_apps/apps/chatapi"
+## should not be changed unless aws task definition files location changes:
+jsonConfigFile = "docker/aws-ecs/[env].task-definition.json"
+
+## don't modify this unless you know what you do (this is to be refactored):
+## put in scenarios array below, the IDs to play the corresponding scenarios: "none" = nothing played, "createOpp", "salesPerson", "oppStatus", "jira"
+## or put "all" to play all scenarios but "jira"
+## to be used only if you know what you do: "OFpwd" "test"
+scenarios = ["none"]
+
+## don't modify this:
+## jira 
+jiraApiUrl = ""
+## one year token: change it every year on 13/01 here: https://id.atlassian.com/manage-profile/security/api-tokens
+jiraApiToken = ""
+jiraUserName = ""
+jiraCsvFilePath = ""
