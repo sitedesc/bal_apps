@@ -2,46 +2,75 @@ import ballerina/http;
 import ballerina/io;
 import thisarug/prettify;
 
-public function errorSearch(string index, string docId) returns error? {
+public function errorSearch(string index, string requestId, int statusCode, string startDay, string endDay) returns error? {
     // URL du endpoint Kibana
     string url = "http://10.1.2.200:5601";
 
     // Corps JSON (identique à la version bash, mais avec les variables injectées)
-    json body = {
-        batch: [
-            {
-                options: {
-                    strategy: "ese"
+    json body =   {
+    batch: [
+      {
+        options: {
+          strategy: "ese"
+        },
+        request: {
+          params: {
+            body: {
+              _source: true,
+              fields: [
+                {
+                  'field: "*",
+                  include_unmapped: "true"
                 },
-                request: {
-                    params: {
-                        body: {
-                            _source: true,
-                            fields: [
-                                {
-                                    'field: "*",
-                                    include_unmapped: "true"
-                                },
-                                {
-                                    'field: "timestamp",
-                                    format: "date_time"
-                                }
-                            ],
-                            query: {
-                                ids: {
-                                    values: [docId]
-                                }
-                            },
-                            runtime_mappings: {},
-                            stored_fields: ["*"],
-                            version: true
-                        },
-                        index: index
-                    }
+                {
+                  'field: "timestamp",
+                  format: "date_time"
                 }
-            }
-        ]
-    };
+              ],
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      range: {
+                        timestamp: {
+                          format: "strict_date_optional_time",
+                          gte: startDay,
+                          lte: endDay
+                        }
+                      }
+                    },
+                    {
+                      match_phrase: {
+                        request_id: requestId
+                      }
+                    },
+                    {
+                      match_phrase: {
+                        status_code: statusCode
+                      }
+                    }
+                  ],
+                  must: [],
+                  must_not: [],
+                  should: []
+                }
+              },
+              runtime_mappings: {},
+              stored_fields: [
+                "*"
+              ],
+              version: true
+            },
+            index: index
+          }
+        }
+      }
+    ]
+  }
+;
+
+
+
 
     io:println("----------- Création du Client HTTP : \n", "----------");
     http:Client kibanaClient = check new (url);
