@@ -12,6 +12,12 @@ org = "ballerina"
 name = "yaml"
 version = "0.5.3"
 
+[[dependency]]
+org = "cosmobilis"
+name = "teams"
+version = "0.1.0"
+repository = "local"
+
 [[platform.java11.dependency]]
 groupId = "mysql"
 artifactId = "mysql-connector-java"

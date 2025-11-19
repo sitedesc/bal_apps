@@ -4,6 +4,7 @@ import ballerina/io;
 import ballerina/lang.runtime;
 import ballerina/os;
 import ballerina/time;
+import cosmobilis/teams;
 
 public function process(SchemedTalk[] schemedTalks, string countryCode, boolean checkUserAuth = false) returns json|error? {
 
@@ -46,11 +47,11 @@ public function process(SchemedTalk[] schemedTalks, string countryCode, boolean 
 
     map<string> OFCredentials = checkUserAuth ? {} : check auths[countryCode].cloneWithType();
 
-    http:Client OFAuthClient = check new (authUrl, {timeout: 180,    httpVersion: "1.1"});
-    http:Client OFSellingClient = check new (sellingUrl, {timeout: 180,    httpVersion: "1.1"});
-    http:Client OFGatewayClient = check new (gatewayUrl, {timeout: 180,    httpVersion: "1.1"});
-    http:Client SFClient = check new (salesforceUrl, {timeout: 180,    httpVersion: "1.1"});
-    http:Client SOClient = check new (soUrl, {timeout: 180,    httpVersion: "1.1"});
+    http:Client OFAuthClient = check new (authUrl, {timeout: 180, httpVersion: "1.1"});
+    http:Client OFSellingClient = check new (sellingUrl, {timeout: 180, httpVersion: "1.1"});
+    http:Client OFGatewayClient = check new (gatewayUrl, {timeout: 180, httpVersion: "1.1"});
+    http:Client SFClient = check new (salesforceUrl, {timeout: 180, httpVersion: "1.1"});
+    http:Client SOClient = check new (soUrl, {timeout: 180, httpVersion: "1.1"});
 
     map<string> headers = {};
     map<string> userHeaders = {};
@@ -175,8 +176,8 @@ public function process(SchemedTalk[] schemedTalks, string countryCode, boolean 
             printTitle(users.description);
             UserResponse userResponse = check OFAuthClient->get(route, headers);
             prGet(authUrl + route, userResponse);
-            if (userResponse.items.length() > 0){
-              email = userResponse.items[0].email;
+            if (userResponse.items.length() > 0) {
+                email = userResponse.items[0].email;
             }
             played.push(users);
             response = check userResponse.cloneWithType();
@@ -320,15 +321,45 @@ public function process(SchemedTalk[] schemedTalks, string countryCode, boolean 
             response = sleepStartEnd;
             printResponse("Sleep", response);
             played.push(sleep);
-        }
+        } else if (play(resolvedSchemedTalk, SOError)) {
+            SOError soError = check resolvedSchemedTalk.cloneWithType();
 
-        if (!play(resolvedSchemedTalk, SchemedTalkDoc)) {
-            responses.push((resolvedSchemedTalk.description != ()) ? {"description": resolvedSchemedTalk.description} : {"description": ""});
-        }
-        responses.push(response);
+            string summary = soError.message is string ? <string>soError.message : "No error short description";
+            string sfOpportunityName = soError.sfOpportunityId is string ? "Opportunité Salesforce" : "";
+            //TODO: move this SF url in a conf variable
+            string sfOpportunityUrl = soError.sfOpportunityId is string ? string `**[${<string>soError.sfOpportunityId}](https://bymycar.lightning.force.com/lightning/r/Opportunity/${<string>soError.sfOpportunityId}/view)**` : "";
+            string ofErrorId = soError.ofErrorId ?: "";
+            teams:MessageCard messageCard = {
+                summary: summary,
+                title: summary,
+                sections: [
+                    {
+                        text: soError.descr is string ? <string>soError.descr : "No error description."
+                    },
+                    {
+                        title: "Détail",
+                        facts: [
+                            {name: sfOpportunityName, value: sfOpportunityUrl},
+                            {name: "HTTP STATUS", value: soError.httpStatusCode},
+                            {name: "ID erreur openflex", value: ofErrorId}
+                        ],
+                        markdown: true
+                    }
+                ]
+            };
+
+        response = check teams:sendTeamsNotif(messageCard);
+        played.push(soError);
     }
 
-    return responses;
+    if (!play(resolvedSchemedTalk, SchemedTalkDoc)) {
+        responses.push((resolvedSchemedTalk.description != ()) ? {"description": resolvedSchemedTalk.description} : {"description": ""});
+    }
+    responses.push(response);
+}
+
+return responses ;
+
 }
 
 function printTitle(string text) {
@@ -364,10 +395,10 @@ function processMemorize(SchemedTalk resolvedSchemedTalk, Memorize memorize, jso
                         memory[key] = result;
                     } else if jsonpathExpression.trim().startsWith("substring-before(") {
                         map<string|string[]> functionCall = check decodeFunctionCall(jsonpathExpression.trim());
-                        string jsonpath = (<string[]> functionCall["parameters"])[0];
+                        string jsonpath = (<string[]>functionCall["parameters"])[0];
                         //if one replaces res by result => ballerina compiler error...
                         json res = check jsondata:read(response, `${jsonpath}`);
-                        string delimiter = (<string[]> functionCall["parameters"])[1];
+                        string delimiter = (<string[]>functionCall["parameters"])[1];
                         memory[key] = check substringBefore(res, delimiter);
                     } else {
                         memory[key] = check jsondata:read(response, `${jsonpathExpression}`);

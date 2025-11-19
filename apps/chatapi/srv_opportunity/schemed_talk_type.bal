@@ -12,7 +12,7 @@ public type SchemedTalkDoc record {
 };
 
 public enum ManagedService {
-    identity, selling, gateway, salesforce, srv_opportunity
+    identity, selling, gateway, salesforce, srv_opportunity, teams
 };
 
 type RequestType record {
@@ -161,6 +161,21 @@ type SOApiOpportunities record {
     string description = "Request type SOApiOpportunities executes service opportunity POST endpoint /api/opportunities";
     map<json> body;
 };
+
+//microsoft teams notifications
+
+type SOError record {
+    *ManagedPostRequestType;
+    teams 'service = teams;
+    "SOError" 'type = "SOError";
+    string httpStatusCode;
+    string? sfOpportunityId;
+    string? message;
+    string? descr;
+    string? ofErrorId;
+};
+
+//end microsoft teams notifications
 
 type Memorize record {
     *SchemedTalk;

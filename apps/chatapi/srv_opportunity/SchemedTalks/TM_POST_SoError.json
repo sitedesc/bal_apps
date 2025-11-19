@@ -1,0 +1,11 @@
+[
+    {
+        "type": "SOError",
+        "description": "Service Opportunity Error",
+        "httpStatusCode": "400",
+        "sfOpportunityId": "006Jv00000ajAMgIAM",
+        "message": "TEST: IGNORE ME",
+        "descr": "Ce véhicule ne peut pas être mis en vente.",
+        "ofErrorId": "68f5da9f404134.70959213"
+    }
+]
