@@ -3,11 +3,9 @@ import ballerina/io;
 //see https://ballerina.io/learn/by-example/configuring-via-toml
 configurable string projectDir = ?;
 configurable string jsonConfigFile = ?;
-configurable string balDir = ?;
 configurable string[] scenarios = ?;
 //OF = OpenFlex
 configurable string env = ?;
-configurable string OFAuthJson = ?;
 //Jira
 configurable string jiraApiUrl = ?;
 configurable string jiraApiToken = ?;
@@ -54,16 +52,4 @@ public function getContainerEnvVar(json jsonConf, string containerName, string e
          return enVarValue;
     }
 }
-
-  public function getBalDir() returns string {
-    return projectDir + "/" + balDir;
- }
-
- public function getJsonOFAuthCredentials() returns json|io:Error {
-    return io:fileReadJson(getBalDir() + "/" + OFAuthJson);
- }
-
-  public function getJson(string jsonFileName) returns json|io:Error {
-    return io:fileReadJson(getBalDir() + "/" + jsonFileName);
- }
  

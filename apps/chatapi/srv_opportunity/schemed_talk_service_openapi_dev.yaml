@@ -55,6 +55,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorPayload'
+  /sales_persons:
+    get:
+      operationId: getSalesPersons
+      tags:
+        - Get SalesPerson
+      summary: Retrieves sales persons
+      description: Retrieves sales persons
+      parameters:
+        - name: pointOfSaleId
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 155
+      responses:
+        '201':
+          description: Retrieves the sales persons of the provided OpenFlex point of sale ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SalesPerson'
   /openapi:
     get:
       operationId: getOpenapi
@@ -123,3 +144,33 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SchemedTalk'
+    salesPersonRequest:
+      type: object
+      properties:
+        pointOfSaleId:
+          type: integer
+          example: 155
+    SalesPerson:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          example: jerry.lewis@crazycars.com
+        lastname:
+          type: string
+          example: Lewis
+        firstname:
+          type: string
+          example: Jerry
+        deleted:
+          type: boolean
+          example: false
+      example:
+        id: 1
+        email: jerry.lewis@crazycars.com
+        lastname: Lewis
+        firstname: Jerry
+        deleted: false
