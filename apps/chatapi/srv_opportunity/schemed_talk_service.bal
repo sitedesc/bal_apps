@@ -157,6 +157,23 @@ service http:Service / on new http:Listener(port) {
         }
     }
 
+    resource function post so_error(http:Request request, SOError soError) returns json|http:BadRequest {
+        json|error response = process([soError], "IT", true);
+
+        string requestEmitterIP = getRequestEmitterIP(request);
+
+        match response {
+            var e if e is error => {
+                error|() e1 = io:fileWriteJson(string `./responses/${requestEmitterIP}.json`, [e.message(), e.detail().toBalString()]);
+                return http:BAD_REQUEST;
+            }
+            var foo if foo is json => {
+                error|() e = io:fileWriteJson(string `./responses/${requestEmitterIP}.json`, foo);
+                return response;
+            }
+        }
+    }
+
     resource function get openapi() returns string|error {
         io:println(string `return openapi contract...`);
         return check io:fileReadString("./schemed_talk_service_openapi.yaml");

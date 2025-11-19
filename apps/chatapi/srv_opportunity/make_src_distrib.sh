@@ -13,4 +13,7 @@ pushd `dirname $0`
 cp -r ../srv_opportunity $TARGET_DISTRIB_DIR/.
 rm -rf ./target
 rm -rf $TARGET_DISTRIB_DIR/srv_opportunity/responses/* $TARGET_DISTRIB_DIR/srv_opportunity/tools $TARGET_DISTRIB_DIR/srv_opportunity/Dependencies.toml $TARGET_DISTRIB_DIR/srv_opportunity/Config.toml $TARGET_DISTRIB_DIR/srv_opportunity/tmp/*
+mkdir -p $TARGET_DISTRIB_DIR/modules
+cp -r ../../../modules/teams $TARGET_DISTRIB_DIR/modules/.
+rm -rf $TARGET_DISTRIB_DIR/modules/teams/target $TARGET_DISTRIB_DIR/modules/teams/Config.toml $TARGET_DISTRIB_DIR/modules/teams/tests/Config.toml $TARGET_DISTRIB_DIR/modules/teams/Dependencies.toml $TARGET_DISTRIB_DIR/modules/teams/.vscode $TARGET_DISTRIB_DIR/modules/teams/Secrets*
 popd
