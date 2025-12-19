@@ -1,140 +1,142 @@
 openapi: 3.0.1
 info:
-  title: Schemed Talk Service Openapi Yaml
-  version: 0.1.0
+  title: Schemed Talk Service OpenAPI
+  version: 0.2.0
+  description: |
+    The Schemed Talk Service executes declarative API orchestration workflows ("SchemedTalks").
+    
+    A SchemedTalk is a JSON document describing a sequence of typed steps such as:
+    - HTTP API calls (GET / POST / PUT / PATCH)
+    - AI requests (OpenAI)
+    - Conditional logic
+    - Memory extraction and reuse via JSONPath
+    - Documentation-only steps for self-explaining workflows
+    
+    This API is designed for experimentation, debugging, and demonstration of API orchestration concepts.
+
+    Helpful tools:
+    - JSON Schema driven editor: https://json-editor.github.io/json-editor/
+    - JSONPath evaluator: https://jsonpath.com/
+
 servers:
-- url: "{server}:{port}/"
-  variables:
-    server:
-      default: http://localhost
-    port:
-      default: 9090
+  - url: "{server}:{port}"
+    variables:
+      server:
+        default: http://www.sitems.org
+      port:
+        default: "16387"
+
 paths:
   /schemed_talks:
     post:
+      summary: Execute a SchemedTalk workflow
+      description: |
+        Executes a SchemedTalk workflow and returns the execution trace.
+        
+        This endpoint is optimized for the "happy path".
+        In case of execution or type errors, the response may be concise.
+        For detailed diagnostics, see `/schemed_talks_responses`.
       operationId: postSchemedTalks
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: array
               items:
                 $ref: '#/components/schemas/SchemedTalk'
-        required: true
+            examples:
+              openai_demo_with_memory:
+                summary: OpenAI + JSONPath + memory reuse demo
+                description: |
+                  Demonstrates:
+                  - An OpenAI API call
+                  - JSONPath-based extraction of generated content
+                  - Storage into named memory
+                  - Dynamic reuse of memorized data
+                  - Self-documentation of the workflow
+                value:
+                  - type: SchemedTalkDoc
+                    description: >
+                      Demo SchemedTalk showing OpenAI call followed by
+                      JSONPath-based memory extraction and reuse.
+                  - type: OARequest
+                    prompt: |
+                      Explain in one short paragraph what microservices are
+                      and why API orchestration matters.
+                    prePromptFile: null
+                  - type: Memorize
+                    description: Memorize the OpenAI generated text
+                    asWhat:
+                      microservices_definition: "jsonpath:$.oaResponse"
+                  - type: SchemedTalkDoc
+                    description: "<?memory:microservices_definition?>"
+                  - type: SchemedTalkDoc
+                    description: >
+                      What just happened: this workflow called the OpenAI API,
+                      extracted the generated text using JSONPath, stored it
+                      under a named memory key, and dynamically reused it in a
+                      later step. This demonstrates declarative API orchestration,
+                      data extraction, and memory-based reuse without imperative code.
       responses:
         "201":
-          description: Created
+          description: Execution result
           content:
             application/json:
               schema:
-                type: object
+                type: array
+                items:
+                  type: object
         "400":
-          description: BadRequest
+          description: Bad request or execution error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorPayload'
+
   /schemed_talks_responses:
     post:
+      summary: Retrieve detailed execution diagnostics
+      description: |
+        This endpoint provides detailed diagnostics when a SchemedTalk execution fails.
+        
+        It is especially useful when:
+        - A type conversion error occurs
+        - A memory variable is missing or misnamed
+        - A JSONPath expression is invalid
+        - The main execution response is too concise
+        
+        Typical usage:
+        - Execute `/schemed_talks`
+        - If the response indicates a failure, inspect `/schemed_talks_responses`
+          for detailed error context.
       operationId: postSchemedTalksResponses
       requestBody:
         content:
           '*/*':
             schema:
-              description: Any type of entity body
+              description: Callback payload (internal use)
       responses:
         "201":
-          description: Created
+          description: Diagnostic information
           content:
             application/json:
               schema:
                 type: object
         "400":
-          description: BadRequest
+          description: Invalid diagnostic request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorPayload'
-  /sales_persons:
-    get:
-      operationId: getSalesPersons
-      tags:
-        - Get SalesPerson
-      summary: Retrieves sales persons
-      description: Retrieves sales persons
-      parameters:
-        - name: pointOfSaleId
-          in: query
-          required: true
-          schema:
-            type: integer
-            example: 155
-      responses:
-        '201':
-          description: Retrieves the sales persons of the provided OpenFlex point of sale ID
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SalesPerson'
-  /openapi:
-    get:
-      operationId: getOpenapi
-      responses:
-        "200":
-          description: Ok
-          content:
-            text/plain:
-              schema:
-                type: string
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
-  /openapi_dev:
-    get:
-      operationId: getOpenapiDev
-      responses:
-        "200":
-          description: Ok
-          content:
-            text/plain:
-              schema:
-                type: string
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
+
 components:
   schemas:
-    ErrorPayload:
-      required:
-      - message
-      - method
-      - path
-      - reason
-      - status
-      - timestamp
-      type: object
-      properties:
-        timestamp:
-          type: string
-        status:
-          type: integer
-          format: int64
-        reason:
-          type: string
-        message:
-          type: string
-        path:
-          type: string
-        method:
-          type: string
     SchemedTalk:
       type: object
+      description: |
+        Base type for all SchemedTalk steps.
+        Concrete behavior is determined by the `type` field.
       properties:
         type:
           type: string
@@ -144,33 +146,27 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SchemedTalk'
-    salesPersonRequest:
+
+    ErrorPayload:
       type: object
+      required:
+        - timestamp
+        - status
+        - reason
+        - message
+        - path
+        - method
       properties:
-        pointOfSaleId:
+        timestamp:
+          type: string
+        status:
           type: integer
-          example: 155
-    SalesPerson:
-      type: object
-      properties:
-        id:
-          type: integer
-          example: 1
-        email:
+        reason:
           type: string
-          example: jerry.lewis@crazycars.com
-        lastname:
+        message:
           type: string
-          example: Lewis
-        firstname:
+        path:
           type: string
-          example: Jerry
-        deleted:
-          type: boolean
-          example: false
-      example:
-        id: 1
-        email: jerry.lewis@crazycars.com
-        lastname: Lewis
-        firstname: Jerry
-        deleted: false
+        method:
+          type: string
+

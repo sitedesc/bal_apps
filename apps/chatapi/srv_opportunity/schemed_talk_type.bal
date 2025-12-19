@@ -1,4 +1,9 @@
 
+//Root type of the SchemedTalk type hierarchy: every schemed talk type IS A SchemedTalk
+//dynamic behavior: anywhere it is valid in a SchemedTalk, the following dynamic expression can be used:
+// <?jsonpath?>
+//where 'jsonpath' is executed by default on the response of the last executed request,
+//unless it starts by 'memory:' : in this case it is executed on the current 'memory' of the SchemedTalk : See Memorize request below.
 public type SchemedTalk record {
     string 'type?;
     string description?;
@@ -8,11 +13,12 @@ public type SchemedTalk record {
 public type SchemedTalkDoc record {
     *SchemedTalk;
     "SchemedTalkDoc" 'type = "SchemedTalkDoc";
-    string description;
+    string description = "A SchemedTalkDoc request can be used to describe a schemed talk or a part of it: put you description in its 'desciption' field. The schemed talk processor simply returns its description field as the response to this request.";
 };
 
+// names of the supported services: add a name here for new services supported by the processor and set the service field with this name for the new request types of this service. 
 public enum ManagedService {
-    identity, selling, gateway, salesforce, srv_opportunity
+    identity, selling, gateway, salesforce, srv_opportunity, openai
 };
 
 type RequestType record {
@@ -162,10 +168,20 @@ type SOApiOpportunities record {
     map<json> body;
 };
 
+public type OARequest record {
+    *ManagedPostRequestType;
+    openai 'service = openai;
+    "OARequest" 'type = "OARequest";
+    "/chat/completions" route = "/chat/completions";
+    string description = "Request type OARequest executes service openai POST endpoint /chat/completions with its prompt property as the prompt text sent to openai";
+    string prompt;
+    string? prePromptFile;
+};
+
 type Memorize record {
     *SchemedTalk;
     "Memorize" 'type = "Memorize";
-    string description = "Memorize a json value of the last response: the asWhat map property specifies: as the key : the name under which the value is memorized, and as the key value: either the name of the key referencing the value if the reponse is a map, or the index of the value if the response is an array.";
+    string description = "Memorize a json value of the last response: the asWhat map property specifies: as the key : the name under which the value is memorized, and as the key value: either the name of the key referencing the value if the reponse is a map, or the index of the value if the response is an array, or a jsonpath executed on the response if the key value is a string prefixed by 'jsonpath:'.";
     string|map<string|int> asWhat;
 };
 

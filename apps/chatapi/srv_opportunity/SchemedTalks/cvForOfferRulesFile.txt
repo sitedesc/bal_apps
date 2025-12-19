@@ -1,0 +1,784 @@
+jeu de règles complet de génération de CV ciblé pour une offre :
+
+- objectif : générer en XML une version de CV estimée la plus pertinente :
+  - pour une "Offre Cible"  dont le lien et la copie du texte sont copiés ci-dessous dans ce prompt,
+  - et à partir d'un CV XML appelé "Super CV" donné aussi ci-dessous, et qui contient les sections contenant les informations à remanier et/ou filtrer et/ou reformuler (notament adapter les termes et formulation au ton de l'offre cible) et/ou restructurer et/ou dédupliquer et/ou synthétiser... pour produire la version de CV XML la plus pertinente pour l'offre, et tenant sur deux pages. Ce "Super CV" contient notament la totalité des expériences avec le plus de détail possibles (voir la "Déscription du Super CV" ci-dessous sa déscription).
+
+On appelle cette version XML de CV ciblé pour une Offre Cible: "le CV Cible".
+
+- règle "format XML": le format XML du "Super CV" et du CV Cible à générer est défini par les règles suivantes:
+  - ils doivent être conformes au "schéma XSD de CV" donné ci-dessous;
+  - il faut respecter systématiquement l’échappement de tous les caractères réservés XML dans tous les CV générés ( &, " ...);
+  - il faut respecter le "Template CV XML" suivant :
+
+  <document section-numbering="true" figure-numbering="true" features="RESUME"> 
+    <h text-align="justify">...</h> 
+    <p/> 
+    <section id="Contact" coex="...">...</section> 
+    <section id="Objectives" coex="...">...</section> 
+    <section id="skills" coex="...">...</section> 
+    <section id="Employment" coex="...">...</section> 
+    <section id="Education" coex="...">...</section> 
+    <section id="Languages" coex="...">...</section> 
+    <section id="Interest" coex="...">...</section> 
+    <section id="NOTES" coex="...">...</section>
+  </document>
+
+  - les attributs coex doivent contenir le texte du titre de section (<section><h>).
+  - dans les sections id="skills" et id="Employment", deux structures (conformes au Schéma XSD) sont possibles :
+    - liste simple :
+      <ul><li><p>...</p></li></ul>
+    - sous-section :
+      <ul><li><p><strong>...</strong></p><ul><li><p>...</p></li></ul></li></ul>
+
+- fin de la règle: "format XML".
+
+- règle "Structure, Contenus et Optionnalité des section du Template CV XML":
+  - les sections sont prévues à la base pour contenir les informations correspondant à leur attribut id: la section id = "Contact" est sensée contenir les information de contact du candidat, "Ovjectives" : un résumé de ces objectif professionnel, "skills" : ses compétences etc...;
+  - si c'est estimé pertinent, on peut ne pas respecter cela et y mettre/ajouter d'autres types d'information que prévu. Par exemple si l'on estime qu'une structuration différente du CV est plus pertinente à l'analyse de l'offre. Mais il faut respecter techniquement que:	
+  - les sections suivantes sont obligatoires: Contact, Objectives, skills, Employment, Education, Languages, Interest.
+  - la section Employment n'est pas très bien nommée: elle est prévue pour contenir l'expérience professionelle du candidat.
+  - la section NOTES est optionelle.
+  - le contenu de la section skills du Super CV a été en majorité déduite des infos de sa section Employment (voir ci-dessous la "Déscription du Super CV").
+  - la génération du contenu de la section skills du CV Cible doit toujours être déduite de l'analyse ces deux sections du Super CV vs les compétences et experiences demandées dans l'Offre Cible. Il ne faut jamais mettre dans les section skills et Employment des élément de compétence et expérience qui ne seraient pas déductibles de ces sources d'informations, mais en revanche on peut librement interpréter les élément des section skills et Employment du Super CV, vs ce qui est demandé dans l'Offre Cible, pour déduire ces élément pour le CV Cible.
+  - les experiences générées doivent indiquer un ou plusieurs employeur ou client en regard de la période (début/fin) de l'expérience.
+  - générer des caractères tiret HYPHEN-MINUS (U+002D) et pas des NON-BREAKING HYPHEN (U+2011).
+- fin de la règle: "Structure, Contenus et Optionnalité des section du Template CV XML".
+
+ - règle "liens dans les CV": si un element <a href="...">...</a> est recopié du "Super CV" dans le "CV cible", il faut par défaut conserver le lien (sauf si on l'estime pas pertinent pour l'offre cible).
+
+- règle "langue du CV": générer le CV dans la langue de l'Offre Cible. Le Super CV étant en anglais: si l'Offre Cible est en français, et que l'on décide d'en recopier des parties, il faut les traduire.
+
+- règle "surdéfinition": les règles ci-dessus peuvent être surdéfinies ci-dessous: appliquer la version surdéfinie.
+
+- régle "aucun style par API": lorsque le XML est retourné en réponse à l'appel d'un endpoint de l'API openai, il faut renvoyer UNIQUEMENT le contenu XML, strictement sans aucun caractère avant ou après <document>…</document>. Pas de ```xml, pas de markdown, pas de quotes.
+
+- Déscription du Super CV:
+  - il est conforme au "Schéma XSD de CV" ci-dessous;
+  - il est conforme aux régles qui le concernent ci-dessus et/ou ci-dessous si elles sont surdéfinies pour lui ci-dessous.
+  - il contient notament une aggrégation de toutes les compétences et expériences les plus détaillées du candidat depuis le début de sa carrière à aujourd'hui.
+  - cette aggrégation peut contenir des parties qui reformulent les mêmes experiences différemment: lorsqu'on trouve dans ce Super CV XML, des parties séparées par des "----------" (comme par exemple des listes d'item séparés par des "------"), c'est qu'elles contiennent probablement des reformulation des mêmes élément d'expérience.
+- fin de la Déscription du Super CV.
+
+- schéma XSD de CV :
+
+<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- RDFa Lite attribute group -->
+  <xs:attributeGroup name="rdfaLite">
+    <xs:attribute name="vocab" type="xs:anyURI" use="optional"/>
+    <xs:attribute name="typeof" type="xs:string" use="optional"/>
+    <xs:attribute name="property" type="xs:string" use="optional"/>
+    <xs:attribute name="resource" type="xs:anyURI" use="optional"/>
+    <xs:attribute name="about" type="xs:anyURI" use="optional"/>
+    <xs:attribute name="content" type="xs:string" use="optional"/>
+    <xs:attribute name="datatype" type="xs:anyURI" use="optional"/>
+  </xs:attributeGroup>
+
+
+
+  <!-- elements -->
+  <xs:element name="practices" type="practices.type"/>
+
+  <xs:element name="dictionary" type="dictionary.type"/>
+
+  <xs:element name="document" type="document.type"/>
+
+  <xs:element name="meta" type="meta.type"/>
+
+  <xs:element name="author" type="author.type"/>
+
+  <xs:element name="date" type="xs:date"/>
+
+  <xs:element name="categories" type="categories.type"/>
+
+  <xs:element name="category" type="category.type"/>
+
+  <xs:element name="section" type="section.type"/>
+  <xs:element name="practice" type="practice.type"/>
+  <xs:element name="data_definition" type="data_definition.type"/>
+  <xs:element name="data_constraints_definition" type="data_constraints_definition.type"/>
+  <xs:element name="data_constraint_definition" type="data_constraint_definition.type"/>
+  <xs:element name="property_definition" type="property_definition.type"/>
+  <xs:element name="property_constraints_definition" type="property_constraints_definition.type"/>
+  <xs:element name="h" type="plaintext.type"/>
+
+  <xs:element name="h-sub" type="plaintext.type"/>
+
+  <xs:element name="p" substitutionGroup="abstract-block" type="paragraph.type"/>
+
+  <xs:element name="code" substitutionGroup="abstract-block" type="code.type" xml:space="preserve"/>
+
+  <xs:element name="technical_restriction" substitutionGroup="abstract-block" type="paragraph.type"/>
+
+  <xs:element name="body" type="paragraph.type"/>
+
+  <xs:element name="source" type="plaintext.type"/>
+
+  <xs:element name="a" substitutionGroup="abstract-plaintextelement" type="hyperlink.type"/>
+
+  <xs:element name="br" substitutionGroup="abstract-richtextelement" type="empty.type"/>
+
+  <xs:element name="strong" substitutionGroup="abstract-richtextelement" type="richtext.type"/>
+
+  <xs:element name="em" substitutionGroup="abstract-richtextelement" type="richtext.type"/>
+
+  <xs:element name="note" substitutionGroup="abstract-richtextelement" type="notetext.type"/>
+
+  <xs:element name="u" substitutionGroup="abstract-richtextelement" type="richtext.type"/>
+
+  <xs:element name="sub" substitutionGroup="abstract-plaintextelement" type="plaintext.type"/>
+
+  <xs:element name="sup" substitutionGroup="abstract-plaintextelement" type="plaintext.type"/>
+
+  <xs:element name="span" substitutionGroup="abstract-plaintextelement" type="plaintext.type"/>
+
+  <xs:element name="table" substitutionGroup="abstract-block" type="tableType" />
+
+  <xs:element name="ul" substitutionGroup="abstract-block" type="list.type"/>
+
+  <xs:element name="ol" substitutionGroup="abstract-block" type="list.type"/>
+
+  <xs:element name="li" type="li.type"/>
+
+  <xs:element name="figure" substitutionGroup="abstract-block" type="figure.type"/>
+
+  <xs:element name="img" substitutionGroup="abstract-media" type="media.type"/>
+
+  <xs:element name="video" substitutionGroup="abstract-media" type="media.type"/>
+
+  <xs:element name="legend" type="richtext.type"/>
+
+  <xs:element name="quote" substitutionGroup="abstract-block" type="quote.type"/>
+
+  <xs:element name="orgchart" substitutionGroup="abstract-media">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="person" minOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute ref="width" use="optional" />
+      <xs:attribute ref="border-type" use="optional" />
+      <xs:attribute ref="ignore_for"/>
+        <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+  </xs:element>
+
+  <xs:element name="person">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="person" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="name" use="required" type="nonEmptyString"/>
+      <xs:attribute ref="email" use="optional"/>
+      <xs:attribute name="division" use="optional" type="xs:string"/>
+      <xs:attribute ref="ignore_for"/>
+        <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+  </xs:element>
+
+
+  <xs:element name="include" substitutionGroup="abstract-block">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="media.type">
+          <xs:sequence>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+        <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+  </xs:element>
+
+  <!-- types and abstracts -->
+
+  <xs:element name="abstract-block"            abstract="true"/>
+  <xs:element name="abstract-plaintextelement" abstract="true"/>
+  <xs:element name="abstract-richtextelement"  abstract="true"/>
+  <xs:element name="abstract-media"            abstract="true"/>
+
+  <!-- empty.type -->
+  <xs:complexType name="empty.type" mixed="false">
+    <xs:choice minOccurs="0"/>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <!-- plaintext.type -->
+  <xs:complexType name="notetext.type" mixed="true">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="abstract-plaintextelement"/>
+    </xs:choice>
+    <xs:attribute name="view" use="optional" default="default" type="noteview.type"/>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+  
+  <xs:complexType name="plaintext.type" mixed="true">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="abstract-plaintextelement"/>
+    </xs:choice>
+    <xs:attribute ref="text-align" use="optional" />
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <!-- richtext.type -->
+  <xs:complexType name="richtext.type" mixed="true">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="abstract-plaintextelement"/>
+      <xs:element ref="abstract-richtextelement"/>
+    </xs:choice>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <!-- hyperlink.type -->
+  <xs:complexType name="hyperlink.type" mixed="true">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="abstract-plaintextelement"/>
+    </xs:choice>
+    <xs:attribute ref="href" use="required"/>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <!-- paragraph.type -->
+  <xs:complexType name="paragraph.type" mixed="true">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="abstract-plaintextelement"/>
+      <xs:element ref="abstract-richtextelement"/>
+    </xs:choice>
+    <xs:attribute ref="text-align"   use="optional" />
+    <!--    <xs:attribute ref="left-indent"  use="optional" default="0" /> -->
+    <!--    <xs:attribute ref="right-indent" use="optional" default="0" /> -->
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <!-- code.type -->
+  <xs:complexType name="code.type" mixed="true">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="br"/>
+    </xs:choice>
+    <xs:attribute ref="text-align"   use="optional" />
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <!-- figure.type -->
+  <xs:complexType name="figure.type" mixed="false">
+    <xs:sequence>
+      <xs:element ref="abstract-media" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element ref="legend" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute ref="align"        use="optional" />
+    <!--    <xs:attribute ref="left-indent"  use="optional" default="0" /> -->
+    <!--    <xs:attribute ref="right-indent" use="optional" default="0" /> -->
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <!-- media.type -->
+  <xs:complexType name="media.type" mixed="false">
+    <xs:attribute ref="border-type" use="optional" />
+    <xs:attribute ref="src" use="required" />
+    <xs:attribute ref="width" use="optional" />
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <!-- epad.type -->
+  <xs:complexType name="practices.type" mixed="false">
+    <xs:sequence>
+      <xs:element ref="meta" minOccurs="0"/>
+      <xs:element ref="h"    />
+      <xs:element ref="h-sub" minOccurs="0" maxOccurs="1" />
+      <xs:element ref="abstract-block" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element ref="practice" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute ref="section-numbering" use="optional" />
+    <xs:attribute ref="figure-numbering" use="optional" />
+    <xs:attribute ref="ignore_for"/>
+    <xs:attribute ref="features"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <xs:complexType name="dictionary.type" mixed="false">
+    <xs:sequence>
+      <xs:element ref="h"    />
+      <xs:element ref="h-sub" minOccurs="0" maxOccurs="1" />
+      <xs:element ref="abstract-block" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element ref="data_definition" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute ref="section-numbering" use="optional" />
+    <xs:attribute ref="figure-numbering" use="optional" />
+    <xs:attribute ref="ignore_for"/>
+    <xs:attribute ref="features"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <xs:complexType name="document.type" mixed="false">
+    <xs:sequence>
+      <xs:element ref="h"    />
+      <!-- At least 1 block or section and all blocks precede sections. -->
+      <xs:choice>
+        <xs:element ref="abstract-block" maxOccurs="unbounded" />
+        <xs:element ref="section" />
+      </xs:choice>
+      <xs:element ref="section" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+    <xs:attribute ref="section-numbering" use="optional" />
+    <xs:attribute ref="figure-numbering" use="optional" />
+    <xs:attribute ref="ignore_for"/>
+    <xs:attribute ref="features"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <!-- section.type -->
+  <xs:complexType name="section.type" mixed="false">
+    <xs:sequence>
+      <xs:element ref="h"    />
+      <xs:element ref="h-sub" minOccurs="0" maxOccurs="1" />
+      <!-- At least 1 block or section and all blocks precede sections. -->
+      <xs:choice>
+        <xs:element ref="abstract-block" maxOccurs="unbounded" />
+        <xs:element ref="section" />
+      </xs:choice>
+      <xs:element ref="section" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+    <xs:attribute ref="view" use="optional" default="normal"/>
+    <xs:attribute ref="behavior" use="optional" default="section"/>
+    <xs:attribute ref="id" use="optional"/>
+    <xs:attribute ref="coex" use="optional"/>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <!-- dataset_definition.type -->
+  <xs:complexType name="practice.type" mixed="false">
+    <xs:sequence>
+      <xs:element ref="h"    />
+      <xs:element ref="h-sub" minOccurs="0" maxOccurs="1" />
+      <xs:element ref="categories" minOccurs="1" maxOccurs="1" />
+      <!-- At least 1 block or section and all blocks precede sections. -->
+      <xs:choice>
+        <xs:element ref="abstract-block" maxOccurs="unbounded" />
+        <xs:element ref="section" />
+      </xs:choice>
+      <xs:element ref="section" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+    <xs:attribute ref="view" use="optional" default="normal"/>
+    <xs:attribute ref="behavior" use="optional" default="section"/>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <xs:complexType name="data_definition.type" mixed="false">
+    <xs:sequence>
+      <xs:element ref="h"    />
+      <xs:element ref="h-sub" minOccurs="0" maxOccurs="1" />
+      <!-- At least 1 block or section and all blocks precede sections. -->
+      <xs:choice>
+        <xs:element ref="abstract-block" maxOccurs="unbounded" />
+      </xs:choice>
+      <xs:element ref="data_constraints_definition" minOccurs="0" maxOccurs="1" />
+    </xs:sequence>
+    <xs:attribute ref="view" use="optional" default="list"/>
+    <xs:attribute ref="behavior" use="optional" default="section"/>
+    <xs:attribute ref="managed" use="required" default="true"/>
+    <xs:attribute ref="id" use="required"/>
+    <xs:attribute ref="implementation_class" use="optional"/>
+    <xs:attribute ref="implementation_method" use="optional"/>
+    <xs:attribute ref="symfony_service_id" use="optional"/>
+    <xs:attribute ref="gitlab_repository" use="optional"/>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <xs:complexType name="data_constraints_definition.type" mixed="false">
+    <xs:sequence>
+      <xs:element ref="h"    />
+      <xs:element ref="h-sub" minOccurs="0" maxOccurs="1" />
+      <!-- At least 1 block or section and all blocks precede sections. -->
+      <xs:choice>
+        <xs:element ref="abstract-block" maxOccurs="unbounded" />
+        <xs:element ref="data_constraint_definition" />
+      </xs:choice>
+      <xs:element ref="data_constraint_definition" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+    <xs:attribute ref="view" use="optional" default="normal"/>
+    <xs:attribute ref="behavior" use="optional" default="section"/>
+    <xs:attribute ref="managed" use="optional" default="false"/>
+    <xs:attribute ref="switch" use="optional" default="none"/>
+    <xs:attribute ref="id" use="optional"/>
+    <xs:attribute ref="implementation_class" use="optional"/>
+    <xs:attribute ref="implementation_method" use="optional"/>
+    <xs:attribute ref="symfony_service_id" use="optional"/>
+    <xs:attribute ref="gitlab_repository" use="optional"/>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <xs:complexType name="data_constraint_definition.type" mixed="false">
+    <xs:sequence>
+      <xs:element ref="h"    />
+      <xs:element ref="h-sub" minOccurs="0" maxOccurs="1" />
+      <!-- At least 1 block or section and all blocks precede sections. -->
+      <xs:choice>
+        <xs:element ref="abstract-block" maxOccurs="unbounded" />
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute ref="view" use="optional" default="list"/>
+    <xs:attribute ref="behavior" use="optional" default="section"/>
+    <xs:attribute ref="managed" use="required" default="true"/>
+    <xs:attribute ref="id" use="required"/>
+    <xs:attribute ref="switch" use="optional" default="none"/>
+    <xs:attribute ref="implementation_class" use="optional"/>
+    <xs:attribute ref="implementation_method" use="optional"/>
+    <xs:attribute ref="symfony_service_id" use="optional"/>
+    <xs:attribute ref="gitlab_repository" use="optional"/>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <xs:complexType name="property_definition.type" mixed="false">
+    <xs:sequence>
+      <xs:element ref="h"    />
+      <xs:element ref="h-sub" minOccurs="0" maxOccurs="1" />
+      <!-- At least 1 block or section and all blocks precede sections. -->
+      <xs:choice>
+        <xs:element ref="abstract-block" maxOccurs="unbounded" />
+      </xs:choice>
+      <xs:element ref="property_constraints_definition" minOccurs="0" maxOccurs="1" />
+    </xs:sequence>
+    <xs:attribute ref="view" use="optional" default="normal"/>
+    <xs:attribute ref="behavior" use="optional" default="section"/>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <xs:complexType name="property_constraints_definition.type" mixed="false">
+    <xs:sequence>
+      <xs:element ref="h"    />
+      <xs:element ref="h-sub" minOccurs="0" maxOccurs="1" />
+      <!-- At least 1 block or section and all blocks precede sections. -->
+      <xs:choice>
+        <xs:element ref="abstract-block" maxOccurs="unbounded" />
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute ref="view" use="optional" default="normal"/>
+    <xs:attribute ref="behavior" use="optional" default="section"/>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <!-- meta.type -->
+  <xs:complexType name="meta.type" mixed="false">
+    <xs:sequence>
+      <xs:element ref="author" minOccurs="0" maxOccurs="1"/>
+      <xs:element ref="date" minOccurs="0" maxOccurs="1" />
+      <xs:element ref="categories" minOccurs="0" maxOccurs="1" />
+    </xs:sequence>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <!-- categories.type -->
+  <xs:complexType name="categories.type" mixed="false">
+    <xs:sequence>
+      <xs:element ref="category" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <!-- category.type -->
+  <xs:simpleType name="category.type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Analysis" id="analysis"/>
+      <xs:enumeration value="Bug analysis" id="bug_analysis"/>
+      <xs:enumeration value="Evolution analysis" id="evolution_analysis"/>
+      <xs:enumeration value="Solution business design" id="solution_business_design"/>
+      <xs:enumeration value="Solution technical design" id="solution_technical_design"/>
+      <xs:enumeration value="Solution dev" id="solution_dev"/>
+      <xs:enumeration value="Solution test" id="solution_test"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- author.type -->
+  <xs:complexType name="author.type" mixed="true">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="abstract-plaintextelement"/>
+    </xs:choice>
+    <xs:attribute ref="email" use="optional" />
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <!-- attribute type -->
+  <xs:simpleType name="nonEmptyString">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- border-type -->
+  <xs:simpleType name="border-type.type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="solid"/>
+      <xs:enumeration value="smooth"/>
+      <xs:enumeration value="soft"/>
+      <xs:enumeration value="hard"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="view.type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="normal"/>
+      <xs:enumeration value="list"/>
+      <xs:enumeration value="accordion"/>
+      <xs:enumeration value="tabs"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="behavior.type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="section"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="noteview.type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="default"/>
+      <xs:enumeration value="below-paragraph"/>
+      <xs:enumeration value="below-epad"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="list.type" mixed="false">
+    <xs:sequence>
+      <xs:element ref="li"  maxOccurs="unbounded"/>
+    </xs:sequence>
+    <!--xs:attribute ref="column-count" use="optional" /-->
+    <xs:attribute ref="border-type" use="optional" />
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <xs:complexType name="li.type" mixed="false">
+    <xs:sequence>
+      <xs:choice>
+        <xs:element ref="p"/>
+        <xs:element ref="technical_restriction"/>
+      </xs:choice>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="p"/>
+        <xs:element ref="ul" />
+        <xs:element ref="ol" />
+      </xs:choice>
+    </xs:sequence>
+    <!--xs:attribute ref="column-count" use="optional" /-->
+    <xs:attribute ref="crossed" use="optional" />
+    <xs:attribute ref="status" use="optional" />
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <!-- quote.type -->
+  <xs:complexType name="quote.type" mixed="false">
+    <xs:sequence>
+      <xs:element ref="body"/>
+      <xs:element ref="source" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+  
+  <xs:simpleType name="text-align.type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="left"/>
+      <xs:enumeration value="center"/>
+      <xs:enumeration value="right"/>
+      <xs:enumeration value="justify"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="align.type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="left"/>
+      <xs:enumeration value="right"/>
+      <xs:enumeration value="center"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <!-- table type-->
+
+  <xs:complexType name="tableType">
+    <xs:sequence>
+      <xs:element name="caption" type="xs:string" minOccurs="0" />
+      <xs:element name="tbody" type="tbodyType" />
+    </xs:sequence>
+    <xs:attribute name="width" type="xs:positiveInteger" />
+    <xs:attribute name="border" type="borderType" default="cell" />
+    <xs:attribute name="color" type="colorSchemesType" default="grey" />
+    <xs:attribute name="alternaterowcolor" type="xs:boolean" default="false" />
+    <xs:attribute name="cellspacing" type="xs:nonNegativeInteger" default="0" />
+    <xs:attribute name="cellpadding" default="1">
+      <xs:simpleType>
+        <xs:restriction base="xs:nonNegativeInteger">
+          <xs:maxInclusive value="32"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="align" type="align.type" default="center" />
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <xs:complexType name="tbodyType">
+    <xs:sequence>
+      <xs:element name="tr" type="trType" maxOccurs="unbounded" />
+    </xs:sequence>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <xs:complexType name="trType">
+    <xs:choice maxOccurs="unbounded">
+      <xs:element name="td" type="tdType" />
+      <xs:element name="th" type="tdType" />
+    </xs:choice>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <xs:complexType name="tdType">
+    <xs:choice maxOccurs="unbounded">
+      <xs:element ref="abstract-block" maxOccurs="unbounded" />
+    </xs:choice>
+    <xs:attribute name="colspan" type="xs:positiveInteger" />
+    <xs:attribute name="rowspan" type="xs:positiveInteger" />
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <xs:simpleType name="borderType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="no" />
+      <xs:enumeration value="row" />
+      <xs:enumeration value="column" />
+      <xs:enumeration value="cell" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="colorSchemesType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="blue" />
+      <xs:enumeration value="green" />
+      <xs:enumeration value="orange" />
+      <xs:enumeration value="grey" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="alignType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="left" />
+      <xs:enumeration value="center" />
+      <xs:enumeration value="right" />
+      <xs:enumeration value="justify" />
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!-- attributes -->
+  <xs:attribute name="href">
+    <xs:simpleType>
+      <xs:restriction base="xs:anyURI">
+        <xs:minLength value="1"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+
+  <xs:attribute name="src" type="xs:anyURI"/>
+
+  <xs:attribute name="width">
+    <xs:simpleType>
+      <xs:restriction base="xs:positiveInteger">
+        <xs:maxExclusive value="10001"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+
+  <xs:attribute name="section-numbering" type="xs:boolean"/>
+
+  <xs:attribute name="figure-numbering" type="xs:boolean"/>
+
+  <xs:attribute name="email" type="xs:string"/>
+
+  <xs:attribute name="view" type="view.type"/>
+
+  <xs:attribute name="behavior" type="behavior.type"/>
+
+  <xs:attribute name="managed" type="xs:boolean"/>
+
+  <xs:attribute name="switch">
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+        <xs:enumeration value="none"/>
+        <xs:enumeration value="enabled"/>
+        <xs:enumeration value="disabled"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+
+
+  <xs:attribute name="id" type="xs:ID"/>
+  <!-- label displayed in place of a collapsed element (like collapsed section ) -->
+  <xs:attribute name="coex" type="xs:string"/>
+
+  <xs:attribute name="implementation_class" type="xs:string"/>
+  <xs:attribute name="implementation_method" type="xs:string"/>
+  <xs:attribute name="symfony_service_id" type="xs:string"/>
+  <xs:attribute name="gitlab_repository" type="xs:string"/>
+
+
+  <xs:attribute name="border-type" type="border-type.type"/>
+
+  <xs:attribute name="text-align" type="text-align.type"/>
+
+  <xs:attribute name="align" type="align.type"/>
+
+  <!-- crossed :  flag telling the content is "crossed", for example on order list items, it tells that this item is
+  "crossed" : if this item is a task list item, then this means this task is done;
+  so the fact that this attribute exists or not means something whatever its value is.
+  -->
+  <xs:attribute name="crossed" type="xs:string"/>
+
+  <!-- status :  flag telling the content is a "status", for example in order list items like a task list items,
+  it tells that this item is a status of a task parent item;
+  so the fact that this attribute exists or not means something whatever its value is. -->
+  <xs:attribute name="status" type="xs:string"/>
+
+  <!-- if a value is set, as a blank sepated list of "codes", then its element is ignored if
+  one of this codes is within the blank separated list of codes, of the "ignore" parameter passed to the stylesheet.
+  This implements an applicability mechanism, example for a resume document:
+  - suppose you want to manage resumes for different target jobs: "web developper", "dev lead" or "jobAtDisneyOffer";
+  - the you want to ignore the element of your CV that don't apply to one of, or some of, them, by setting the ignore_for
+  attribute value to one of, or some of, them : example : the ignore_for value " dev_lead jobAtDisneyOffer " tells that this
+  element should be ignored for "web developper" and "jobAtDisneyOffer" target jobs;
+  - if the stylesheet is called to deliver the resume for a "web developper" job, then it will be called
+  with a "ignore" parameter value " dev_lead jobAtDisneyOffer ", so this element will not appear in the delivered resume.
+  -->
+
+  <xs:attribute name="ignore_for" type="xs:string"/>
+  <xs:attribute name="features" type="xs:string"/>
+</xs:schema>
+
+FIN DES RÈGLES.
+
+Voilà ci-dessous le Super CV XML:
+
+<document section-numbering="true" figure-numbering="true" features="RESUME" vocab="http://example.org/cv#" typeof="Person" about="#franck"><h text-align="justify" property="label"> Curriculum Vitae – Franck Delahaye (global CV) </h><p/><!-- ===================== CONTACT ===================== --><section id="Contact" coex="CONTACT" typeof="ContactPoint"><h>CONTACT</h><p property="name">Franck Delahaye</p><p property="email">franck_delahaye@yahoo.fr</p><p property="telephone">+33 7 67 38 28 95</p><p property="addressLocality">Grenoble, France</p><p property="headline"> Senior software engineer &amp; solutions architect – XML/SGML, e-commerce &amp; ERP integrations, search &amp; data-centric platforms. </p></section><!-- ===================== OBJECTIVES / SUMMARY ===================== --><section id="Objectives" coex="PROFESSIONAL SUMMARY" typeof="Summary"><h>PROFESSIONAL SUMMARY</h><p property="description"> Senior IT engineer and solutions architect with 25+ years of experience in enterprise application integration, XML/SGML content and publishing systems, high-traffic Internet and e-commerce platforms, and ERP/CRM/PIM integrations. Strong background in search engines, NoSQL/XML databases, data-centric and microservice architectures, and structured authoring workflows. Experienced in technical leadership, legacy platform migration, mentoring development teams and working closely with business stakeholders (marketing, logistics, finance, support). </p></section><!-- ===================== SKILLS (TECH / METHODS / DOMAINS) ===================== --><section id="skills" coex="KEY SKILLS" typeof="SkillSet"><h>KEY SKILLS</h><!-- Technologies & Frameworks --><section id="Skills-Technologies" coex="Technologies &amp; frameworks" typeof="SkillCluster"><h>Technologies &amp; frameworks</h><ul><li typeof="Technology" resource="#tech_symfony"><p> <a href="https://symfony.com" property="externalReference">Symfony</a> – PHP framework for large e-commerce and back-office platforms (multi-country catalog, order flows, integrations). </p></li><li typeof="Technology" resource="#tech_php"><p> <a href="https://www.php.net" property="externalReference">PHP</a> – backend development for high-traffic web sites and APIs, including e-commerce and loyalty platforms. </p></li><li typeof="Technology" resource="#tech_yii"><p> <a href="https://www.yiiframework.com" property="externalReference">Yii</a> – integration for product catalog modules and back-office tools. </p></li><li typeof="Technology" resource="#tech_odoo"><p> <a href="https://www.odoo.com" property="externalReference">Odoo</a> – ERP integration for sales, purchases, warehouse, helpdesk and accounting (Python / PostgreSQL). </p></li><li typeof="Technology" resource="#tech_java"><p> <a href="https://www.java.com" property="externalReference">Java</a> / J2EE – three-tier architectures, XML-centric CMS, health-care platforms and publishing chains. </p></li><li typeof="Technology" resource="#tech_xml_xslt_xquery"><p> XML / XSLT / XQuery – schema-driven content, transformations to HTML, XSL-FO/PDF, data views, and search index feeds. </p></li><li typeof="Technology" resource="#tech_exstdb"><p> <a href="https://exist-db.org" property="externalReference">eXist-db</a> – XML database used for health-care platforms (HL7 messages) and documentation/search. </p></li><li typeof="Technology" resource="#tech_basex"><p> <a href="https://basex.org" property="externalReference">BaseX</a> – XML database &amp; REST-XQ used as the backbone of the CMS and CV management/demo platform. </p></li><li typeof="Technology" resource="#tech_lucene"><p> <a href="https://lucene.apache.org" property="externalReference">Lucene</a> – full-text search engine embedded in Internet offers comparator platforms and content systems. </p></li><li typeof="Technology" resource="#tech_vespa"><p> <a href="https://vespa.ai" property="externalReference">Vespa</a> – Yahoo search engine, used as distributed REST/XML search backend after migration from Lucene. </p></li><li typeof="Technology" resource="#tech_postgresql"><p> <a href="https://www.postgresql.org" property="externalReference">PostgreSQL</a> – main RDBMS behind Odoo and other back-office integrations. </p></li><li typeof="Technology" resource="#tech_docker"><p> <a href="https://www.docker.com" property="externalReference">Docker</a> – containerization of services and dev/test environments. </p></li><li typeof="Technology" resource="#tech_gitlab"><p> <a href="https://about.gitlab.com" property="externalReference">GitLab</a> &amp; <a href="https://github.com" property="externalReference">GitHub</a> – source control, CI/CD pipelines and code reviews. </p></li><li typeof="Technology" resource="#tech_rust_wasm"><p> <a href="https://www.rust-lang.org" property="externalReference">Rust</a> / <a href="https://webassembly.org" property="externalReference">WebAssembly</a> – PoC-level work on new stacks and web components. </p></li><li typeof="Technology" resource="#tech_ballerina"><p> <a href="https://ballerina.io" property="externalReference">Ballerina</a> – integration &amp; orchestration language used for OpenAI API based CV retro-conversion services. </p></li><li typeof="Technology" resource="#tech_openai"><p> <a href="https://platform.openai.com" property="externalReference">OpenAI API</a> – prompt design and integration for automated CV XML generation and retro-conversion. </p></li><li typeof="Technology" resource="#tech_kibana"><p> <a href="https://www.elastic.co/kibana" property="externalReference">Kibana</a> – dashboards and monitoring for high-traffic production platforms (logs, KPIs, incident analysis). </p></li></ul></section><!-- Architecture / Integration / Data --><section id="Skills-Architecture" coex="Architecture &amp; integration" typeof="SkillCluster"><h>Architecture, integration &amp; data</h><ul><li typeof="Skill" resource="#skill_integration"><p> Enterprise application integration – ERP (Odoo), PIM, CRM, BI, payment workflows, SEPA/EBICS, marketplaces, marketing tools, ESB-like orchestrations and data flows. </p></li><li typeof="Skill" resource="#skill_microservices"><p> REST APIs &amp; microservices – design, refactoring of legacy PHP/J2EE platforms toward services, documentation, and testable interfaces. </p></li><li typeof="Skill" resource="#skill_search"><p> Search and indexing – Lucene, Vespa, XML-aware search engines, bibliographic and technical documentation search, performance tuning. </p></li><li typeof="Skill" resource="#skill_structured_content"><p> Structured content &amp; publishing – SGML/XML tag suites (CALS, AECMA, ATA, HL7, domain vocabularies), XSLT/XSL-FO chains, multi-output (Web, PDF, CD-ROM). </p></li><li typeof="Skill" resource="#skill_cms_edms"><p> CMS/EDMS &amp; workflows – collaborative authoring (checkin/checkout, versions, reviews), schema-driven forms and publication chains; experience with structured CMS concepts (JSON schema–driven content types, content aggregation services, Twig component rendering). </p></li></ul></section><!-- DevOps & Tooling --><section id="Skills-DevOps" coex="DevOps &amp; tooling" typeof="SkillCluster"><h>DevOps &amp; tooling</h><ul><li typeof="Skill" resource="#skill_devops"><p> DevOps &amp; CI/CD – GitLab and GitHub pipelines, build &amp; deploy scripts, environment management (virtualization, containers). </p></li><li typeof="Skill" resource="#skill_monitoring"><p> Monitoring &amp; KPIs – BI modules, custom dashboards, operational KPIs and log analysis for high-traffic sites and back-office processes (including Kibana-based monitoring). </p></li><li typeof="Skill" resource="#skill_issue_tracking"><p> Project &amp; issue tracking – Jira/Confluence, Trello, Redmine, GitLab issues, backlog and iteration management with business teams. </p></li><li typeof="Skill" resource="#skill_tooling_ide"><p> Development tooling – intensive use of debuggers and IDEs such as JetBrains PhpStorm, IntelliJ IDEA, PyCharm, and others for daily development and troubleshooting. </p></li><li typeof="Skill" resource="#skill_testing_tools"><p> Browser testing and custom tooling – design and evolution of in-house browser testing tools to improve regression testing on e-commerce and loyalty platforms. </p></li></ul></section><!-- Methods & Leadership --><section id="Skills-Methods" coex="Methods &amp; leadership" typeof="SkillCluster"><h>Methods &amp; leadership</h><ul><li typeof="Method" resource="#method_agile"><p> Agile / iterative – Scrum-inspired practices, incremental delivery, negotiation of scope with business stakeholders. </p></li><li typeof="Method" resource="#method_tdd"><p> <a href="https://en.wikipedia.org/wiki/Test-driven_development" property="externalReference">Test-Driven Development (TDD)</a> – use of tests and debugger as primary feedback loop for safer refactoring, legacy code understanding and defect reduction. </p></li><li typeof="Method" resource="#method_scrum"><p> <a href="https://en.wikipedia.org/wiki/Scrum_(software_development)" property="externalReference">Scrum</a> – backlog-driven iterations, regular dev meetings, collective decisions on architecture and implementation guidelines. </p></li><li typeof="Method" resource="#method_user_story_mapping"><p> <a href="https://www.visual-paradigm.com/guide/agile-software-development/what-is-user-story-mapping/" property="externalReference">User Story Mapping</a> – structuring product backlogs and iterations around end-to-end user journeys. </p></li><li typeof="Method" resource="#method_cmmi"><p> <a href="https://en.wikipedia.org/wiki/Capability_Maturity_Model_Integration" property="externalReference">CMMI</a> &amp; quality inspiration – practices for process clarity, documentation and continuous improvement. </p></li><li typeof="Method" resource="#method_xp"><p> <a href="https://en.wikipedia.org/wiki/Extreme_programming" property="externalReference">eXtreme Programming (XP)</a> – collective code ownership, continuous refactoring and feedback-driven development when relevant. </p></li><li typeof="Skill" resource="#skill_lead"><p> Technical leadership – coaching of developers, code reviews, quality practices, mentoring on frameworks and architectures. </p></li><li typeof="Skill" resource="#skill_presales"><p> Pre-sales &amp; RFPs – solution proposals, effort estimates, architecture options and technical advisory for customers. </p></li><li typeof="Method" resource="#method_bpmn"><p> <a href="https://en.wikipedia.org/wiki/Business_Process_Model_and_Notation" property="externalReference">BPMN</a> – regular use of process modeling (Camunda and similar tools) to capture and refine business workflows in integration projects. </p></li></ul></section><!-- Domains --><section id="Skills-Domains" coex="Business domains" typeof="SkillCluster"><h>Business domains</h><ul><li typeof="Skill" resource="#skill_ecommerce"><p> E-commerce &amp; loyalty – product catalogs, promotions, loyalty programs, multi-country platforms, marketplaces. </p></li><li typeof="Skill" resource="#skill_energy"><p> Energy – liberalized market billing, meter data exchanges via XML messages, invoicing and accounting. </p></li><li typeof="Skill" resource="#skill_healthcare"><p> Health-care – HL7 XML, patient records, genetics-enabled platforms (pedigrees, karyotypes), LIMS and biobank (BRC) modules. </p></li><li typeof="Skill" resource="#skill_industry_docs"><p> Industrial technical documentation – aeronautics, automotive, energy; multi-language maintenance manuals and document repositories. </p></li></ul></section></section><!-- ===================== EXPERIENCE ===================== --><section id="Employment" coex="PROFESSIONAL EXPERIENCE" typeof="EmploymentHistory"><h>PROFESSIONAL EXPERIENCE</h><ul><!-- Internet / e-commerce platforms --><li typeof="Experience"><p><strong property="role"> Senior Lead Developer &amp; Architect – Internet &amp; e-commerce platforms</strong></p><p><strong property="label"><span>Cosmobilis</span> – Chambéry<span property="addressLocality">, France</span> </strong></p><p><span property="startDate" content="2023-01-01" datatype="http://www.w3.org/2001/XMLSchema#date">Jan 2023</span> – Present</p><ul><li typeof="WebSiteProjectExperience"><p>Ongoing enhancement and maintenance of a multi-country, high-traffic website.</p><ul><li typeof="ProjectPeriod"><p><strong property="label"/>Dates: Jan 2023 – Jun 2024</p></li><li><p>Site URL: http://www.bymycar.fr, http://www.bymycar.ch, http://www.bymycar.es, http://www.bymycar.it</p></li><li typeof="SiteUrl"><p>Role: Lead Developer</p></li><li typeof="SiteUrl"><p>Technologies and tools: PHP/Symfony 3 - 6, Prestashop, API REST (API Platform), Postman, OAuth token, Redis, Mysql, <a href="https://github.com/json-editor/json-editor">JSON Schema based editor</a>, XML, XSLT, ETL (Talend), HTML, CSS, JS, jQuery, GitHub CI/CD, semver, Docker/AWS, Ubuntu, PhpStorm.</p></li><li><p>Quality practices and tools: Jira/Confluence, Scrum-inspired request and backlog management, CMMI Level 4–inspired practices</p></li><li><p>Responsibilities:</p><ul><li><p>Integrated multiple third-party api based services and partners across key domains: vehicle sales offers, financing, vehicle master data, trade-in valuation, marketing (reviews, Google Analytics), CRM (Salesforce), search (Algolia), marketplaces, social networks, mailing, image services, and legal workflows (eco tax, vehicle registration). </p></li><li><p>Contributed to and evolved core functional modules: pricing, marketing campaigns, CMS, meetings and appointment management, car dealership modules.</p></li><li><p>Advanced integrations of PHP/Symfony components: bundle, service container, orm, expression language, template engine, form, validation, translation, events.</p></li><li><p>Standard integrations of PHP/Symfony components: router, messenger, serializer, configurations, security, assets, logging, testing.</p></li><li><p>Set up and maintained GitHub workflows, including CI/CD pipelines and on-demand deployment processes.</p></li><li><p>Led a team of five developers: evolution and bug-fix analysis, effort estimation with project managers and requesters, and coordination with the DevOps team on Docker/AWS infrastructure setup.</p></li></ul></li></ul></li><li><p>Automated functional testing for a high-traffic, multi-country automotive marketplace.</p><ul><li><p><strong property="label"/>Dates: Jun 2023 – Dec 2023</p></li><li typeof="SiteUrl"><p>Role: Test Solution Integrator</p></li><li typeof="SiteUrl"><p>Technologies and tools: <a href="https://github.com/ctitdoc/browser_test/tree/old_bmc">Browser test</a>, Selenium Webdriver, php-webdriver, firefox, chrome, <a href="https://www.saxonica.com/saxon-c/php_api.xml">SaxonC XSLT processor for PHP</a>, <a href="http://vrici.lojban.org/~cowan/tagsoup">TagSoup HTML parser</a></p></li><li><p>Quality practices and tools: Jira/Confluence, Scrum-inspired request and backlog management, CMMI Level 4–inspired practices</p></li><li><p>Responsibilities:</p><ul><li><p>Upgraded Browser test solution to current stable versions of Selenium Webdriver, php webdriver, firefox and chrome.</p></li><li><p>Designed and Developed an end to end browser test of bymycar sites base scenario: find a vehicle offer, click on "call me back" CTA, check the lead generation in CRM app (Salesforce), check the expected mail notification in the seller mailbox. Regressions detected before reaching end users, reducing production incident impact and fix delays.</p></li><li><p>Developed a Twig template processing pipeline to add ID attribute to template elements, enabling ID based element selections in browser test scripts, making them more robust across templates updates: TagSoup parser transform them as valid XHTML documents and Saxon XSLT adds IDs to each element.</p></li><li><p> Estimates and proposals for RFPs of Browser test integration to other sites of Cosmobilis group.</p></li></ul></li></ul></li><li><p>Enterprise Application Integration Service</p><ul><li><p><strong property="label"/>Dates: Jan 2024 – Dec 2025</p></li><li typeof="SiteUrl"><p>Role: Lead Developer, Customer relationship manager</p></li><li typeof="SiteUrl"><p>Technologies and tools: <a href="https://github.com/ctitdoc/browser_test/tree/old_bmc"/>PHP/Symfony 3 - 6, OpenAPI/API Platform, Swagger, WebHook, <a href="https://ballerina.io/">Ballerina</a> (WSO2 products main technology), Mysql, JSON, <a href="https://bee2linkgroup.com/en/">OpenFlex car dealers ERP</a>, Salesforce CRM, GitHub CI/CD, Docker/AWS, PhpStorm.</p></li><li><p>OS: Ubuntu, Linux Alpine.</p></li><li><p>Quality practices and tools: Jira/Confluence, "scrum stories like" requests management, CMMI level 4 practices</p></li><li><p>Responsibilities:</p><ul><li><p>Developed an API based integration between Salesforce and <a href="https://bee2linkgroup.com/en/">OpenFlex</a> leads/opportunities workflows: send opportunity from Salesforce (SF) , record it in OpenFlex (OF) and managed SF/OF opportunity mapping, synchronize OF opportunity status change with SF opportunity status, multi country opportunities.</p></li><li><p>Managed architecture evolution to a BPM/ESB design direction with message oriented and observable API orchestrations, and started incremental integration of Ballerina's tchatAPI service (see below), for async executions : prefered to Symfony's default messenger based solution requiring a heavier infrastucture with a third party message broker middleware, and leading to a more heterogenous and less flexible architecture and code management.</p></li><li><p>Advanced integrations of PHP/Symfony components: API Platform, serializer, router, property access, validation, shutdown hook.</p></li><li><p>Standard integrations of PHP/Symfony components: bundle, orm, service container, configurations, security, logging.</p></li><li><p>Managed end to end automated scenario test with tchatAPI. Regressions detected before reaching end users, reducing production incident impact and fix delays.</p></li><li><p>Managed 8 developers and solution integrators, evolution/correction analysis and estimates with customer. Docker/AWS infrastructure setup with devops team.</p></li></ul></li></ul></li><li><p> tchatAPI – Modular API Workflow Orchestration in <a href="https://ballerina.io/">Ballerina</a><br/>GitHub: <a href="https://github.com/ctitdoc/bal/blob/main/srv_opportunity/README.md">https://github.com/ctitdoc/bal/blob/main/srv_opportunity/README.md</a></p><p>Developed a <a href="https://ballerina.io/">Ballerina</a>-based tool to simulate business workflows ("Talks") via API orchestration. These Talks, defined in structured JSON, model step-by-step processes like authentication and sales opportunity creation across different systems (e.g.,<a href="https://bee2linkgroup.com/en/">OpenFlex</a>, <a href="https://www.salesforce.com/uk/?ir=1">Salesforce</a>).</p><ul><li><p>Dates: Oct 2024 – Present</p></li><li typeof="SiteUrl"><p>Role: Solo Developer</p></li><li typeof="SiteUrl"><p>Technologies and tools: <a href="https://github.com/ctitdoc/browser_test/tree/old_bmc"/><a href="https://ballerina.io/">Ballerina</a>, SwaggerUI, OpenAPI, JSON, <a href="https://bee2linkgroup.com/en/">OpenFlex car dealers ERP</a>, Salesforce API/SOQL, OpenAI prompt API, GitHub CI/CD, Docker/AWS, VScode.</p></li><li><p>OS: Ubuntu, Linux Alpine.</p></li><li><p>Responsibilities:</p><ul><li><p>Designed modular execution of workflows using strongly/loosely API "typed requests hierarchy" combined in workflow like JSON descriptions (SchemedTalks), and supporting responses registering for later use, conditional execution of request sequences and modularization : a request sequence can become a new reusable SchemedTalk type.</p></li><li><p>Implemented secure REST integrations using OAuth2 and Ballerina services, via "authentications request types".</p></li><li><p>Enabled interactive testing via Swagger UI.</p></li><li><p>Prepared for AI-powered generation of API flows from natural language inputs.</p></li><li><p>Integrated following APIs: Salesfore, Openflex care dealers ERP, OpenAI prompt.</p></li></ul></li></ul></li><li><p>Excel to Jira timesheet – Excel timesheets import as Jira timesheets in <a href="https://ballerina.io/">Ballerina</a></p><ul><li><p>Dates: Oct 2024 </p></li><li typeof="SiteUrl"><p>Role: Solo Developer</p></li><li typeof="SiteUrl"><p>Technologies and tools: <a href="https://github.com/ctitdoc/browser_test/tree/old_bmc"/><a href="https://ballerina.io/">Ballerina</a>, Jira API, CSV, vscode.</p></li><li><p>OS: Ubuntu</p></li><li><p>Responsibilities:</p><ul><li><p>Developed a Ballerina command line script integrating Jira timesheet API: csv time tracking lines are converted as Jira time tracking POST requests, reducing time consuming time tracking manual entries.</p></li></ul></li></ul></li><li><p> dev_it – Dev deployment tool for PHP/Symfony applications in <a href="https://ballerina.io/">Ballerina</a><br/>GitHub: <a href="https://github.com/sitedesc/bal_apps/tree/main/apps/dev_it/README.md">https://github.com/sitedesc/bal_apps/tree/main/apps/dev_it/README.md</a><br/>Developed a Ballerina-based tool managing Symfony bundle in develop environnements.</p><ul><li><p>Dates: Jan 2025</p></li><li typeof="SiteUrl"><p>Role: Solo Developer</p></li><li typeof="SiteUrl"><p>Technologies and tools: <a href="https://github.com/ctitdoc/browser_test/tree/old_bmc"/><a href="https://ballerina.io/">Ballerina</a>, JSON<a href="https://bee2linkgroup.com/en/"/>, PHP composer, Symfony, GitHub CI/CD, Docker/AWS.</p></li><li><p>Responsibilities:</p><ul><li><p>Switching between Symfony bundle releases and dev branch in a Symfony dockerized dev environnement lacked an automated way to switch, reducing human commit errors and making sure developpers put the reusable code in the proper bundle instead in all apps to avoid the painful "by hand" management of bundle branches in an app. This tool solves it.</p></li><li><p>Developed composer.json, Dockerfile and docker-compose.yml configurable transformations to switch between bundle dev branch vs bundle release deployment in the app container.</p></li></ul></li></ul></li><li><p>Migration and ongoing enhancement and maintenance of a legacy high-traffic website.</p><ul><li typeof="ProjectPeriod"><p><strong property="label"/>Dates: Sep 2024 – Sep 2025</p></li><li><p>Site URL: http://www.elite-auto.fr</p></li><li typeof="SiteUrl"><p>Role: Lead Developer</p></li><li typeof="SiteUrl"><p>Technologies and tools: PHP/Symfony 2 &amp; 6, <a href="https://ballerina.io/">Ballerina</a>, elasticsearch, API REST, websocket, Mysql, PostgreSQL, ETL (Talend), HTML, CSS, Angular, GitHub CI/CD, Docker/AWS, VirtualBox, PhpStorm, Archimate.</p></li><li><p>OS: Ubuntu</p></li><li><p>Quality practices and tools: Jira/Confluence, Scrum-inspired request and backlog management, CMMI Level 4–inspired practices</p></li><li><p>Responsibilities:</p><ul><li><p>Managed back-office server migration from obsolete in-house linux CentOS 2011 server, to AWS Ubuntu 24 Virtual Machine of AWS Cloud, with very short delays constraints.</p></li><li><p>Managed multiple third-party api based services and partners across key domains: vehicle sales offers, financing, vehicle master data, CRM (Salesforce), search (Algolia), marketplaces, social networks, mailing, image services. </p></li><li><p>Managed its incremental migration in a service oriented architecture based on Symfony 6 crons, and an Angular / <a href="https://github.com/sitedesc/bal_apps/tree/EA-463_doc_git_workflow">Ballerina componentized services</a> architecture.</p></li><li><p>Managed its incremental migration from OVH and <a href="https://www.itsintegra.com/">ITS Integra</a> hosting providers to AWS VMs.</p></li><li><p>Contributed to and evolved core functional modules: pricing, marketing campaigns, CMS, meetings and appointment management, car dealership modules.</p></li><li><p>Set up and maintained GitHub workflows, including CI/CD pipelines and on-demand deployment processes.</p></li><li><p>Led a team of two developers: evolution and bug-fix analysis, effort estimation with project managers and requesters, and coordination with the DevOps team on VM/AWS infrastructure setup.</p></li></ul></li></ul></li><li><p>Ballerina componentized services<br/>GitHub: <a href="https://github.com/sitedesc/bal_apps/tree/EA-463_doc_git_workflow">https://github.com/sitedesc/bal_apps/tree/EA-463_doc_git_workflow</a><br/>Developed a Ballerina modular architecture as a monorepo and refactored existing ballerina repos</p><ul><li><p><strong property="label"/>Dates: Jun 2025 – Present </p></li><li typeof="SiteUrl"><p>Role: Lead Developer</p></li><li typeof="SiteUrl"><p>Technologies and tools: <a href="https://ballerina.io/">Ballerina</a>, Algolia API, Teams API, websocket, Mysql, PostgreSQL, Java, GitHub CI/CD, Docker/AWS, VScode.</p></li><li><p>OS: Ubuntu, Alpine linux.</p></li><li><p>Quality practices and tools: Jira/Confluence, Scrum-inspired request and backlog management, CMMI Level 4–inspired practices</p></li><li><p>Responsibilities:</p><ul><li><p>Refactored existing Ballerina scripts/services in a monorepo and a new ones integrated in web sites.</p></li><li><p>Defined a component oriented architecture with multi environnement deployment scripts: this architecture is based on Ballerina modules and packages features: no business logic is duplicated in this repo: Algolia, Teams and Database clients are implemented as "connector" modules shared in other Ballerina scripts/services. </p></li><li><p>Developed ETL script integrating Algolia and Teams connectors to index PostgreSQL datas.</p></li><li><p>Integrated Ballerina task module and Java DateTime library to develop crontab like jobs executions.</p></li><li><p>Developed with java bindgen, a mysql 5 client as the standard mysql client does not support this old mysql version.</p></li><li><p>Developed also a websocket broadcast job : it notifies events to its connected Angular front-end apps.</p></li><li><p>Set up and maintained GitHub workflow of this repo, including CI/CD pipelines and on-demand deployment processes.</p></li><li><p>MAN developers on Ballerina, this archtecture and this workflow.</p></li></ul></li></ul></li></ul></li><li typeof="Experience" resource="#exp_cosmobilis_bilendi_arturia_mid"><p> <strong property="label"> Senior Solutions Architect &amp; Developer – Internet &amp; e-commerce platforms </strong> </p><p> <span><a href="https://www.madeindesign.com" property="externalReference">Made In Design</a> / <span property="label">Bilendi / <span property="label">Arturia</span></span></span> – <span property="addressLocality">Grenoble, France</span> </p><p> <span property="startDate" content="2011-01-01" datatype="http://www.w3.org/2001/XMLSchema#date">2011</span> – <span property="endDate" content="2025-01-01" datatype="http://www.w3.org/2001/XMLSchema#date">2022</span><strong/></p><ul><li><p>Developed e-commerce and loyalty architectures with multi-country deployments.</p></li><li><p>Integrated bank partners via <a href="https://en.wikipedia.org/wiki/Electronic_Banking_Internet_Communication_Standard">EBICS/SEPA</a> standard protocol:</p><ul><li><p>An <a href="https://en.wikipedia.org/wiki/ISO_20022">ISO 20022</a> XML document, encodes standard <a href="https://en.wikipedia.org/wiki/Single_Euro_Payments_Area">SEPA</a> credit transfers. The libxslt PHP extension executes an XSLT scripts converting the XML credit transfert datas as a PHP array stored afterwords in the tables of a database.</p></li></ul></li><li><p>Managed DevOps pipelines using GitLab CI/CD.</p></li><li><p>Designed and documented the integration architecture for a new e-commerce platform, centered on a custom-built ESB facilitating seamless data flow between ERP, PIM, CMS, CRM, and third-party services (<a href="http://delahayefranck.free.fr/SchemaApplicatifMID_Cible_2016.png">Schema</a>). Maintained and evolved Talend-based data synchronization processes between MadeInDesign’s PIM, CRM (Neolane), and marketplaces like <a href="https://www.lectra.com/en/fashion/products/neteven">Neteven</a>, supporting marketing and product feed flows.</p></li><li><p>Was a main contributor in (a lot of) legacy applications and platforms migrations: PHP/Symfony e-commerce and loyalty platforms during this decade, python ERP solutions, java search, health-care and <a href="https://en.wikipedia.org/wiki/Document_management_system">EDM</a> platforms.</p></li><li><p>------------------------------------------------------------------------------------------------------------------------------</p></li><li><p> Design, development and maintenance of multi-country e-commerce and loyalty platforms with rich back-offices, product catalogs and partner integrations (including Bilendi panel sites, Arturia, Made In Design and others). </p></li><li><p> Integration of Odoo ERP (sales, purchases, helpdesk, warehouse, accounting) and numerous external systems (marketplaces, payment providers, marketing tools, BI, ETL). </p></li><li><p> Progressive migration of legacy PHP/Symfony platforms (versions, refactoring, APIs) toward better structured, service-oriented architectures. </p></li><li><p> Close collaboration with marketing, logistics, finance and support teams for backlog management, iteration planning and incident resolution. </p></li><li><p> Technical mentoring of developers; framework guidance, code reviews and documentation of target architectures and integration flows. </p></li><li><p> Supervision and monitoring of production platforms using dashboards and tools such as <a href="https://www.elastic.co/kibana" property="externalReference">Kibana</a>, with a focus on stability and performance for high-traffic sites. </p></li><li><p> Contributions to structured content and CMS features, including schema-driven content types (JSON Schema), content aggregation services and component-based front rendering (Twig). </p></li><li><p> Technology watch and PoC work on new stacks (Rust/WebAssembly single-page prototypes, Vue.js / Nuxt and Storefront-UI evaluation, Lit/web components). </p></li><li typeof="Project" resource="#proj_ballerina_openai"><p property="label"> CMS-integrated CV retro-conversion and generation using Ballerina &amp; OpenAI </p><p> <a href="http://www.sitems.org:16386/cms/dictionary" property="externalReference"> XML CMS demo </a> – design and implementation of an automated service that converts free-text CVs entered in a web form, to schema-driven XML via OpenAI API orchestrated in Ballerina, with BaseX as backend: the AI is guided automatically to recognize the CV structure and content types from the text (sections, contact info, skills, experience blocks...), the generated XML is recorded in the CMS and editable via a WYSIWYG editor for final tunings (optional), and formated automatically in PDF and/or HTML. Another demo with the same orchestration deducts automatically from existing CVs, a new CV version tailored for a target job offer whose text is copy/pasted in a web form and sent to the AI.</p></li><li><p>------------------------------------------------------------------------------------------------------------------------------</p></li><li><p>contributions on around forty e-commerce, loyalty, and panel (online surveys) websites, for the company and its clients/subsidiaries (white-label);</p></li><li><p>for the Bymycar and <a href="https://www.bilendi.fr/">Bilendi</a> websites (Maximiles, Meinungsplatz…), their multi-country FrontOffice/BackOffice are based on an internationalized component-oriented <a href="https://symfony.com/">PHP/Symfony</a> architecture (100 bundles);</p><p/></li><li><p>Bymycar uses a microservices architecture: REST API for importing vehicles from the ERP into the site, webhook for sending leads generated by the site into Salesforce, then sales opportunities generated by Salesforce into a dealership sales solution…;</p><ul><li><p>development of a PoC using the new <a href="https://ballerina.io/">Ballerina</a> technology: a “data-centric” and “cloud-native” language targeting integration scenarios between applications, microservice architectures and data processing;</p></li></ul></li><li><p>types of sites: Bymycar (e-commerce), Banque Populaires/Bred (loyalty / cashback), UGC cinemas (offer and loyalty-card management), De Dietrich thermique (partner-installer loyalty), Meinungsplatz/Ivox/Club Nuove Idee (<a href="https://www.panelontheweb.com/">panel website</a>), …;</p></li><li><p>contributions on various modules configurable per site: product catalog and partner feed management, promotions/campaigns, customer support, business monitoring (query/report configuration), online payments (<a href="https://online.worldpay.com/">World Pay</a>, <a href="https://paiement.systempay.fr/">System Pay</a>), bank transfers (protocol <a href="https://fr.wikipedia.org/wiki/Electronic_Banking_Internet_Communication_Standard">EBICS</a> via partner <a href="https://www.exalog.com/fr">Exalog</a>), ERP stock and invoicing processes, print-on-demand…;</p><p/><ul><li><p>description of the invoices print-on-demand module: it integrates an <a href="https://en.wikipedia.org/wiki/OpenDocument">ODF</a> open document editor like <a href="https://www.libreoffice.org/">LibreOffice</a>:</p><p/><ul><li><p>a xml schema of the invoice datas/contents to be published is defined: an invoice has a "customer_name", a "customer_address" and "lines with a product_name, price and quantity", etc...</p></li><li><p>the "template author" creates an <a href="https://en.wikipedia.org/wiki/OpenDocument">ODF</a> "template" invoice document with <a href="https://www.libreoffice.org/">LibreOffice</a>, and with "example contents/data": a header with an example customer name, a table with an example product line, with a cells with example product name, price and quantity etc...</p><p/></li><li><p>the author then creates a style "customer_name" and assigns it to the customer name header example, then makes the same for the "product name" example celle etc...</p></li><li><p>the effect of that in the (XML) ODF format generated by <a href="https://www.libreoffice.org/">LibreOffice</a>, is that the ODF element of the customer name header has a "style" attribute "customer_name", the ODF element of the product name example celle has a "name" (not style) attribute "product_name" etc...</p></li><li><p>a first XSLT scripts generates, from this template document, a second XSLT script replacing the styled and/or named example contents by xpath queries feeding the real content from an XML invoice document extracted from the web site database;</p></li><li><p>the second XSLT script is executed online by the PHP code of the site, to generate the final <a href="https://en.wikipedia.org/wiki/OpenDocument">ODF</a> document;</p></li><li><p>finally, the <a href="https://www.libreoffice.org/">LibreOffice</a> batch PDF converter is executed to convert the <a href="https://en.wikipedia.org/wiki/OpenDocument">ODF</a> document to the final PDF invoice.</p></li></ul></li></ul></li><li><p>study and prototypes for migrating Arturia’s web shop based on Drupal/Symfony;</p></li><li ignore_for="lead_tech_content"><p>contributions on classic Web CMS modules (relational article model) and <a href="https://sulu.io/blog/mastering-structured-content-a-comprehensive-guide-to-structured-content-cmss">Structured CMS</a> modules;</p></li><li ignore_for="standard lead_tech_sante cdp_it dev_web"><p>contributions on CMS modules:</p><ul><li><p>evolving maintenance of classic Web CMS modules: relational model of articles/static content, with columns containing HTML fragments managed by marketing teams, and other columns locating content placement in website pages…;</p></li><li><p>addition of dynamic content management using <a href="https://sulu.io/blog/mastering-structured-content-a-comprehensive-guide-to-structured-content-cmss">Structured CMS</a> design; the principle:</p><ul><li><p>content types (without HTML) are defined by a <a href="https://json-schema.org/">JSON schema</a>, content being edited with <a href="https://github.com/json-editor/json-editor">a schema-driven editor</a>;</p></li><li><p>this content is then processed by a Symfony Content Aggregator Service, applying business rules instantiating dynamic parts of the content;</p></li><li><p>the final content is processed by a Twig macro structure generating the final front-end components;</p></li></ul></li></ul></li><li><p>migrations of Symfony 3/4, PHP 5/7 websites to Symfony 5/6, PHP 7/8;</p></li><li><p>management of translations/integration with Design/Marketing teams and front-end development: <a href="https://getbootstrap.com/">Bootstrap</a>, <a href="https://js.devexpress.com/">Devextreme</a> and <a href="https://jquery.com/">jQuery</a> frameworks;</p></li><li><p>Rust/Wasm projects:</p><ul><li><p>supervision during two years of two beginners apprentice on an e-commerce tech-watch project: <a href="http://www.so-nems.fr/">site mockup</a> built using <a href="https://www.rust-lang.org/fr">Rust</a>/<a href="https://webassembly.org/">Wasm</a>, see this <a href="http://www.so-nems.fr/docs/so-nems.png">diagram</a>:</p><ul><li ignore_for="skill_front_plus"><p>“React-like” <a href="https://yew.rs/">Yew</a> framework integrated via REST/JSON API with the <a href="https://rocket.rs/">Rocket</a> backend framework managing an e-commerce data model in PostgreSQL: this e-commerce site prototype in <a href="https://appwrite.io/blog/post/csr-vs-ssr-with-nextjs">CSR</a> architecture, fully coded by beginners, demonstrates basic screens and behavior (orders, product, registration), without any server-side HTML generation nor client-side JavaScript (because entirely coded in <a href="https://www.rust-lang.org/fr">Rust</a>/<a href="https://webassembly.org/">Wasm</a>).</p></li><li><p>Montée en compétence sur Rust/Wasm <a href="https://yew.rs/">Yew</a> et <a href="https://rocket.rs/">Rocket</a>.</p></li><li><p>Setup of the execution infrastructure of this project, github workflows, and remote reviews process with the developers.</p></li><li><p>Mise à niveau initiale des apprentis et reviews quotidiennes.</p></li></ul></li><li><p><a href="https://github.com/ctitdoc/wit-dom-shim">wit-dom-shim</a> : Developed this Rust/JS PoC : its goal is to enable an early replacement of <a href="https://github.com/wasm-bindgen/wasm-bindgen">wasm-bindgen</a> by <a href="https://github.com/bytecodealliance/wit-bindgen">wit-bindgen</a> in rust web frameworks like <a href="https://yew.rs/">Yew</a>: <a href="https://github.com/bytecodealliance/wit-bindgen">wit-bindgen</a> solves the "<a href="https://hacks.mozilla.org/2019/08/webassembly-interface-types/">intermediate glue layer issue described in this post</a>" of <a href="https://github.com/wasm-bindgen/wasm-bindgen">wasm-bindgen</a>. This glue increases the response time and resources consumption of in browser Rust/Wasm applications, like <a href="https://yew.rs/">Yew</a> applications, and so, slows down their adoption. The problem today is that, for such frameworks to switch to <a href="https://github.com/bytecodealliance/wit-bindgen">wit-bindgen</a>, the browsers is expected to support <a href="https://component-model.bytecodealliance.org/design/wit.html">WIT</a>, which is not expected to come soon. So this <a href="https://developer.mozilla.org/en-US/docs/Glossary/Shim">shim</a> brings an intermediate solution based on <a href="https://component-model.bytecodealliance.org/language-support/using-wit-resources/rust.html">WIT resources concept</a>, enabling a Rust/Wasm framework to switch to <a href="https://github.com/bytecodealliance/wit-bindgen">wit-bindgen</a> whatever the browsers support of WIT, making this glue a thing from the past.</p></li></ul></li><li><p>study of the “custom element centric” <a href="https://lit.dev/">Lit</a> framework: promoted by Google, offering a vision of future web applications based on standardized multi-vendor web-component ecosystems rather than relying on a single framework/vendor;</p></li><li><p>definition of the application architecture of Arturia’s new e-commerce site, in coordination with business teams and IT;</p><ul><li><p>one-week training on <a href="https://vuejs.org/">VueJS</a> and <a href="https://nuxt.com/">Nuxt</a>;</p></li><li><p>evaluation of the VueJS <a href="https://docs.storefrontui.io/v2/">Storefront-UI</a> library as component base for the new site;</p></li></ul></li><li><p><em ignore_for="dev_web">lead</em>development on the <a href="https://www.madeindesign.com/">Made In Design</a> online platform:</p><ul><li><p>management of the in-house BackOffice (in <a href="https://www.yiiframework.com/">YII</a>) for Magento sites, and inter-application interoperability: data from sites to <a href="https://fr.wikipedia.org/wiki/Informatique_d%C3%A9cisionnelle">BI</a> modules and the ERP, product catalogs to sites and marketplaces (via partners such as <a href="https://www.neteven.com/fr/home-fr/">Neteven</a>, <a href="https://shoppingfeed.com/fr">ShoppingFeed</a> or <a href="https://www.verbolia.com/">Verbolia</a>), user accounts to marketing-campaign platforms such as <a href="https://fr.wikipedia.org/wiki/Neolane">Neolane</a>; integration of tools such as <a href="https://www.talend.com/fr/">Talend</a>, and in-house development of ESB-type modules: <a href="http://delahayefranck.free.fr/SchemaApplicatifMID_Cible_2016.png">this diagram of madeindesign.com’s application architecture</a> illustrates the central role of such a module;</p></li><li><p>integration of Java packages such as <a href="https://community.jaspersoft.com/">JasperReports</a> for custom <a href="https://fr.wikipedia.org/wiki/Informatique_d%C3%A9cisionnelle">BI</a>/statistics modules;</p></li><li><p>integration of the Python ERP <a href="https://www.odoo.com/">Odoo</a> and <a href="https://www.yiiframework.com/">YII</a> development of a <a href="https://fr.wikipedia.org/wiki/Product_information_management">PIM</a> integrated with the ERP;</p></li><li><p>Python customization of Odoo modules for managing <a href="https://www.odoo.com/fr_FR/app/sales">customer orders</a> (online and in store), <a href="https://www.odoo.com/fr_FR/app/purchase">supplier replenishment</a>, <a href="https://www.odoo.com/fr_FR/app/inventory">stock/warehouse</a>, <a href="https://www.odoo.com/fr_FR/app/accounting">finance/accounting</a> and <a href="https://www.odoo.com/fr_FR/app/crm">CRM</a>;</p></li><li ignore_for="cdp_it"><p>part-time product owner role in collaboration with the company’s seven departments to align ERP integration with business processes;</p></li><li ignore_for="standard lead_tech_sante lead_tech_content dev_web"><p>assistant IT director role on the IS roadmap (macro project planning…) and part-time product owner role collaborating with seven departments to align ERP integration with business processes;</p></li></ul></li><li><p>management of development workflows via Github, Gitlab CI/CD, in Dockerized architecture via AWS, and in hosted physical/virtualized architecture;</p></li><li><p>platform supervision/monitoring using tools such as <a href="https://www.elastic.co/fr/kibana">Kibana</a>;</p></li><li><p>development over the years of <a href="https://github.com/ctitdoc/browser_test/tree/old_bmc">a php browser testing tool</a> integrating <a href="https://www.selenium.dev/documentation/webdriver/">Selenium</a> and <a href="https://github.com/php-webdriver/php-webdriver">php-webdriver</a>, to compensate for the lack of resources dedicated to this critical activity: testing the site;</p></li><li ignore_for="db"><p>databases integrated into the various projects: <a href="https://www.postgresql.org/">Postgresql</a>, <a href="https://www.mysql.com/fr/">Mysql</a>, <a href="https://basex.org/">BaseX</a>.</p></li><li><p>PoC of a Java SpringBoot web application integrating MarkLogic server using XQuery.</p></li></ul></li><!-- Energy & healthcare --><li typeof="Experience" resource="#exp_energy_health"><p> <strong property="label"> Technical lead – Energy &amp; health-care solutions </strong> </p><p> <span typeof="Employer" resource="#org_health_energy"> </span><strong><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC29821/">HC Forum</a></strong><span typeof="Employer" resource="#org_health_energy"><span property="label"> / Open ENERGIE</span> </span> – <span property="addressLocality">Grenoble, France</span> </p><p> <span property="startDate" content="2007-01-01" datatype="http://www.w3.org/2001/XMLSchema#date">2007</span> – <span property="endDate" content="2010-11-30" datatype="http://www.w3.org/2001/XMLSchema#date">2010</span> </p><ul><li typeof="Project" resource="#proj_open_energie"><p property="label"> Open ENERGIE – billing platform for liberalized energy market </p><p> Odoo-based invoicing and accounting, driven by XML messages of energy consumption exchanged with distributors and operators. Python customizations of Odoo modules: Accounting/Taxes, CRM, Products/pricing, creation of energy subscription modules ...<br/> Estimates and proposals for RFPs for Odoo integrations in e-commerce platforms, and python PoC of order and warehouse modules usage and integrationwith e-commerce sites.</p></li><li typeof="Project" resource="#proj_hcnet"><p property="label"> <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC29821/">HC Forum</a> – health-care genetics-enabled platform </p><p> J2EE three-tier application suite with LIMS module, biobank (BRC) and patient record with pedigrees and karyotype analysis. <br/>Java <a href="https://basex.org/">BaseX</a>/<a href="https://fr.wikipedia.org/wiki/XQuery">XQuery</a> module to manage <a href="https://en.wikipedia.org/wiki/Health_Level_7">HL7</a> XML messages interchange workflow between several healthcare applications.</p></li><li><p> Agile development in teams of five to ten developers, close collaboration with medical and energy domain experts, and management of technical choices and evolutions. </p></li></ul></li><!-- Kelkoo / Yahoo --><li typeof="Experience" resource="#exp_kelkoo"><p> <strong property="label"> Senior Java developer – Kelkoo Internet search engine </strong> </p><p> <span typeof="Employer" resource="#org_kelkoo"> <span property="label">Kelkoo (later Yahoo)</span> <a href="https://www.kelkoo.fr" property="externalReference">Kelkoo</a> </span> – <span property="addressLocality">Grenoble, France</span> </p><p> <span property="startDate" content="2005-01-01" datatype="http://www.w3.org/2001/XMLSchema#date">2005</span> – <span property="endDate" content="2006-12-31" datatype="http://www.w3.org/2001/XMLSchema#date">2006</span> </p><ul><li><p> Maintenance and evolution of Lucene-based search APIs in a large component-based J2EE platform (250+ components) powering the offers comparator. </p></li><li><p> Integration of <a href="https://en.wikipedia.org/wiki/Berkeley_DB">Berkeley-DB</a> to accelerate result delivery for high-traffic queries. </p></li><li><p> Migration of search APIs to Yahoo <a href="https://vespa.ai/">Vespa</a> – REST/XML API, distributed architecture on a matrix of servers for scalability. </p></li></ul></li><!-- CMS / Document management --><li typeof="Experience" resource="#exp_cms"><p> <strong property="label"> Development team leader – Content &amp; document management systems </strong> </p><p> <span typeof="Employer" resource="#org_cms_mix"> <span property="label">Cap Gemini, <span typeof="Employer" resource="#org_cms_mix"><span property="label">Akazi technologies, </span></span>Xerox Global Services</span></span> – <span property="addressLocality">Grenoble, France</span> </p><p> <span property="startDate" content="1999-02-01" datatype="http://www.w3.org/2001/XMLSchema#date">1999</span> – <span property="endDate" content="2004-10-31" datatype="http://www.w3.org/2001/XMLSchema#date">2004</span> </p><ul><li typeof="Customer" resource="#cust_schneider"><p property="label">Migration of <a href="https://www.se.com/fr/fr/">Schneider Electrics</a> document management repository to Documentum java <a href="https://en.wikipedia.org/wiki/Document_management_system">EDMS</a> with a replicated repositories architecture: configurations of the document workflows and life cycles, and the user roles and settings, etc...</p></li><li typeof="Customer" resource="#cust_schneider"><p property="label">for the<a href="https://www.clubic.com/actualite-44486-.html"> FlowMind</a> Java BPM engine, development of the FlowPoint <a href="https://en.wikipedia.org/wiki/Business_Process_Modeling_Language">BPML</a> process modeler backend: integration of the <a href="https://www.xml.com/pub/a/2001/11/28/dbxml.html">dbXML database</a> to manage the schema repository (querying, storage, validation workflow, etc.), and generation of process documentation in PDF using <a href="https://xmlgraphics.apache.org/fop/">FOP xsl-fo processor</a>.</p></li><li typeof="Project" resource="#proj_fiat_docs"><p property="label"> Fiat Auto – multi-language technical documentation publishing chain </p><p> J2EE/XML chain for vehicle documentation in nine languages/alphabets (European, Russian, Arabic), with Web, CD-ROM (XML search with eXist-db and Jetty web server) and PDF outputs (XSL-FO, Apache FOP/XEP). Use of XMetaL editor.</p></li><li typeof="Customer" resource="#cust_edf"><p property="label"><a href="https://en.wikipedia.org/wiki/%C3%89lectricit%C3%A9_de_France">EDF</a> R&amp;D CMS: a Java/Swing CMS application managing EDF R&amp;D teams documentation-publication workflow.</p></li><li typeof="Customer" resource="#cust_cnil"><p property="label"><a href="https://en.wikipedia.org/wiki/Commission_nationale_de_l%27informatique_et_des_libert%C3%A9s">CNIL</a> Portal: J2EE/<a href="https://en.wikipedia.org/wiki/Apache_Tomcat#Jasper">Tomcat</a> web portal of inquiries management.</p></li><li typeof="Customer" resource="#cust_renault"><p property="label"><a href="https://en.wikipedia.org/wiki/Renault_Trucks">Renault Trucks</a> CMS: <a href="https://en.wikipedia.org/wiki/Common_Object_Request_Broker_Architecture">C++/CORBA</a> application integrating <a href="https://www.xml.com/pub/a/SeyboldReport/ps261901.html">Astoria SGML Database</a> to manage the vehicles technical documentation contents.</p><p property="label"><a href="https://www.cotranet.com/">Cotranet</a> <a href="https://en.wikipedia.org/wiki/Collaborative_software">groupware solution</a>: J2EE developpment on this solution.</p></li><li><p> Estimates and proposals for RFPs in industry, legal, healthcare and energy sectors. </p></li></ul></li><!-- SGML/XML content & publishing --><li typeof="Experience" resource="#exp_ais_sgml"><p> <strong property="label"> Developer – SGML/XML content &amp; publishing systems </strong> </p><p> <span typeof="Employer" resource="#org_ais"> <span property="label"><a href="https://xml.coverpages.org/novellAIS.html">AIS Technologies</a></span>,</span><span typeof="Employer" resource="#org_synlog"> <span property="label">Synlog Technologies</span></span> &amp;<span typeof="Employer" resource="#org_csgroup"> <span property="label"><a href="https://fr.wikipedia.org/wiki/CS_Group">CS Group</a></span></span> -<span property="addressLocality"> Paris, Grenoble, Toulouse</span> </p><p> <span property="startDate" content="1993-10-01" datatype="http://www.w3.org/2001/XMLSchema#date">1993</span> – <span property="endDate" content="1999-02-01" datatype="http://www.w3.org/2001/XMLSchema#date">1999</span> </p><ul><li typeof="Project" resource="#proj_edilectre"><p property="label"> <a href="https://dataservices.electre.com/">Electre</a> – bibliographic <a href="https://en.wikipedia.org/wiki/Standard_Generalized_Markup_Language">SGML</a> database &amp; search </p><p> C++ indexation of large bibliographic datasets extracted as SGML from <a href="https://en.wikipedia.org/wiki/Ingres_(database)">Ingres RDBMS</a> and indexed by OpenText's <a href="https://www.cni.org/wp-content/uploads/2013/05/DLXS-JWilkin2001Stf.pdf">XPAT</a> search engine for fast and structure aware searches in the bibliographic corpus via an advanced search API. </p></li><li typeof="Project" resource="#proj_swiss_dict"><p property="label"> Swiss historical dictionary – <a href="https://en.wikipedia.org/wiki/Standard_Generalized_Markup_Language">SGML</a> publishing chain </p><p> Full C++/<a href="https://www.perl.org/">Perl</a> chain from SQL dictionary database, extracted as <a href="https://en.wikipedia.org/wiki/Standard_Generalized_Markup_Language">SGML</a> documents, formated as <a href="https://en.wikipedia.org/wiki/Adobe_FrameMaker#MIF">FrameMaker/MIF</a> printable outputs. </p></li><li><p> Works on <a href="https://xml.coverpages.org/novellAIS.html">Balise</a> (SGML/XML transformation tool), <a href="https://en.wikipedia.org/wiki/Dynatext">Dynatext</a> (<a href="https://en.wikipedia.org/wiki/Style_sheet_(web_development)">stylesheet</a> based SGML browser) and Synerweb (C++ <a href="https://xml.coverpages.org/hyQuick-tr1v1.html#ilink">HyTime-based</a> linking prototype). </p></li><li><p><a href="https://www.scheme.org/">Scheme</a> customizations of <a href="https://en.wikipedia.org/wiki/SoftQuad_Software#Author/Editor">Author/Editor</a> <a href="https://en.wikipedia.org/wiki/Standard_Generalized_Markup_Language">SGML</a> Authoring tool for Airbus authors, and use of other <a href="https://en.wikipedia.org/wiki/Standard_Generalized_Markup_Language">SGML</a>/XML softwares of <a href="https://en.wikipedia.org/wiki/SoftQuad_Software">Softquad</a> company, Arbortext...</p></li><li><p>C++ developpment on STMicroelectronics datawarehouse project based on <a href="https://en.wikipedia.org/wiki/Oracle_Database">Oracle RDBMS</a>.</p></li><li typeof="Project" resource="#proj_airbus_gfor"><p property="label"> Airbus – GFOR <a href="https://en.wikipedia.org/wiki/Standard_Generalized_Markup_Language">SGML</a> publishing engine </p><p> C++ SGML publishing engine generating <a href="https://en.wikipedia.org/wiki/LaTeX">LaTeX</a> for ~80 000 pages of maintenance manuals (CALS tables, floating images, lists of modified pages…). </p></li><li><p>Technical proposals for RFPs, architecture design and customer advisory on solution choices for CMS, publishing and database applications.</p></li></ul></li><!-- National service in Nepal --><li typeof="Experience" resource="#exp_nepal"><p> <strong property="label"> Field engineer <strong property="label">–</strong> National seismological network of Nepal </strong> </p><p> <span typeof="Employer" resource="#org_nepal_project"> <span property="label">Cooperation project – Nepal seismological network</span> </span> – <span property="addressLocality">Kathmandu, Nepal</span> </p><p> <span property="startDate" content="1991-10-01" datatype="http://www.w3.org/2001/XMLSchema#date">1991</span> – <span property="endDate" content="1993-01-31" datatype="http://www.w3.org/2001/XMLSchema#date">1993</span> </p><ul><li><p> Assisted Nepali stakeholders and French project managers during survey and installation of seismological stations, mapping, configuration of acquisition chain and expedition logistics. </p></li></ul></li><!-- Verilog internship --><li typeof="Experience" resource="#exp_verilog"><p> <strong property="label"> Internship – Verilog technologies (<a href="http://www.artist-embedded.org/docs/Events/2007/CAV_ToolPlatforms/13-Berry-ArtistCAV+FMICS.pdf">SCADE</a> documentation) </strong> </p><p> <span typeof="Employer" resource="#org_verilog"> <span property="label">Verilog technologies</span> </span> – <span property="addressLocality">Grenoble, France</span> </p><p> <span property="startDate" content="1990-05-01" datatype="http://www.w3.org/2001/XMLSchema#date">1990</span> – <span property="endDate" content="1991-09-30" datatype="http://www.w3.org/2001/XMLSchema#date">1991</span> </p><ul><li><p> Development in C of a PostScript interpreter/driver targeting multiple printer languages (HPGL, PCL5, low-level PostScript). </p></li><li><p>Study and integration of <a href="https://en.wikipedia.org/wiki/Standard_Generalized_Markup_Language">SGML</a> as pivot format for configurable documentation generation, in a development team of an SGML parser/formatter for high-level PostScript. Wrote the parser specification for a full support of the <a href="https://en.wikipedia.org/wiki/Standard_Generalized_Markup_Language">SGML</a> language and Developed the PostScript interpreter C API called by the formater.</p></li></ul></li></ul></section><!-- ===================== EDUCATION ===================== --><section id="Education" coex="EDUCATION" typeof="EducationHistory"><h>EDUCATION</h><ul><li typeof="Education" resource="#edu_polytech"><p> <strong property="label"> 1989–1991 – Polytech Grenoble – Engineering degree, IT &amp; automation </strong> </p></li><li typeof="Education" resource="#edu_deug"><p> <strong property="label"> 1985–1988 – DEUG A – General science diploma – Université Joseph Fourier, Grenoble </strong> </p></li><li typeof="Education" resource="#edu_bac"><p> <strong property="label"> 1984 – Scientific high school diploma – Grenoble </strong> </p></li></ul></section><!-- ===================== LANGUAGES ===================== --><section id="Languages" coex="LANGUAGES" typeof="LanguageSet"><h>LANGUAGES</h><ul><li typeof="LanguageSkill" resource="#lang_fr"><p><strong property="label">French</strong> – native language</p></li><li typeof="LanguageSkill" resource="#lang_en"><p><strong property="label">English</strong> – professional</p></li><li typeof="LanguageSkill" resource="#lang_others"><p> <strong property="label">German, Russian, Nepali</strong> – school learning, not practiced recently </p></li></ul></section><!-- ===================== INTERESTS ===================== --><section id="Interest" coex="INTERESTS" typeof="InterestSet"><h>INTERESTS</h><p property="description"> Nature and outdoor activities (trekking, downhill longboarding, snowboarding), discovering other cultures and observing how complex systems (technical, social or organizational) behave and evolve. </p></section></document>
+
+

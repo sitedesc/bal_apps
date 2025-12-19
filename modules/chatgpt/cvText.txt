@@ -1,0 +1,64 @@
+Contact
+Franck Delahaye
+email:franck_delahaye@yahoo.fr
+tel: +33 7 67 38 28 95
+Professional summary
+Senior IT software engineer with over 25 years of experience in enterprise application integration, high-traffic Internet
+platforms and structured content systems. Strong expertise in XML / XSLT / XQuery, search engines, SQL & NoSQL
+databases, ERP/CRM/PIM integrations and microservices/data-centric architectures. Comfortable working with both
+technical and business stakeholders, leading migrations of legacy platforms and coaching development teams on
+modern practices.
+Key skills
+XML, XSLT, XQuery, SGML, structured document systems, CMS and EDMS.
+XML-aware & NoSQL databases (BaseX, Berkeley DB, dbXML), full-text search engines (Lucene, Vespa).
+Enterprise application integration: ERP (Odoo), PIM, CRM, BI, payment workflows, EBICS/SEPA banking
+protocols, health-care data & HL7.
+Web & backend frameworks: Java/J2EE/Spring, PHP/Symfony & Yii, Python/Odoo, Rust/WASM (PoC-level).
+DevOps & CI/CD: GitLab, GitHub, Docker, AWS, virtualized and container-based environments.
+Architecture design, legacy platform migrations, multi-site and multi-country deployments, component-based
+and customizable platforms.
+Technical leadership & mentoring, agile practices (Scrum, TDD, CMMI-inspired), technical pre-sales and RFP
+responses.
+Multi-lingual documentation & publishing chains: schema-driven content, Web & PDF output (XSL-FO/
+PostScript), internationalization.
+Professional experience
+Senior Solutions Architect & Developer– Cosmobilis / Bilendi / Arturia / Made In Design – Grenoble, France
+– 2011–2025
+Design, development and maintenance of multi-country e-commerce, loyalty and paneling platforms
+based on PHP/Symfony with rich back-offices, product catalogs and partner integrations.
+Integration of enterprise systems: ERP (Odoo), PIM, CRM, marketing campaign tools, marketplaces,
+payment providers, BI and ETL tools.
+Implementation of REST APIs and microservice architectures, progressive migration of legacy platforms
+(PHP/Symfony versions, technical & functional refactoring).
+Close collaboration with business teams (marketing, logistics, finance, customer support) to analyse
+requirements, manage backlogs and plan iterations.
+Technical mentoring and coaching of developers (code reviews, best practices, framework guidance).
+Contribution to target architecture and IT roadmap (in-house ESB, Talend data flows, marketplace
+integrations, application landscape diagrams).
+Technology watch and PoC work on new stacks (Rust/WASM, web components, Ballerina for API
+orchestration, etc.).
+Solutions Architect & Technical Lead / Developer– Kelkoo, Ositech, HCForum, Schneider Electric, Cap
+Gemini – 2000–2010
+EDMS/CMS/BPM and technical publishing projects (automotive, energy, aeronautics, health-care,
+industry) from design to production.
+Deployment of full-text search and XML-aware repositories (Lucene, Vespa, XML databases) for large
+document and data volumes.
+ERP/CRM/PIM and document management integrations (Documentum and other solutions), project
+management and team leadership.
+Technical proposals for RFPs, architecture design and customer advisory on solution choices.
+Software Engineer – Content & Document Systems– Airbus, STMicroelectronics, CS Group, AIS
+Technologies – 1991–2000
+C/C++ and SGML/XML development on large-scale technical documentation systems (tens of thousands
+of pages).
+Design and implementation of processing chains: import, validation, transformation, publishing (Web &
+print).
+Work on printing formats (PostScript, HP-GL, PCL), SGML/XML parsers and document databases.
+Education & training
+Engineering degree – Polytech Grenoble, major in IT & automation
+DEUG A (general science degree) – Université Joseph Fourier, Grenoble
+Scientific high school diploma – Grenoble
+Languages
+French (native), English (professional), basic German, Russian and Nepali.
+Interests
+Nature, discovering other cultures, and outdoor sports & activities (trekking, downhill longboarding, snowboarding).
+

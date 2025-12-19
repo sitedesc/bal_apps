@@ -4,6 +4,7 @@ import ballerina/io;
 import ballerina/lang.runtime;
 import ballerina/os;
 import ballerina/time;
+import cosmobilis/chatgpt;
 
 public function process(SchemedTalk[] schemedTalks, string countryCode, boolean checkUserAuth = false) returns json|error? {
 
@@ -320,6 +321,12 @@ public function process(SchemedTalk[] schemedTalks, string countryCode, boolean 
             response = sleepStartEnd;
             printResponse("Sleep", response);
             played.push(sleep);
+        } else if (play(resolvedSchemedTalk, OARequest)) {
+            OARequest oaRequest = check resolvedSchemedTalk.cloneWithType();
+            response = {};
+            _ = check processOARequest(resolvedSchemedTalk, oaRequest, <map<json>> response);
+            printResponse("OARequest", response);
+            played.push(oaRequest);
         }
 
         if (!play(resolvedSchemedTalk, SchemedTalkDoc)) {
@@ -394,4 +401,17 @@ public function getOFCountries() returns string[]|error {
         }
     }
     return result;
+}
+
+public function processOARequest(SchemedTalk resolvedSchemedTalk, OARequest oaRequest, map<json> response) returns error? {
+    resolvedSchemedTalk.description = oaRequest.description;
+    printTitle(oaRequest.description);
+    string prompt="";
+    if oaRequest.prePromptFile is () {
+      prompt=oaRequest.prompt;
+    } else {
+      string prePrompt = check io:fileReadString(<string> oaRequest.prePromptFile);
+      prompt = prePrompt + oaRequest.prompt;     
+    }
+    response["oaResponse"] = check chatgpt:processRequest(oaRequest.route, prompt);
 }

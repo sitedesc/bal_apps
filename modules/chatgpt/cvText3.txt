@@ -1,0 +1,108 @@
+Contact
+Franck Delahaye
+email:franck_delahaye@yahoo.fr
+tel: +33 7 67 38 28 95
+Résumé professionnel
+Développeur senior spécialisé dans les technologies XML, XSLT, XQuery et les bases de données documentaires
+avec plus de 25 ans d'expérience dans les systèmes de contenus structurés, la publication documentaire et
+l'intégration de données textuelles à grande échelle. Pratique intensive des chaînes éditoriales SGML → XML, des
+transformations XSLT, des bases XML-native et NoSQL (BaseX, Berkeley DB, dbXML, eXist-db) et des moteurs de
+recherche plein texte (Lucene, Vespa, XPAT). À l'aise dans les environnements de recherche où les textes, les
+métadonnées et les données chiffrées sont au cœur de l'activité, en interaction avec des chercheurs et des équipes
+pluridisciplinaires.
+Compétences techniques clés
+XML pour les humanités numériques : modélisation de documents structurés, schémas XML, corpus textuels
+multi-langues, marquage fin d'entités (personnes, lieux, dates, montants, unités, etc.).
+Transformations "texte balisé → données" : XSLT, XPath et XQuery pour l'extraction, la normalisation et la
+réorganisation de contenus textuels et de données chiffrées à partir de documents XML complexes.
+Bases de données XML-native et NoSQL : BaseX, Berkeley DB, dbXML, eXist-db ; conception de modèles de
+données documentaires, indexation, requêtes complexes, APIs de collecte et d'exploitation des données.
+Moteurs de recherche "structure-aware" : intégration et paramétrage de moteurs prenant en compte les balises
+et la structure (XPAT, Lucene, Vespa) pour interroger de grands corpus textuels.
+Chaînes de publication et d'édition : pipelines de transformation SGML/XML/XSLT, génération HTML et PDF/
+print (XSL-FO, PostScript), gestion d'encodages (ISO → UTF-8) et de contenus multi-écriture.
+Systèmes de gestion de contenus structurés : conception de dictionnaires métiers et de CMS XML, édition
+guidée par schémas XSD, intégration d'éditeurs XML (Xopus, XmlMind), publication vers des wikis ou aides en
+ligne.
+Intégration de données et outillage : scripts d'import/export XML, génération de tableaux de données (CSV,
+ODF) à partir de corpus XML, mise en place de structures proches de tableurs avec variables et formules pour
+l'exploitation des données chiffrées.
+Environnements de développement et outillage collaboratif : Java, C/C++, PHP, Python, outils XSLT/XQuery
+(Saxon, libXML, libXSLT), Git, GitHub, GitLab, travail en interaction étroite avec des experts métier et des
+équipes de recherche.
+Expérience professionnelle
+Systèmes de documentation technique automobile (Fiat, Renault, autres constructeurs)
+Conception et développement de systèmes de publication multi-langues pour la documentation
+technique de véhicules : transformation de corpus SGML vers des contenus XML structurés stockés
+dans des bases XML-aware (eXist-db, solutions internes).
+Mise en place de chaînes XSLT pour générer des vues HTML et des documents imprimables à partir des
+documents XML, avec gestion d'un mécanisme d'applicabilité (filtrage par modèle de véhicule, type de
+moteur, carburant, etc.).
+Gestion des encodages (ISO → UTF-8), prise en charge d'alphabets non latins (arabe, turc, etc.) et
+maintien de la cohérence des métadonnées et des identifiants de sections.
+Systèmes de gestion de processus et référentiels XML (BPM et GED)
+Développement d'un référentiel XML pour un moteur de Business Process Management : stockage des
+définitions de processus en XML, requêtage avec des expressions proches de XQuery, validation par
+schémas, historisation des versions.
+Génération automatique de la documentation des processus en PDF à partir des définitions XML via
+XSLT/XSL-FO : transformation de contenus balisés en rapports structurés et lisibles par les équipes
+métier et les autorités de contrôle.
+Utilisation de modèles de documents et de chaînes de traitement qui préfigurent des approches
+d'extraction d'entités nommées (acteurs, tâches, états, délais) pour l'analyse des processus.
+Bases bibliographiques et moteurs de recherche (Electre, dictionnaires, portails documentaires)
+Intégration d'une base relationnelle (Ingres) avec un moteur de recherche "tags aware" (XPAT) pour des
+recherches avancées dans une base bibliographique de très grande taille : requêtes combinant structure
+des balises et plein texte.
+Modélisation et extraction de métadonnées (auteurs, collections, titres, identifiants, dates, thèmes) à
+partir de documents structurés, avec génération de vues tabulaires pour l'analyse et la révision par les
+documentalistes.
+Participation à la mise en place de workflows d'édition et de contrôle qualité des données textuelles et
+chiffrées (tirages, prix, dates, codes).
+Dictionnaires historiques et corpus textuels structurés
+Développement d'un module de publication pour le Dictionnaire historique suisse : extraction d'entrées
+stockées en base de données, projection en arbres proches de DOM puis génération de documents MIF
+(Framemaker) à partir de structures balisées.
+Conception de scripts de transformation pour convertir des structures internes en formats éditoriaux, en
+conservant la hiérarchie des sections, les références croisées, les notes et les entités nommées.
+Pratique de contraintes éditoriales strictes : cohérence des formes, normalisation interne, gestion des
+versions, prise en compte des variantes graphiques ou typographiques selon les règles de la rédaction.
+Portails, CMS structurés et démonstrateurs XML
+Conception et maintiend'un démonstrateur de CMS XML pour documents structurés : dictionnaire de
+données métier géré en XML, édité via un éditeur WYSIWYG (Xopus) piloté par un schéma XSD, publié
+en ligne sous forme de wiki ou d'aide intégrée aux applications.
+Mise en place de pipelines où les modifications de code (Git) déclenchent l'identification des entrées de
+dictionnaire impactées (via XSLT et XPath) et proposent leur relecture : exemple de couplage fort entre
+code, documentation structurée et processus de révision.
+Production de contenus dérivés (listes, tableaux, rapports) à partir des documents XML, afin d'alimenter
+des analyses, des tableaux de bord ou des supports de communication.
+Chaînes de publication et outils de transformation SGML/XML
+Étude approfondie dulangage SGMLafin d'améliorer le niveau de conformité d'un parseur développé en
+Eiffel. Intégration de diversoutils SGML : parseur, éditeur, navigateur,composeur.
+Développement d'algorithmes de comparaison de versions de documents structurés (SGML/XML)
+permettant de ne publier que les pages modifiées dans des corpus volumineux (doc des Airbus de
+80000 pages,composeur LateX).
+Utilisation intensive de l'outil de transformation "Balise" (prédécesseur des processeurs XSLT) pour
+transformer des contenus balisés (SGML, XML, autres formats marqués) en documents de publication
+ou en flux de données.
+Développement d'uncomposeurPostScript pour SGML : association de fonctions PostScript à chaque
+type d'élément de laDTDpour générer des documents imprimables, puis développement d'un
+interpréteur PostScript en C produisant des sortiesHP-GLetPCL.
+Intégration de données et applications métiers récentes
+Intégration de données métier complexes (e-commerce, santé, énergie, finance) à l'aide de formats XML
+standardisés et de transformations XSLT/XQuery, avec contrôle de cohérence et normalisation des
+valeurs.
+Mise en place de scripts d'extraction vers des tableurs (CSV, ODF) pour permettre aux équipes métier
+d'analyser des jeux de données chiffrées, de construire leurs propres agrégations et de préparer des
+visualisations.
+Travail quotidien avec Git/GitLab/GitHub, revue de code, documentation technique et échanges réguliers
+avec les métiers (product owners, chercheurs, responsables de service).
+Formation
+Ingénieur – Polytech Grenoble, option informatique et automatique
+DEUG A – Université Joseph Fourier, Grenoble
+Baccalauréat scientifique – Grenoble
+Langues
+Français (langue maternelle) ; anglais (utilisation professionnelle régulière) ; notions anciennes en allemand, russe et
+népalais.
+Centres d'intérêt
+Systèmes de contenus structurés, publication documentaire, moteurs de recherche, humanités numériques, veille
+technologique, ainsi que nature et activités de plein air.

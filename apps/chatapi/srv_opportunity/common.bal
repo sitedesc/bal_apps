@@ -94,7 +94,8 @@ function resolveExpressions(string jsonString, json response, map<json> memory =
             if value is string {
                 value = value.toJsonString();
                 if value is string && value.startsWith("\"") && value.endsWith("\"") {
-                    return value.substring(1, value.length() - 1);
+                    //return value.substring(1, value.length() - 1);
+                      return value;
                 } else {
                     return <string> value;
                 }
@@ -106,7 +107,8 @@ function resolveExpressions(string jsonString, json response, map<json> memory =
             if value is string {
                 value = value.toJsonString();
                 if value is string && value.startsWith("\"") && value.endsWith("\"") {
-                    return value.substring(1, value.length() - 1);
+                    //return value.substring(1, value.length() - 1);
+                    return value;
                 } else {
                     return <string> value;
                 }
@@ -117,6 +119,8 @@ function resolveExpressions(string jsonString, json response, map<json> memory =
     };
 
     string result = regex.replaceAll(jsonString, replaceFunction);
+    io:println("resolved json path: ");
+    io:println(result);
     SchemedTalk resolvedSchemedTalk = check (<anydata>(check result.fromJsonString())).cloneWithType();
     return resolvedSchemedTalk;
 }
