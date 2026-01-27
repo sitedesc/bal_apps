@@ -243,7 +243,7 @@ class AlgoliaIndexJob {
             'record.isOccasion ?
             1
             :
-                [0, 3].indexOf('record.nature) != () ?
+                [0, 3, 13, 14].indexOf('record.nature) != () ?
                 3
                 :
                 4
