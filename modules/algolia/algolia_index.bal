@@ -243,14 +243,14 @@ class AlgoliaIndexJob {
             'record.isOccasion ?
             1
             :
-                [0, 3, 13, 14].indexOf('record.nature) != () ?
+                [0, 3].indexOf('record.nature) != () ?
                 3
                 :
                 4
         ;
 
         'record["customerDispo"] =
-            ('record.nature != 1 && 'record.nature != 5 && 'record.disponibiliteForFO == "en stock") ?
+            ('record.nature != 1 && 'record.nature != 5 && 'record.nature != 13 && 'record.nature != 14 && 'record.disponibiliteForFO == "en stock") ?
             "disponible"
             :
                 'record.disponibiliteForFO is () || 'record.disponibiliteForFO == "" ? "error" : <string>'record.disponibiliteForFO
