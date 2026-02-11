@@ -1,0 +1,6 @@
+#!/bin/bash -xv
+./makecvForOfferRules.sh OPERATIONAL_SENIOR_PROFILE > cvForOfferRulesFile_operational_senior_profile.txt
+./makecvForOfferRules.sh APPLIED_LLM_ENGINEER_PROFILE > cvForOfferRulesFile_applied_llm_engineer_profile.txt
+./makecvForOfferRules.sh RUST_DATA_INTEROPERABILITY_ENGINEER_PROFILE > cvForOfferRulesFile_rust_data_interoperability_engineer_profile.txt
+./makecvForOfferRules.sh CCM_DOCUMENT_ENGINEER_PROFILE > cvForOfferRulesFile_ccm_document_engineer_profile.txt
+./makecvForOfferRules.sh SOLUTION_ARCHITECT_PROFILE > cvForOfferRulesFile_solution_architect_profile.txt

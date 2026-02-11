@@ -1,0 +1,91 @@
+=============
+
+PROFIL — CCM_DOCUMENT_ENGINEER_PROFILE
+
+OBJECTIF :
+Générer un CV ciblé pour des postes de conception éditique / CCM (Customer Communication Management),
+document engineering et chaînes de publication, en mettant en avant l’expertise XML, XSLT, génération
+documentaire, performance et interopérabilité SI.
+
+PRIORITÉS DE POSITIONNEMENT :
+
+1. Le CV doit positionner le candidat comme :
+   - Senior Document / CCM Engineer
+   - Spécialiste des chaînes documentaires et de la génération structurée
+   - Orienté maintenabilité, performance et interopérabilité
+
+2. Le vocabulaire doit privilégier :
+   - Document generation
+   - CCM / document engineering
+   - XML-driven publishing
+   - Structured document pipelines
+   - Referential/document repositories
+   - Performance & scalability of document generation
+
+3. Les technologies propriétaires (Exstream, Quadient, StreamServe) ne doivent PAS être revendiquées
+   comme compétences directes si elles ne figurent pas explicitement dans le Super CV.
+   En revanche, il est autorisé d’indiquer :
+   - “transferable CCM skills”
+   - “CCM platforms based on XML/XSLT concepts”
+
+---
+
+RÈGLES DE SÉLECTION DES COMPÉTENCES :
+
+4. DOIVENT être mises en avant en priorité :
+   - XML, XSL, XSLT, XQuery
+   - Chaînes de publication XML → PDF / HTML
+   - Référentiels documentaires
+   - Validation par schémas
+   - Tests de non-régression documentaire
+   - Performance et robustesse de génération
+   - Interopérabilité SI et intégration de données métier
+
+5. DOIVENT être dépriorisées ou supprimées si non pertinentes pour l’offre :
+   - IA générative / LLM
+   - PHP applicatif / frameworks web
+   - Front-end moderne
+   - DevOps avancé hors besoins éditiques
+
+---
+
+RÈGLES SUR LE RÉSUMÉ PROFESSIONNEL (SUMMARY) :
+
+6. Le Professional Summary doit :
+   - Être orienté document engineering / CCM
+   - Mettre en avant l’expérience longue (seniority)
+   - Insister sur la maîtrise des chaînes structurées et de la qualité documentaire
+   - Éviter toute mention d’IA si l’offre ne l’exige pas explicitement
+
+---
+
+RÈGLES SUR LES EXPÉRIENCES :
+
+7. Les expériences suivantes doivent être mises en avant et détaillées :
+   - AIS Technologies / Synlog / CS Group
+   - Cap Gemini / Akazi / Xerox
+   - Toute expérience liée à XML, SGML, publication, GED, CMS, chaînes documentaires
+
+8. Les expériences plus récentes non éditiques peuvent être :
+   - Résumées fortement
+   - Agrégées chronologiquement
+   - Conservées pour éviter les trous de carrière
+
+---
+
+RÈGLES DE COMPATIBILITÉ CCM :
+
+9. Il est autorisé d’indiquer explicitement :
+   - “Experience transferable to CCM platforms such as Quadient Inspire, OpenText Exstream or StreamServe”
+   - UNIQUEMENT si formulé comme transférabilité conceptuelle
+   - SANS prétendre à une expérience outil directe
+
+---
+
+RÈGLES DE LANGUE :
+
+10. Le CV doit être généré dans la langue de l’offre cible.
+
+=============
+
+

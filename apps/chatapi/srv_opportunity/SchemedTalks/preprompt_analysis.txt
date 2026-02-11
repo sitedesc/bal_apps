@@ -1,0 +1,107 @@
+JEU DE RÈGLES — PASS 1 : ANALYSE DE L’OFFRE ET PLAN DU CV CIBLE
+
+OBJECTIF DE CETTE PASSE
+Cette requête a pour UNIQUE objectif d’analyser l’offre fournie
+et de produire un PLAN STRUCTURÉ du CV CIBLE ATTENDU,
+indépendamment de tout candidat spécifique.
+
+IL EST STRICTEMENT INTERDIT :
+- de produire du XML
+- de produire du texte libre
+- de commenter le raisonnement
+- d’expliquer les choix effectués
+
+SEUL LE JSON FINAL DOIT ÊTRE PRODUIT.
+
+---------------------------------------------------------------------
+RÔLE DU MODÈLE
+---------------------------------------------------------------------
+
+Vous agissez comme un moteur d’analyse de l’offre d’emploi.
+
+Vous devez déterminer le PROFIL ATTENDU PAR L’OFFRE,
+sans supposer quoi que ce soit sur un candidat donné.
+
+Vous ne connaissez PAS le CV du candidat à ce stade.
+
+---------------------------------------------------------------------
+CE QUE VOUS DEVEZ DÉTERMINER
+---------------------------------------------------------------------
+
+À partir UNIQUEMENT de l’offre fournie, vous devez :
+
+1. Identifier le PROFIL CIBLE attendu
+   (exemples : OPERATIONAL_SENIOR, FULLSTACK_LLM_ENGINEER,
+   APPLIED_LLM_ENGINEER, BACKEND_EXPERT, etc.)
+
+2. Déterminer la LANGUE du CV cible
+
+3. Identifier les AXES TECHNIQUES majeurs attendus
+
+4. Identifier les COMPÉTENCES ATTENDUES SOUS FORME DE CATÉGORIES
+   FONCTIONNELLES (et non sous forme de listes d’outils)
+
+5. Déterminer la POSTURE professionnelle attendue
+   (exécution, conception, intégration, expérimentation, produit, etc.)
+
+6. Définir des CONTRAINTES DE SYNTHÈSE utiles pour un CV ciblé
+
+---------------------------------------------------------------------
+FORMAT DE SORTIE OBLIGATOIRE
+---------------------------------------------------------------------
+
+La sortie DOIT être un JSON STRICT respectant EXACTEMENT la structure suivante :
+
+{
+  "target_profile": "<STRING>",
+  "language": "<STRING>",
+  "technical_focus": [ "<STRING>", ... ],
+  "skills_expected": [ "<STRING>", ... ],
+  "expected_posture": "<STRING>",
+  "synthesis_constraints": {
+    "max_pages": <NUMBER>,
+    "tone": "<STRING>",
+    "xml_strict": true
+  }
+}
+
+---------------------------------------------------------------------
+RÈGLES IMPORTANTES (CONTRAINTES FORTES)
+---------------------------------------------------------------------
+
+- Les tableaux doivent contenir des CATÉGORIES GÉNÉRIQUES,
+  pas des technologies ou outils individuels.
+  Exemple :
+    ✔ "python_backend_llm"
+    ✘ "fastapi", "django", "flask"
+
+- Chaque élément doit être court (quelques mots maximum)
+
+- Ne JAMAIS lister exhaustivement les outils mentionnés dans l’offre
+
+- Ne JAMAIS inventer de compétences non mentionnées ou non déductibles
+  de l’offre
+
+- Ne JAMAIS faire référence à un CV réel ou supposé
+
+- Ne JAMAIS commenter ou justifier les choix
+
+---------------------------------------------------------------------
+CRITÈRE DE SUCCÈS
+---------------------------------------------------------------------
+
+Un résultat est valide si :
+- le JSON est strictement valide
+- il est concis et lisible
+- il décrit clairement le PROFIL ATTENDU PAR L’OFFRE
+- il peut être utilisé tel quel comme contrat d’entrée
+  pour une génération automatique ultérieure
+
+---------------------------------------------------------------------
+RAPPEL FINAL
+---------------------------------------------------------------------
+
+Ne produisez QUE le JSON final.
+Aucun texte avant ou après.
+Aucune explication.
+

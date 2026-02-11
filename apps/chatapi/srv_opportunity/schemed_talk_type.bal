@@ -174,7 +174,7 @@ public type OARequest record {
     "OARequest" 'type = "OARequest";
     "/chat/completions" route = "/chat/completions";
     string description = "Request type OARequest executes service openai POST endpoint /chat/completions with its prompt property as the prompt text sent to openai";
-    string prompt;
+    string|json prompt;
     string? prePromptFile;
 };
 

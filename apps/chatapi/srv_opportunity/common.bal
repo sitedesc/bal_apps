@@ -113,7 +113,11 @@ function resolveExpressions(string jsonString, json response, map<json> memory =
                     return <string> value;
                 }
             } else {
-                return value.toJsonString();
+                string serializedValue = value.toJsonString();
+                if serializedValue.startsWith("\"") && serializedValue.endsWith("\"") {
+                  return serializedValue.substring(1, serializedValue.length() - 1); 
+                }
+                return serializedValue;
             }
         }
     };

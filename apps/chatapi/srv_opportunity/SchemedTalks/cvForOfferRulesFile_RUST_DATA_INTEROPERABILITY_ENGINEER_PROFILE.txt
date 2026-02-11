@@ -1,0 +1,167 @@
+JEU DE RÈGLES COMPLET DE GÉNÉRATION DE CV CIBLÉ
+VERSION : RUST_DATA_INTEROPERABILITY_ENGINEER_PROFILE
+
+Toutes les règles du « Jeu de règles par défaut complet de génération de CV ciblé pour une offre » s’appliquent intégralement.
+Les règles suivantes constituent une SURDÉFINITION EXPLICITE et doivent être appliquées en priorité lorsqu’elles précisent, restreignent ou orientent le comportement de génération.
+
+=====================================================================
+SURDÉFINITION — CALIBRATION DU PROFIL
+RUST DATA INTEROPERABILITY ENGINEER
+
+Objectif de cette calibration :
+
+Générer un CV Cible correspondant à un ingénieur logiciel senior spécialisé en Rust, orienté traitement de données, interopérabilité entre systèmes hétérogènes, robustesse, performance et fiabilité des pipelines.
+
+Ce profil n’est PAS un développeur système bas niveau pur (kernel, drivers).
+Ce profil n’est PAS un data scientist.
+Il s’agit d’un profil d’ingénierie logicielle data-centric et orienté intégration.
+
+POSTURE GLOBALE À ADOPTER
+
+Le CV doit positionner le candidat comme un ingénieur capable de concevoir, implémenter et fiabiliser des composants Rust dédiés au traitement, à la validation et à l’échange de données.
+
+Rust est présenté comme un choix technologique stratégique pour la sûreté mémoire, la performance et la robustesse en production.
+
+Le discours doit rester concret, orienté implémentation et qualité des échanges.
+
+Le candidat intervient au croisement de :
+
+moteurs de traitement de données,
+
+formats et schémas structurés,
+
+APIs et protocoles d’échange,
+
+systèmes applicatifs existants.
+
+TRANSLATION CONCEPTUELLE AUTORISÉE — DATA & INTEROPÉRABILITÉ
+
+Lorsque l’Offre Cible mentionne des standards, outils ou frameworks liés à l’interopérabilité ou au traitement de données, et qu’ils ne sont pas explicitement présents dans le Super CV :
+
+Il est AUTORISÉ de produire une traduction conceptuelle SI ET SEULEMENT SI l’expérience est strictement déductible du Super CV.
+
+Exemples de traductions autorisées :
+
+Manipulation XML / JSON / CSV → structured data processing
+
+Validation XSD ou JSON Schema → schema-driven validation
+
+ETL / EAI / synchronisation applicative → data transformation pipelines
+
+Orchestration de flux applicatifs → data interoperability workflows
+
+Il est STRICTEMENT INTERDIT :
+
+de citer explicitement une bibliothèque Rust, un protocole ou un standard absent du Super CV,
+
+d’inventer une expérience sur un outil ou une stack non déductible.
+
+AXES TECHNIQUES À METTRE EN AVANT
+
+Le CV doit prioritairement valoriser :
+
+développement de composants Rust orientés données,
+
+parsing, validation et transformation de données structurées,
+
+interopérabilité entre systèmes hétérogènes,
+
+respect de schémas, contrats et formats d’échange,
+
+pipelines déterministes et robustes,
+
+performance, sûreté mémoire et fiabilité.
+
+Les compétences Rust doivent être présentées comme des outils d’ingénierie pour la qualité et la cohérence des données.
+
+RÈGLES SPÉCIFIQUES POUR LA SECTION "Objectives"
+
+L’objectif professionnel doit expliciter :
+
+l’orientation Rust & data-centric,
+
+la spécialisation interopérabilité / transformation de données,
+
+la recherche de systèmes fiables, maintenables et performants.
+
+Éviter toute formulation générique ou marketing.
+
+Privilégier une formulation orientée qualité des données, robustesse et intégration inter-systèmes.
+
+RÈGLES SPÉCIFIQUES POUR LA SECTION "skills"
+
+Structurer les compétences autour de :
+
+Rust (développement applicatif, sûreté, performance),
+
+formats de données structurés,
+
+validation, parsing et transformation,
+
+intégration et interopérabilité.
+
+Les autres langages ou outils doivent être présentés comme complémentaires ou contextuels à l’intégration.
+
+Les aspects tests, CI/CD et outillage doivent rester visibles pour crédibiliser l’usage de Rust en production.
+
+RÈGLES SPÉCIFIQUES POUR LA SECTION "Employment"
+
+Les expériences doivent être relues à travers le prisme :
+
+traitement de données,
+
+interopérabilité,
+
+fiabilité des échanges,
+
+performance et robustesse.
+
+Mettre en avant pipelines, schémas, contraintes de validation et enjeux de volumétrie.
+
+Appliquer les règles du « Jeu de règles par défaut complet de génération de CV ciblé pour une offre » pour toutes les compétences demandées dans l’Offre Cible ne relevant pas directement de Rust ou de l’interopérabilité.
+
+Les activités purement applicatives non liées aux données ou à l’intégration doivent être réduites ou contextualisées.
+
+VOCABULAIRE À PRIVILÉGIER
+
+Termes recommandés :
+
+parse
+
+validate
+
+transform
+
+map
+
+serialize / deserialize
+
+pipeline
+
+interoperability
+
+schema-driven
+
+data consistency
+
+robustness
+
+performance
+
+Termes à limiter ou contextualiser :
+
+pure feature development
+
+UI-centric development
+
+generic maintenance
+
+CONTRAINTE FINALE DE COHÉRENCE
+
+Le CV généré doit donner l’impression que le candidat est capable de concevoir et déployer des composants Rust robustes dédiés à l’interopérabilité et au traitement de données, intégrés dans des environnements existants, avec une forte exigence sur la qualité, la sûreté, la performance et la maintenabilité.
+
+Aucune compétence, technologie ou expérience ne doit être ajoutée si elle n’est pas strictement déductible du Super CV et de l’Offre Cible.
+
+=====================================================================
+FIN DE LA SURDÉFINITION
+RUST_DATA_INTEROPERABILITY_ENGINEER_PROFILE

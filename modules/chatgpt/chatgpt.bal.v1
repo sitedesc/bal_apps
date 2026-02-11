@@ -1,0 +1,49 @@
+import ballerina/http;
+import ballerina/io;
+import ballerina/data.jsondata;
+
+public type Conf record {
+    string secretKey;
+};
+
+public configurable Conf conf = ?;
+
+public function main() returns error? {
+
+    string secretKey = conf.secretKey;
+
+    // Create HTTP client for OpenAI API
+    http:Client 'client = check new ("https://api.openai.com/v1", config = {
+        auth: {
+            token : secretKey
+        }
+    });
+
+    // Build the JSON request manually (no strict typing)
+
+json payload = {
+    "model": "gpt-5.1",
+    "messages": [
+        {
+            "role": "user",
+            "content": "What is the Ballerina language?"
+        }
+    ],
+    "max_completion_tokens": 4000,
+    "temperature": 0,
+    "response_format": { "type": "text" }
+};
+
+    // Send POST request to OpenAI Chat Completions endpoint
+    http:Response response = check 'client->post("/chat/completions", payload);
+
+    // Extract JSON body
+    json body = check response.getJsonPayload();
+
+    // Extract answer
+    //string? answer = (check (check (check (check body["choices"])[0])["message"])["content"]).toString();
+    string? answer = <string?> check jsondata:read(body, `$.choices[0].message.content`);
+    //io:println(body);
+   io:println(answer);
+}
+

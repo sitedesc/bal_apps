@@ -1,0 +1,41 @@
+import ballerina/log;
+import ballerinax/openai.chat;
+
+public type Conf record {
+string secretKey;
+};
+
+public configurable Conf conf = ?;
+
+public function main() returns error? {
+    string secretKey = conf.secretKey;
+    final chat:Client openAIChat = check new ({auth: {token: secretKey}});
+    string prompt = "What is Ballerina language";
+        chat:CreateChatCompletionRequest request = {
+//        model: "gpt-4o-mini",
+        model: "gpt-5.1",
+
+        messages: [
+            {
+                role: "user",
+                content: [
+                    {
+                        "type": "text",
+                        "text": prompt
+                    }
+                ]
+            }
+        ],
+        max_completion_tokens: 300
+    };
+//    chat:CreateChatCompletionResponse response = check openAIChat->/chat/completions.post(request);
+json response = check openAIChat->/chat/completions.post(request);
+
+string answer = check response.choices[0].message.content.toString();
+    if answer is () {
+      log:printInfo("no answer returned by chatgpt");
+    } else {
+      log:printInfo(answer);
+    }
+
+}

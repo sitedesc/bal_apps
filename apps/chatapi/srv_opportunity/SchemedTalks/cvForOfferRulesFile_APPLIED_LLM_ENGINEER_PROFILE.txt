@@ -1,0 +1,167 @@
+JEU DE RÈGLES COMPLET DE GÉNÉRATION DE CV CIBLÉ
+VERSION : APPLIED_LLM_ENGINEER_PROFILE
+
+Toutes les règles du "Jeu de règles par défaut complet de génération de CV ciblé pour une offre" s’appliquent intégralement.
+Les règles suivantes constituent une SURDÉFINITION EXPLICITE et doivent être appliquées en priorité
+lorsqu’elles précisent ou restreignent le comportement de génération.
+
+=====================================================================
+SURDÉFINITION — CALIBRATION DU PROFIL APPLIED LLM ENGINEER
+=====================================================================
+
+Objectif de cette calibration :
+Générer un CV ciblé correspondant à un ingénieur logiciel senior spécialisé dans
+l’intégration applicative de l’IA générative et des Large Language Models (LLM),
+orienté usages concrets, robustesse des pipelines IA, qualité des réponses
+et exploitation métier.
+
+Ce profil n’est PAS un data scientist académique.
+Ce profil n’est PAS un développeur applicatif classique.
+Il s’agit d’un profil d’ingénierie logicielle appliquée à l’IA.
+
+---------------------------------------------------------------------
+POSTURE GLOBALE À ADOPTER
+---------------------------------------------------------------------
+
+- Le CV doit positionner le candidat comme un ingénieur capable de concevoir,
+  implémenter et intégrer des services IA générative dans des stacks web existantes.
+- L’IA doit être un SUJET CENTRAL du CV, pas une compétence périphérique.
+- Le discours doit rester concret, orienté delivery, intégration et qualité
+  des résultats produits par les modèles.
+
+Le candidat travaille au croisement de :
+- back-end applicatif,
+- orchestration de services IA,
+- données structurées,
+- interfaces métier.
+
+---------------------------------------------------------------------
+TRANSLATION CONCEPTUELLE AUTORISÉE (RÈGLE CLÉ)
+---------------------------------------------------------------------
+
+Lorsque l’offre mentionne des outils ou frameworks IA spécifiques (ex. LangChain,
+LlamaIndex, RAG frameworks), et que le Super CV ne les mentionne pas explicitement :
+
+- Il est AUTORISÉ de décrire des expériences "RAG-like", "LangChain-like" ou
+  "LLM pipeline orchestration" SI ET SEULEMENT SI ces expériences sont
+  déductibles du Super CV.
+
+Exemples de traductions autorisées :
+- Orchestration d’API LLM multi-étapes → "LLM pipeline orchestration"
+- Génération contrainte par schéma (XML/XSD, JSON Schema) → "structured output parsing"
+- Enrichissement de prompts par données métier structurées → "RAG-style enrichment"
+
+Il est STRICTEMENT INTERDIT :
+- de citer un outil non présent dans le Super CV (LangChain, LlamaIndex, Qdrant, etc.)
+  comme étant utilisé explicitement.
+- d’inventer une expérience sur une base vectorielle ou un framework IA précis.
+
+---------------------------------------------------------------------
+AXES TECHNIQUES À METTRE EN AVANT
+---------------------------------------------------------------------
+
+Le CV doit prioritairement valoriser :
+
+- Intégration d’APIs de LLM (OpenAI, ou équivalent mentionné dans le Super CV)
+- Prompt engineering orienté contraintes, robustesse et non-hallucination
+- Génération de contenus structurés (XML, JSON, schémas formels)
+- Validation, parsing et contrôle de qualité des outputs LLM
+- Orchestration de workflows IA multi-étapes
+- Intégration des services IA dans des applications web existantes
+- Mise à disposition d’interfaces métier (back-office, outils internes)
+
+Les compétences IA doivent être présentées comme des composants logiciels,
+pas comme des expérimentations isolées.
+
+---------------------------------------------------------------------
+RÈGLES SPÉCIFIQUES POUR LA SECTION "OBJECTIVES"
+---------------------------------------------------------------------
+
+- L’objectif professionnel doit expliciter :
+  - l’orientation IA générative appliquée,
+  - l’intégration de LLM dans des systèmes existants,
+  - la recherche d’impact concret et mesurable.
+
+- Éviter toute formulation vague de type "passionné par l’IA".
+- Préférer une formulation orientée :
+  - usages,
+  - qualité des réponses,
+  - intégration métier.
+
+---------------------------------------------------------------------
+RÈGLES SPÉCIFIQUES POUR LA SECTION "SKILLS"
+---------------------------------------------------------------------
+
+- Structurer les compétences IA comme des compétences d’ingénierie :
+  - LLM integration
+  - Prompt engineering
+  - Structured output generation
+  - Output validation and parsing
+  - API orchestration
+
+- Les langages et frameworks (Python, PHP, Ballerina, etc.) doivent être
+  présentés comme des moyens d’intégration de l’IA, pas comme une fin.
+
+- Les outils DevOps, CI/CD et la robustesse applicative doivent rester visibles,
+  car ils renforcent la crédibilité production du profil.
+
+---------------------------------------------------------------------
+RÈGLES SPÉCIFIQUES POUR LA SECTION "EMPLOYMENT"
+---------------------------------------------------------------------
+
+- Les expériences doivent être relues à travers le prisme IA appliquée :
+  - mise en avant des intégrations LLM,
+  - génération automatique de documents ou de données,
+  - pipelines de transformation,
+  - orchestration de services.
+
+- Les expériences "RAG-like" doivent être expliquées de façon pragmatique :
+  - sources de données,
+  - enrichissement du prompt,
+  - génération,
+  - validation.
+
+- appliquer les régles par défaut pour les compétences non catégorisées "IA" demandées dans l'Offre Cible.
+
+- Les activités purement maintenance applicative non liées à l’IA
+  doivent être réduites ou repositionnées en contexte secondaire.
+
+---------------------------------------------------------------------
+VOCABULAIRE À PRIVILÉGIER
+---------------------------------------------------------------------
+
+Verbes et termes recommandés :
+- integrate
+- orchestrate
+- enrich
+- constrain
+- validate
+- parse
+- evaluate
+- pipeline
+- robustness
+- structured outputs
+- applied generative AI
+
+Verbes à limiter ou contextualiser :
+- maintain
+- corrective maintenance
+- legacy refactoring (sauf si lié à l’IA)
+- pure bug fixing
+
+---------------------------------------------------------------------
+CONTRAINTE FINALE DE COHÉRENCE
+---------------------------------------------------------------------
+
+Le CV généré doit donner au recruteur l’impression que le candidat est capable
+de concevoir et déployer des solutions d’IA générative exploitables en production,
+avec une forte attention portée à la qualité des résultats, à la robustesse
+et à l’intégration dans des environnements existants.
+
+Aucune compétence, technologie ou expérience ne doit être ajoutée si elle n’est
+pas strictement déductible du Super CV et de l’offre cible.
+
+=====================================================================
+FIN DE LA SURDÉFINITION
+=====================================================================
+

@@ -1,0 +1,269 @@
+import ballerina/http;
+import ballerina/io;
+import ballerina/time;
+import ballerina/data.jsondata;
+
+// =======================
+// Configuration
+// =======================
+
+// Clé OpenAI
+public configurable string SECRET_KEY = ?;
+
+// ID de l'assistant (une fois créé, tu peux le mettre ici en dur)
+public configurable string ASSISTANT_ID = ?;
+
+// Client HTTP réutilisé
+function getOpenAIClient() returns http:Client|error {
+    return new ("https://api.openai.com/v1", {
+        auth: { token: SECRET_KEY },
+        timeout: 300
+    });
+}
+
+// =======================
+// 1. Création de l'assistant (one-shot)
+// =======================
+
+public function createAssistant() returns string|error {
+    http:Client client = check getOpenAIClient();
+
+    json payload = {
+        "model": "gpt-5.1",
+        "name": "cv_xml_generator",
+        "instructions": "You are an expert in XML CV generation. You strictly follow the XML schema and rules attached as files. You always output a single well-formed XML document, no explanations, no markdown. Escape XML special characters. You transform raw CV text and job offers into an XML CV compliant with the provided schema and the default CV generation rules.",
+        "tools": []  // no tools for now, pure LLM
+    };
+
+    http:Response res = check client->post("/assistants", payload);
+    json body = check res.getJsonPayload();
+
+    string assistantId = check jsondata:read(body, `$.id`);
+    io:println("Assistant created: " + assistantId);
+    return assistantId;
+}
+
+// =======================
+// 2. Upload de fichiers globaux (rules, XSD, dictionnaire)
+// =======================
+//
+// NOTE : ceci est un squelette. Selon ta version de Ballerina, tu dois
+// utiliser les primitives multipart de `http` (Request, BodyPart, etc.).
+// L'idée : POST /files avec `file` + `purpose=assistants`.
+//
+
+public function uploadFile(string filePath) returns string|error {
+    http:Client client = check getOpenAIClient();
+
+    byte[] fileBytes = check io:fileReadBytes(filePath);
+
+    // Construction d'une requête multipart "à la main"
+    http:Request req = new;
+    req.setHeader("Content-Type", "multipart/form-data");
+    // À adapter avec les bonnes API multipart de ta version Ballerina :
+    // Ici, on met un pseudo-code conceptuel :
+    //   - ajouter la partie "file"
+    //   - ajouter la partie "purpose=assistants"
+    //
+    // Voir la doc Ballerina pour http:Request.setBodyParts() etc.
+
+    // Pseudo (à adapter) :
+    // http:BodyPart filePart = new;
+    // filePart.setContent(fileBytes, "application/octet-stream");
+    // filePart.setContentDisposition({ name: "file", filename: filePath });
+    //
+    // http:BodyPart purposePart = new;
+    // purposePart.setText("assistants");
+    //
+    // req.setBodyParts([filePart, purposePart]);
+
+    // En attendant, on fait un simple appel qui NE FONCTIONNERA PAS tel quel,
+    // mais te donne la structure d'appel :
+    http:Response res = check client->post("/files", req);
+    json body = check res.getJsonPayload();
+
+    string fileId = check jsondata:read(body, `$.id`);
+    io:println("File uploaded: " + fileId);
+    return fileId;
+}
+
+// Attacher un fichier à un assistant
+public function attachFileToAssistant(string assistantId, string fileId) returns error? {
+    http:Client client = check getOpenAIClient();
+
+    json payload = {
+        "file_id": fileId
+    };
+
+    // D'après la logique Assistants v2 : POST /assistants/{assistant_id}/files
+    check client->post("/assistants/" + assistantId + "/files", payload);
+    io:println("File " + fileId + " attached to assistant " + assistantId);
+}
+
+// =======================
+// 3. Thread utilisateur (multi-user)
+// =======================
+
+public function createThread() returns string|error {
+    http:Client client = check getOpenAIClient();
+
+    json payload = { "messages": [] };
+    http:Response res = check client->post("/threads", payload);
+    json body = check res.getJsonPayload();
+    string threadId = check jsondata:read(body, `$.id`);
+    io:println("Thread created: " + threadId);
+    return threadId;
+}
+
+// Ajouter un message utilisateur dans un thread
+public function addUserMessage(string threadId, string prompt) returns error? {
+    http:Client client = check getOpenAIClient();
+
+    json payload = {
+        "role": "user",
+        "content": prompt
+    };
+
+    check client->post("/threads/" + threadId + "/messages", payload);
+}
+
+// =======================
+// 4. Upload du CV base spécifique à l'utilisateur
+// =======================
+
+public function uploadUserCvBase(string filePath) returns string|error {
+    // Même logique que uploadFile(), mais tu peux séparer si tu veux tracer
+    return check uploadFile(filePath);
+}
+
+// =======================
+// 5. Lancer un run
+// =======================
+
+public function launchRun(string threadId, string assistantId, string[] additionalFileIds) returns string|error {
+    http:Client client = check getOpenAIClient();
+
+    json payload = {
+        "assistant_id": assistantId,
+        "additional_instructions": "",
+        "additional_file_ids": additionalFileIds
+    };
+
+    http:Response res = check client->post("/threads/" + threadId + "/runs", payload);
+    json body = check res.getJsonPayload();
+    string runId = check jsondata:read(body, `$.id`);
+    io:println("Run started: " + runId);
+    return runId;
+}
+
+// =======================
+// 6. Polling jusqu'à completion
+// =======================
+
+public function waitForRun(string threadId, string runId) returns error? {
+    http:Client client = check getOpenAIClient();
+
+    while true {
+        http:Response res = check client->get("/threads/" + threadId + "/runs/" + runId);
+        json body = check res.getJsonPayload();
+        string status = check jsondata:read(body, `$.status`);
+
+        if status == "completed" {
+            io:println("Run completed: " + runId);
+            break;
+        } else if status == "failed" {
+            error e = error("Run failed: " + runId);
+            return e;
+        }
+
+        // Petite pause avant de re-tester
+        time:sleep(1);
+    }
+}
+
+// =======================
+// 7. Récupérer le résultat
+// =======================
+
+public function getFinalAnswer(string threadId) returns string|error {
+    http:Client client = check getOpenAIClient();
+
+    http:Response res = check client->get("/threads/" + threadId + "/messages");
+    json body = check res.getJsonPayload();
+
+    // On suppose que le dernier message est la réponse pertinente
+    string answer = check jsondata:read(body, `$.data[0].content[0].text.value`);
+    return answer;
+}
+
+// =======================
+// 8. Pipeline complet de génération de CV XML pour un utilisateur
+// =======================
+
+public function generateCvXml(string assistantId, string threadId, string cvBasePath, string userPrompt)
+    returns string|error {
+
+    // 1. Upload du CV base spécifique à l'utilisateur
+    string cvFileId = check uploadUserCvBase(cvBasePath);
+
+    // 2. Ajouter le message utilisateur (job offer + cv text brut, etc.)
+    check addUserMessage(threadId, userPrompt);
+
+    // 3. Lancer le run avec le CV base comme fichier additionnel
+    string runId = check launchRun(threadId, assistantId, [cvFileId]);
+
+    // 4. Attendre la fin
+    check waitForRun(threadId, runId);
+
+    // 5. Lire le résultat XML
+    return check getFinalAnswer(threadId);
+}
+
+// =======================
+// 9. Exemple de main CLI
+// =======================
+//
+// Usage typique (à adapter) :
+//   ballerina run cv_assistant.bal run <threadId|new> <cvBasePath> <jobOfferFile> <cvTextFile>
+//
+// - ASSISTANT_ID vient de la config (ou d'un .toml).
+// - Le prompt est construit à partir du texte job + CV brut.
+// - Le threadId est propre à chaque utilisateur et stocké dans ton CMS.
+//
+
+public function main(string mode, string threadIdOrNew = "", string cvBasePath = "",
+                     string jobOfferFile = "", string cvTextFile = "") returns error? {
+
+    if mode == "create-assistant" {
+        _ = check createAssistant();
+        return;
+    }
+
+    if mode == "run" {
+        if ASSISTANT_ID == "" {
+            error e = error("ASSISTANT_ID must be configured");
+            return e;
+        }
+
+        string threadId = threadIdOrNew;
+        if threadIdOrNew == "new" || threadIdOrNew == "" {
+            threadId = check createThread();
+            io:println("New thread for this user: " + threadId);
+            // À stocker dans ton CMS pour réutilisation
+        }
+
+        string jobOfferText = jobOfferFile != "" ? check io:fileReadString(jobOfferFile) : "";
+        string cvText = cvTextFile != "" ? check io:fileReadString(cvTextFile) : "";
+
+        string prompt = "Job offer:\n" + jobOfferText +
+            "\n\nRaw CV text:\n" + cvText +
+            "\n\nGenerate the full XML CV now, strictly following the schema and rules attached.";
+
+        string xmlCv = check generateCvXml(ASSISTANT_ID, threadId, cvBasePath, prompt);
+        io:println(xmlCv);
+        return;
+    }
+
+    io:println("Unknown mode. Use 'create-assistant' or 'run'.");
+}
+

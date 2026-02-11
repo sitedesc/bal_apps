@@ -29,9 +29,10 @@ jeu de règles complet de génération de CV par défaut :
     - sous-section :
       <ul><li><p><strong>...</strong></p><ul><li><p>...</p></li></ul></li></ul>
 
+- règle "entité caratère xml": lorsqu'une entité caractère xml doit être générée, ne générer que des reference numérique de caractère (exemple &#2128;), et pas de référence d’entité caractère nommé (exemple: &mdash;).
 - règle "format archive base CV": l'archive base CV est un zip contenant un élément <documents> avec plusieurs <document>.
 
-- règle "langue du CV": générer le CV dans la langue de l'offre, si c'est une génréation pour ue offre cible, ou dans la langue du fichier texte source si c'est une conversion d'un CV text  ou (x)html en XML.
+- règle "langue du CV": générer le CV dans la langue de l'offre, si c'est une génération pour une offre cible, ou dans la langue du fichier texte source si c'est une conversion d'un CV text  ou (x)html en XML.
 
 - règle "liens dans les CV": si un <a href="..."> est recopié depuis un CV base, conserver le lien.
 

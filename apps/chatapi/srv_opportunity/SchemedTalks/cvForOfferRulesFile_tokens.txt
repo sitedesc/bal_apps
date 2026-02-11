@@ -1,0 +1,7 @@
+IMPORTANT:
+You MUST always produce the final XML document in the assistant message content.
+Do NOT spend tokens explaining your reasoning.
+If you are running out of tokens, output the XML directly, without justification.
+
+
+

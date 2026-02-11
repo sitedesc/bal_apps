@@ -1,0 +1,212 @@
+=====================================================================
+SURDÉFINITION — CALIBRATION DU PROFIL
+SOLUTION ARCHITECT PROFILE (ARCHITECTE SOLUTION / TECHNIQUE)
+
+Objectif de cette calibration :
+
+Générer un CV Cible positionné explicitement comme un profil Architecte Solution / Technique intervenant de manière transverse sur des projets et programmes SI, capable de concevoir des architectures applicatives et techniques alignées avec une trajectoire cible (SDSI), de produire des scénarios d’architecture, de piloter des arbitrages, et d’accompagner les équipes projets.
+
+Ce profil n’est PAS un “développeur senior” présenté comme identité principale, même si des compétences de réalisation existent.
+Ce profil n’est PAS un architecte purement infrastructure.
+Il s’agit d’un architecte orienté architecture applicative, intégration, urbanisation pragmatique, gouvernance, avec une crédibilité forte sur les systèmes data-centric et les plateformes d’intégration.
+
+POSTURE GLOBALE À ADOPTER
+
+Le CV doit donner une impression immédiate de posture “architecte” :
+
+vision transverse, structuration, alignement cible, trajectoire,
+
+arbitrages, scénarios, documentation d’architecture,
+
+accompagnement des équipes et coordination multi-acteurs,
+
+maîtrise de l’intégration entre systèmes hétérogènes (API, orchestration, flux de données),
+
+mise sous contrôle de la complexité (cohérence, maintenabilité, robustesse, observabilité).
+
+Le discours doit rester concret, factuel, et fondé sur les éléments réellement présents dans le Super CV.
+
+AXES À METTRE EN AVANT (PRIORITAIRES)
+
+Le CV doit prioritairement valoriser :
+
+Architecture SI / trajectoire / SDSI (pragmatique)
+
+scénarios d’architecture, trajectoire cible, cohérence, arbitrages,
+
+alignement besoins métier / applicatif / technique.
+
+Architecture d’intégration
+
+intégration ERP / CRM / PIM / CMS / BI / marketplaces,
+
+synchronisation, workflows inter-applicatifs, orchestration orientée API,
+
+robustesse des échanges et cohérence des données.
+
+Modélisation et représentation
+
+BPMN (processus, flux),
+
+ArchiMate (cartographie et alignement multi-couches) lorsque pertinent,
+
+documentation compréhensible par différents publics (IT, métier, delivery).
+
+Qualité d’architecture en contexte réel
+
+migrations (legacy → mieux structuré),
+
+industrialisation, CI/CD, monitoring/observabilité,
+
+contraintes d’exploitation, stabilité, performance.
+
+AXES À DÉPRIORISER (SAUF SI L’OFFRE CIBLE LES EXIGE)
+
+détail bas niveau des frameworks et du code (Symfony composants, specifics Angular, etc.)
+
+“features” UI-centric
+
+tech watch Rust/Wasm très détaillée (garder seulement si utile pour crédibilité architecture / systèmes robustes)
+
+RÈGLES SPÉCIFIQUES POUR LA SECTION "Objectives"
+
+L’objectif professionnel doit :
+
+annoncer clairement le positionnement Architecte Solution / Technique,
+
+mentionner intervention transverse, scénarios, arbitrages, accompagnement,
+
+évoquer l’intégration et la cohérence des flux SI (API, data, orchestration) sans tomber dans le détail d’implémentation,
+
+rester court et orienté “valeur” pour l’organisation (cohérence, trajectoire, réduction du risque, efficacité delivery).
+
+Éviter :
+
+formulations trop “développeur senior” en tête de résumé,
+
+empilement de technologies en résumé.
+
+RÈGLES SPÉCIFIQUES POUR LA SECTION "skills"
+
+Objectif : transformer la section compétences en lecture “architecte”.
+
+Réorganiser les compétences pour que les premières catégories perçues soient :
+
+architecture & gouvernance,
+
+intégration & data flows,
+
+modélisation (BPMN / ArchiMate),
+
+puis seulement technologies.
+
+Conserver les technologies présentes dans le Super CV, mais les exprimer au niveau “capacité d’architecture / intégration”, et non comme inventaire d’implémentation.
+
+Mettre en avant explicitement :
+
+intégration inter-systèmes (ERP/CRM/PIM/CMS),
+
+API / microservices,
+
+bases XML & moteurs de recherche (BaseX, eXist-db, Lucene, Vespa) comme briques data-centric,
+
+chaîne éditique / CMS structuré comme preuve de maîtrise des modèles, schémas, pipelines de publication.
+
+VOCABULAIRE À PRIVILÉGIER (FR)
+
+Termes recommandés :
+
+trajectoire SI, cible, cohérence, urbanisation pragmatique
+
+scénarios d’architecture, arbitrages, cadrage
+
+intégration, interopérabilité, synchronisation, orchestration
+
+data consistency / cohérence des données, observabilité, robustesse
+
+accompagnement des équipes, coordination multi-acteurs
+
+cartographie, modélisation (BPMN, ArchiMate)
+
+Termes à limiter :
+
+“développement de fonctionnalités”, “maintenance applicative” (sauf pour condenser des périodes non prioritaires)
+
+jargon trop bas niveau / framework-centric
+
+RÈGLES SPÉCIFIQUES POUR LA SECTION "Employment"
+
+Les expériences doivent être relues et reformulées avec un prisme architecte :
+
+décisions structurantes, architecture cible, patterns, intégration, flux, gouvernance,
+
+coordination et animation technique (reviews, arbitrages, guidance),
+
+migrations et rationalisation.
+
+Priorisation d’expériences (si présentes dans le Super CV) :
+
+Cosmobilis (2023–présent) :
+
+Lead Developer & Architect, intégration Salesforce/OpenFlex, orchestration, évolutions d’architecture, approche BPM/ESB, API observables, multi-pays.
+
+XML CMS Developer (2018–présent) :
+
+CMS structuré, BaseX, REST-XQ, publication multi-format, schémas, workflows, démonstration d’architecture documentaire.
+
+Made In Design / Bilendi / Arturia (2011–2022) :
+
+architecture d’intégration (ERP/PIM/CMS/CRM/marketplaces), Talend, ESB-like, multi-pays, documentation d’architecture, gouvernance technique.
+
+Expériences historiques (Kelkoo/Yahoo, HC Forum/Open Energie, Cap Gemini/Xerox, AIS/Synlog/CS) :
+
+les conserver pour continuité, mais condenser fortement si non prioritaires à l’offre.
+
+Les sous-projets “tchatapi.org” doivent être positionnés comme :
+
+preuve de capacité à concevoir une orchestration API et à formaliser des workflows exécutables,
+
+sans tomber dans une description produit trop longue.
+
+RÈGLE — DÉMONSTRATEUR / “DISPONIBLE SUR DEMANDE”
+
+Il est AUTORISÉ d’ajouter une mention courte “démonstrateur disponible sur demande” UNE SEULE FOIS dans le CV, uniquement si cela renforce la crédibilité architecte.
+
+Contraintes :
+
+ne pas fournir d’URL publique dans le CV Cible,
+
+ne pas employer de wording marketing (“plateforme”, “solution clé en main”),
+
+formulation attendue :
+“Démonstrateur interne (CMS headless XML + orchestration de workflows API + génération structurée contrainte par schéma) ; démonstration disponible sur demande.”
+
+RÈGLE — ARCHIMATE & BPMN (USAGE CONJOINT)
+
+Lorsque la modélisation est mentionnée :
+
+présenter BPMN comme modélisation des processus et flux,
+
+présenter ArchiMate comme cartographie et alignement métier/applicatif/technique,
+
+insister sur un usage complémentaire et pragmatique (non académique),
+
+ne pas inventer de livrables si non présents dans le Super CV : parler de “documentation / cartographie” sans nommer un document type absent.
+
+CONTRAINTE FINALE DE COHÉRENCE
+
+Le CV généré doit donner l’impression d’un profil Architecte Solution / Technique capable :
+
+d’aligner une architecture cible avec une trajectoire SI,
+
+de proposer et arbitrer des scénarios,
+
+d’accompagner les équipes et de sécuriser l’exécution,
+
+tout en s’appuyant sur une expérience forte d’intégration et de plateformes data-centric.
+
+Aucune compétence, technologie ou expérience ne doit être ajoutée si elle n’est pas strictement déductible du Super CV et de l’Offre Cible.
+
+=====================================================================
+FIN DE LA SURDÉFINITION
+SOLUTION_ARCHITECT_PROFILE

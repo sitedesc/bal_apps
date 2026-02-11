@@ -406,12 +406,12 @@ public function getOFCountries() returns string[]|error {
 public function processOARequest(SchemedTalk resolvedSchemedTalk, OARequest oaRequest, map<json> response) returns error? {
     resolvedSchemedTalk.description = oaRequest.description;
     printTitle(oaRequest.description);
-    string prompt="";
+    string|json prompt="";
     if oaRequest.prePromptFile is () {
-      prompt=oaRequest.prompt;
+      prompt=oaRequest.prompt.toJsonString();
     } else {
       string prePrompt = check io:fileReadString(<string> oaRequest.prePromptFile);
-      prompt = prePrompt + oaRequest.prompt;     
+      prompt = prePrompt + oaRequest.prompt.toJsonString();     
     }
-    response["oaResponse"] = check chatgpt:processRequest(oaRequest.route, prompt);
+    response["oaResponse"] = check chatgpt:processRequest(oaRequest.route, <string> prompt);
 }
