@@ -58,9 +58,12 @@ public function OFUpdate(string updateMethod, http:Client apiClient, string apiU
     return response;
 }
 
+//TODO: refactor me: reread me and test me : there are some strange logic in me...
 function resolveExpressions(string jsonString, json response, map<json> memory = {}) returns SchemedTalk|error {
 
-    string:RegExp regex = re `"?<\?([:\w]+)\?>"?`;
+    //io:println("unresolved json path: ");
+    //io:println(jsonString);
+   string:RegExp regex = re `<\?([:\w]+)\?>`;
 
     //see https://github.com/ballerina-platform/ballerina-lang/issues/42331
     // about isolation, readonlyness and finalness...
@@ -94,8 +97,8 @@ function resolveExpressions(string jsonString, json response, map<json> memory =
             if value is string {
                 value = value.toJsonString();
                 if value is string && value.startsWith("\"") && value.endsWith("\"") {
-                    //return value.substring(1, value.length() - 1);
-                      return value;
+                    return value.substring(1, value.length() - 1);
+                    //return value;
                 } else {
                     return <string> value;
                 }
@@ -107,8 +110,8 @@ function resolveExpressions(string jsonString, json response, map<json> memory =
             if value is string {
                 value = value.toJsonString();
                 if value is string && value.startsWith("\"") && value.endsWith("\"") {
-                    //return value.substring(1, value.length() - 1);
-                    return value;
+                    return value.substring(1, value.length() - 1);
+                    //return value;
                 } else {
                     return <string> value;
                 }

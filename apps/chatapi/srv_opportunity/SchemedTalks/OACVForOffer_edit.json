@@ -1,0 +1,36 @@
+{
+  "type": "CVForOffer",
+  "description": "Ce scénario génère un CV ciblé pour une offre d'emploi, à partir d'un CV source contenant une version très détaillée et exhaustive des compétences et expériences du candidat. L'analyse de l'offre et de ce CV source pour générer le CV ciblé est faite par un LLM.",
+  "talkScheme": [
+    {
+      "type": "SchemedTalkDoc",
+      "description": "Ce scénario génère un CV ciblé pour une offre d'emploi, à partir d'un CV source contenant une version très détaillée et exhaustive des compétences et expériences du candidat. L'analyse de l'offre et de ce CV source pour générer le CV ciblé est faite par un LLM."
+    },
+    {
+      "type": "Memorize",
+      "description": "On mémorise l'offre pour plusieurs utilisation de celle-ci dans le scénario",
+      "asWhat": {
+        "offre": "const:Offre UMR5648-PIEDIM-004 - Concepteur réalisateur (H/F) traitement automatisé de données comptables du Moyen age\\nConcepteur réalisateur (H/F) traitement automatisé de données comptables du Moyen age\\n\\nDate Limite Candidature : lundi 8 décembre 2025 23:59:00 heure de Paris\\n\\nAssurez-vous que votre profil candidat soit correctement renseigné avant de postuler\\nInformations générales\\n\\nIntitulé de l'offre : Concepteur réalisateur (H/F) traitement automatisé de données comptables du Moyen age\\nRéférence : UMR5648-PIEDIM-004\\nNombre de Postes : 1\\nLieu de travail : LYON 07\\nDate de publication : lundi 17 novembre 2025\\nType de contrat : IT en contrat CDD\\nDurée du contrat : 9 mois\\nDate d'embauche prévue : 1 mars 2026\\nQuotité de travail : Complet\\nRémunération : à partir de 2521€ brut selon expérience\\nNiveau d'études souhaité : BAC+3/4\\nExpérience souhaitée : 1 à 4 années\\nBAP : D - Sciences Humaines et Sociales\\nEmploi type : Ingenieure ou ingenieur d'etudes en analyses des sources historiques et culturelles\\nMissions\\n\\nL'objectif principal est le développement et la création d'un outil permettant l'identification et l'exploitation de données chiffrées contenues dans les textes médiévaux.\\nLes missions confiées à la personne recrutée sont d'une part l'identification et l'extraction des données chiffrées dans les textes, puis d'autre part la collecte, l'analyse et la visualisation des éléments obtenus avec pour objectif final la création et le développement de nouveaux outils d'exploitation.\\nActivités\\n\\nAnalyse structurelle des textes du corpus pour cerner les voies possibles d'un traitement automatique ou semi-automatique.\\nMarquage des éléments avec des balises XML, extraits et transformés pour faciliter leur collecte en XSLT.\\nExtraction des données chiffrées considérées comme des entités nommées pour établir un processus prototypique.\\nConception d'une saisie des données, manuelle ou semi-manuelle avec interconnexion logicielle, intégrant éventuellement la conversion de devises, ce qui revient à la création d'un tableur spécifique (accompagné des variables et des formules de conversion).\\nMise en place d'un outil d'analyse des données chiffrées, configurable (construction des différents types d'analyse) en fonction de la problématique de recherche, outil censé produire des rendus visuels.\\nCompétences\\n\\n- Connaissance approfondie de XML TEI, tableurs et technologies NER.\\n- Maîtrise de git pour mettre en place des dépôts github ou gitlab.\\n- Capacité à dialoguer avec des chercheurs et connaissances des problématiques d'édition.\\n- Savoir travailler en équipe et en autonomie.\\n- Savoir rendre compte à sa hiérarchie.\\nCompétences souhaitées :\\n- Maîtrise des langages de script\\n- Connaissance des bases de données XML TEI (eXistdb)\\n- Connaissance de xQuery\\n- Connaissance des méthodes et d'outils d'analyse de données textuelles (plateforme TXM ou autre)\\n- Connaissance du latin et de certaines langues vernaculaires. compétences en paléographie médiévale requises\\nContexte de travail\\n\\nLocalisé dans les bureaux du CIHAM à Lyon et Avignon, le poste est lié à l'obtention d'un contrat Biblissima+ pour la création de ces référentiels exploratoires, qui seront hébergés sur Huma-num. La personne recrutée assurera la gestion de la plateforme de stockage et la mutualisation. Elle aura un rôle d'interface avec les partenaires du CIHAM et Biblissima +. Elle sera rattachée au CIHAM. Des déplacements occasionnels sont à prévoir, mais une grande partie du travail pourra être effectuée en télétravail en accord avec les différents partenaires.\\n\\n\\n"
+      }
+    },
+    {
+      "type": "OARequest",
+      "description": "on lance une request au LLM (openAI/GPT-5.4) avec comme prompt: l'offre, le CV source à cibler pour celle-ci et un jeu de règles spécifiant la génération de CV ciblé voulue",
+      "prompt": "&lt;?memory:offre?&gt;",
+      "prePromptFile": "SchemedTalks/cvForOfferRulesFile_default.txt"
+    },
+    {
+      "type": "Memorize",
+      "description": "On mémorise le CV ciblé généré par le LLM",
+      "asWhat": {
+        "cv": "jsonpath:$.oaResponse"
+      }
+    },
+    {
+      "type": "OARequest",
+      "description": "on lance une nouvelle request au LLM avec comme prompt: l'offre, le CV ciblé pour celle-ci et un jeu de règles spécifiant la génération de LM ciblée pour cette offre et ce CV",
+      "prompt": "Offre:\\\\n\\\\n&lt;?memory:offre?&gt;\\\\n/nCV\\\\n\\\\n&lt;?memory:cv?&gt;\"",
+      "prePromptFile": "SchemedTalks/clForOfferRulesFile_default.txt"
+    }
+  ]
+}

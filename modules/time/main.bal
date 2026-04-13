@@ -9,5 +9,5 @@ public function main() returns error? {
     } else {
         log:printInfo("now is NOT between time slot: " + timeSlot.toString());
     }
-
+    log:printInfo("current time is: " + check now());
 }

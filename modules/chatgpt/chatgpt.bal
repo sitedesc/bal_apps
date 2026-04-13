@@ -34,7 +34,7 @@ public function processRequest(string route, string prompt) returns string?|erro
     });
 
      json payload = {
-        "model": "gpt-5.2",
+        "model": "gpt-5.4",
         "messages": [
             {
                 "role": "user",

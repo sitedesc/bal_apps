@@ -171,5 +171,9 @@ service http:Service / on new http:Listener(port) {
         io:println(string `return openapi local contract...`);
         return check io:fileReadString("./schemed_talk_service_openapi_local.yaml");
     }
+    resource function get schemed_talk_examples() returns json|error {
+        io:println(string `return schemed_talk examples...`);
+        return check io:fileReadString("./SchemedTalks/OACVForOffer_run.json");
+    }
 
 }

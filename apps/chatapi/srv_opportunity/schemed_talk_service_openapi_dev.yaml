@@ -1,17 +1,19 @@
-openapi: 3.0.1
+openapi: 3.1.0
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
+
 info:
   title: Schemed Talk Service OpenAPI
   version: 0.2.0
   description: |
     The Schemed Talk Service executes declarative API orchestration workflows ("SchemedTalks").
-    
+
     A SchemedTalk is a JSON document describing a sequence of typed steps such as:
     - HTTP API calls (GET / POST / PUT / PATCH)
     - AI requests (OpenAI)
     - Conditional logic
     - Memory extraction and reuse via JSONPath
     - Documentation-only steps for self-explaining workflows
-    
+
     This API is designed for experimentation, debugging, and demonstration of API orchestration concepts.
 
     Helpful tools:
@@ -32,7 +34,7 @@ paths:
       summary: Execute a SchemedTalk workflow
       description: |
         Executes a SchemedTalk workflow and returns the execution trace.
-        
+
         This endpoint is optimized for the "happy path".
         In case of execution or type errors, the response may be concise.
         For detailed diagnostics, see `/schemed_talks_responses`.
@@ -44,40 +46,99 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/SchemedTalk'
+                $ref: "#/components/schemas/SchemedTalkNode"
             examples:
-              openai_demo_with_memory:
-                summary: OpenAI + JSONPath + memory reuse demo
+              targeted_cv_and_cover_letter_generation:
+                summary: Génération d’un CV ciblé puis d’une LM ciblée
                 description: |
-                  Demonstrates:
-                  - An OpenAI API call
-                  - JSONPath-based extraction of generated content
-                  - Storage into named memory
-                  - Dynamic reuse of memorized data
-                  - Self-documentation of the workflow
+                  Démonstration d’un scénario SchemedTalk qui :
+                  - mémorise une offre d’emploi,
+                  - génère un CV ciblé via un LLM,
+                  - mémorise ce CV,
+                  - génère ensuite une lettre de motivation ciblée à partir de l’offre et du CV.
                 value:
                   - type: SchemedTalkDoc
-                    description: >
-                      Demo SchemedTalk showing OpenAI call followed by
-                      JSONPath-based memory extraction and reuse.
-                  - type: OARequest
-                    prompt: |
-                      Explain in one short paragraph what microservices are
-                      and why API orchestration matters.
-                    prePromptFile: null
+                    description: >-
+                      Ce scénario génère un CV ciblé pour une offre d'emploi, à partir d'un CV
+                      source contenant une version très détaillée et exhaustive des compétences
+                      et expériences du candidat. L'analyse de l'offre et de ce CV source pour
+                      générer le CV ciblé est faite par un LLM.
+
                   - type: Memorize
-                    description: Memorize the OpenAI generated text
+                    description: >-
+                      On mémorise l'offre pour plusieurs utilisation de celle-ci dans le scénario
                     asWhat:
-                      microservices_definition: "jsonpath:$.oaResponse"
-                  - type: SchemedTalkDoc
-                    description: "<?memory:microservices_definition?>"
-                  - type: SchemedTalkDoc
-                    description: >
-                      What just happened: this workflow called the OpenAI API,
-                      extracted the generated text using JSONPath, stored it
-                      under a named memory key, and dynamically reused it in a
-                      later step. This demonstrates declarative API orchestration,
-                      data extraction, and memory-based reuse without imperative code.
+                      offre: |-
+                        const:Offre UMR5648-PIEDIM-004 - Concepteur réalisateur (H/F) traitement automatisé de données comptables du Moyen age
+                        Concepteur réalisateur (H/F) traitement automatisé de données comptables du Moyen age
+
+                        Date Limite Candidature : lundi 8 décembre 2025 23:59:00 heure de Paris
+
+                        Assurez-vous que votre profil candidat soit correctement renseigné avant de postuler
+                        Informations générales
+
+                        Intitulé de l'offre : Concepteur réalisateur (H/F) traitement automatisé de données comptables du Moyen age
+                        Référence : UMR5648-PIEDIM-004
+                        Nombre de Postes : 1
+                        Lieu de travail : LYON 07
+                        Date de publication : lundi 17 novembre 2025
+                        Type de contrat : IT en contrat CDD
+                        Durée du contrat : 9 mois
+                        Date d'embauche prévue : 1 mars 2026
+                        Quotité de travail : Complet
+                        Rémunération : à partir de 2521€ brut selon expérience
+                        Niveau d'études souhaité : BAC+3/4
+                        Expérience souhaitée : 1 à 4 années
+                        BAP : D - Sciences Humaines et Sociales
+                        Emploi type : Ingenieure ou ingenieur d'etudes en analyses des sources historiques et culturelles
+                        Missions
+
+                        L'objectif principal est le développement et la création d'un outil permettant l'identification et l'exploitation de données chiffrées contenues dans les textes médiévaux.
+                        Les missions confiées à la personne recrutée sont d'une part l'identification et l'extraction des données chiffrées dans les textes, puis d'autre part la collecte, l'analyse et la visualisation des éléments obtenus avec pour objectif final la création et le développement de nouveaux outils d'exploitation.
+                        Activités
+
+                        Analyse structurelle des textes du corpus pour cerner les voies possibles d'un traitement automatique ou semi-automatique.
+                        Marquage des éléments avec des balises XML, extraits et transformés pour faciliter leur collecte en XSLT.
+                        Extraction des données chiffrées considérées comme des entités nommées pour établir un processus prototypique.
+                        Conception d'une saisie des données, manuelle ou semi-manuelle avec interconnexion logicielle, intégrant éventuellement la conversion de devises, ce qui revient à la création d'un tableur spécifique (accompagné des variables et des formules de conversion).
+                        Mise en place d'un outil d'analyse des données chiffrées, configurable (construction des différents types d'analyse) en fonction de la problématique de recherche, outil censé produire des rendus visuels.
+                        Compétences
+
+                        - Connaissance approfondie de XML TEI, tableurs et technologies NER.
+                        - Maîtrise de git pour mettre en place des dépôts github ou gitlab.
+                        - Capacité à dialoguer avec des chercheurs et connaissances des problématiques d'édition.
+                        - Savoir travailler en équipe et en autonomie.
+                        - Savoir rendre compte à sa hiérarchie.
+                        Compétences souhaitées :
+                        - Maîtrise des langages de script
+                        - Connaissance des bases de données XML TEI (eXistdb)
+                        - Connaissance de xQuery
+                        - Connaissance des méthodes et d'outils d'analyse de données textuelles (plateforme TXM ou autre)
+                        - Connaissance du latin et de certaines langues vernaculaires. compétences en paléographie médiévale requises
+                        Contexte de travail
+
+                        Localisé dans les bureaux du CIHAM à Lyon et Avignon, le poste est lié à l'obtention d'un contrat Biblissima+ pour la création de ces référentiels exploratoires, qui seront hébergés sur Huma-num. La personne recrutée assurera la gestion de la plateforme de stockage et la mutualisation. Elle aura un rôle d'interface avec les partenaires du CIHAM et Biblissima +. Elle sera rattachée au CIHAM. Des déplacements occasionnels sont à prévoir, mais une grande partie du travail pourra être effectuée en télétravail en accord avec les différents partenaires.
+
+                  - type: OARequest
+                    description: >-
+                      on lance une request au LLM (openAI/GPT-5.4) avec comme prompt: l'offre,
+                      le CV source à cibler pour celle-ci et un jeu de règles spécifiant la
+                      génération de CV ciblé voulue (pour plus de clarté/efficacité: le CV source et le jeu de règles sont gérés dans le fichier référencé par la propriété prePromptFile)
+                    prompt: "<?memory:offre?>"
+                    prePromptFile: SchemedTalks/cvForOfferRulesFile_default.txt
+
+                  - type: Memorize
+                    description: On mémorise le CV ciblé généré par le LLM
+                    asWhat:
+                      cv: "jsonpath:$.oaResponse"
+
+                  - type: OARequest
+                    description: >-
+                      on lance une nouvelle request au LLM avec comme prompt: l'offre, le CV
+                      ciblé pour celle-ci et un jeu de règles spécifiant la génération de LM
+                      ciblée pour cette offre et ce CV (pour plus de clarté/efficacité: le jeu de règles est géré dans le fichier référencé par la propriété prePromptFile)
+                    prompt: "Offre:\\n\\n<?memory:offre?>\\n/nCV\\n\\n<?memory:cv?>\""
+                    prePromptFile: SchemedTalks/clForOfferRulesFile_default.txt
       responses:
         "201":
           description: Execution result
@@ -92,20 +153,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 
   /schemed_talks_responses:
     post:
       summary: Retrieve detailed execution diagnostics
       description: |
         This endpoint provides detailed diagnostics when a SchemedTalk execution fails.
-        
+
         It is especially useful when:
         - A type conversion error occurs
         - A memory variable is missing or misnamed
         - A JSONPath expression is invalid
         - The main execution response is too concise
-        
+
         Typical usage:
         - Execute `/schemed_talks`
         - If the response indicates a failure, inspect `/schemed_talks_responses`
@@ -113,7 +174,7 @@ paths:
       operationId: postSchemedTalksResponses
       requestBody:
         content:
-          '*/*':
+          "*/*":
             schema:
               description: Callback payload (internal use)
       responses:
@@ -128,24 +189,534 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 
 components:
   schemas:
+    PrimitiveScalar:
+      type:
+        - string
+        - number
+        - boolean
+
+    PrimitiveScalarOrArray:
+      anyOf:
+        - $ref: "#/components/schemas/PrimitiveScalar"
+        - type: array
+          items:
+            $ref: "#/components/schemas/PrimitiveScalar"
+
+    JsonValue:
+      oneOf:
+        - type: "null"
+        - type: boolean
+        - type: number
+        - type: string
+        - type: array
+          items:
+            $ref: "#/components/schemas/JsonValue"
+        - type: object
+          additionalProperties:
+            $ref: "#/components/schemas/JsonValue"
+
+    JsonValueNoNull:
+      oneOf:
+        - type: boolean
+        - type: number
+        - type: string
+        - type: array
+          items:
+            $ref: "#/components/schemas/JsonValueNoNull"
+        - type: object
+          additionalProperties:
+            $ref: "#/components/schemas/JsonValue"
+
+    OptionalHeaders:
+      type: string
+      minLength: 1
+
+    OptionalParameters:
+      type: object
+      minProperties: 1
+      additionalProperties:
+        $ref: "#/components/schemas/PrimitiveScalarOrArray"
+
+    OptionalBody:
+      $ref: "#/components/schemas/JsonValueNoNull"
+
+    UntypedDraftNode:
+      type: object
+      description: UntypedDraftNode — Temporary draft node accepted by the editor before a concrete type is chosen.
+      additionalProperties: false
+      not:
+        required:
+          - type
+      properties:
+        description:
+          type: string
+
     SchemedTalk:
       type: object
-      description: |
-        Base type for all SchemedTalk steps.
-        Concrete behavior is determined by the `type` field.
+      description: SchemedTalk — Root SchemedTalk container. Its talkScheme property is an array of Request that can be executed via the /schemed_talk endpoint.
+      additionalProperties: false
+      required:
+        - type
       properties:
         type:
-          type: string
+          const: SchemedTalk
         description:
           type: string
         talkScheme:
           type: array
           items:
-            $ref: '#/components/schemas/SchemedTalk'
+            $ref: "#/components/schemas/SchemedTalkNode"
+
+    SchemedTalkDoc:
+      type: object
+      description: SchemedTalkDoc — A SchemedTalkDoc request can be used to describe a schemed talk or a part of it. The schemed talk processor simply returns its textual content.
+      additionalProperties: false
+      required:
+        - type
+        - description
+      properties:
+        type:
+          const: SchemedTalkDoc
+        description:
+          type: string
+
+ManagedService:
+  type: string
+  enum:
+    - identity
+    - selling
+    - gateway
+    - salesforce
+    - srv_opportunity
+    - openai
+
+GET:
+  type: object
+  description: GET — Executes an openflex or salesforce HTTP GET request.
+  additionalProperties: false
+  required:
+    - type
+    - service
+  properties:
+    type:
+      const: GET
+    service:
+      $ref: "#/components/schemas/ManagedService"
+    description:
+      type: string
+    headers:
+      $ref: "#/components/schemas/OptionalHeaders"
+    parameters:
+      $ref: "#/components/schemas/OptionalParameters"
+
+POST:
+  type: object
+  description: POST — Executes an openflex or salesforce HTTP POST request.
+  additionalProperties: false
+  required:
+    - type
+    - service
+  properties:
+    type:
+      const: POST
+    service:
+      $ref: "#/components/schemas/ManagedService"
+    description:
+      type: string
+    headers:
+      $ref: "#/components/schemas/OptionalHeaders"
+    parameters:
+      $ref: "#/components/schemas/OptionalParameters"
+    body:
+      $ref: "#/components/schemas/OptionalBody"
+
+PUT:
+  type: object
+  description: PUT — Executes an openflex or salesforce HTTP PUT request.
+  additionalProperties: false
+  required:
+    - type
+    - service
+  properties:
+    type:
+      const: PUT
+    service:
+      $ref: "#/components/schemas/ManagedService"
+    description:
+      type: string
+    headers:
+      $ref: "#/components/schemas/OptionalHeaders"
+    parameters:
+      $ref: "#/components/schemas/OptionalParameters"
+    body:
+      $ref: "#/components/schemas/OptionalBody"
+
+PATCH:
+  type: object
+  description: PATCH — Executes an openflex or salesforce HTTP PATCH request.
+  additionalProperties: false
+  required:
+    - type
+    - service
+  properties:
+    type:
+      const: PATCH
+    service:
+      $ref: "#/components/schemas/ManagedService"
+    description:
+      type: string
+    headers:
+      $ref: "#/components/schemas/OptionalHeaders"
+    parameters:
+      $ref: "#/components/schemas/OptionalParameters"
+    body:
+      $ref: "#/components/schemas/OptionalBody"
+    ProvidersEntities:
+      type: object
+      description: ProvidersEntities — Executes openflex POST endpoint /providers/entities.
+      additionalProperties: false
+      required:
+        - type
+      properties:
+        type:
+          const: ProvidersEntities
+        description:
+          type: string
+        headers:
+          $ref: "#/components/schemas/OptionalHeaders"
+        parameters:
+          $ref: "#/components/schemas/OptionalParameters"
+        body:
+          $ref: "#/components/schemas/OptionalBody"
+        id:
+          type: string
+        password:
+          type: string
+
+    AuthProvidersSign_in:
+      type: object
+      description: AuthProvidersSign_in — Executes openflex POST endpoint /auth/providers/sign-in.
+      additionalProperties: false
+      required:
+        - type
+        - entityId
+      properties:
+        type:
+          const: AuthProvidersSign_in
+        description:
+          type: string
+        headers:
+          $ref: "#/components/schemas/OptionalHeaders"
+        parameters:
+          $ref: "#/components/schemas/OptionalParameters"
+        body:
+          $ref: "#/components/schemas/OptionalBody"
+        entityId:
+          type: string
+        id:
+          type: string
+        password:
+          type: string
+
+    AuthUsersSign_in:
+      type: object
+      description: AuthUsersSign_in — Executes openflex POST endpoint /auth/users/sign-in.
+      additionalProperties: false
+      required:
+        - type
+      properties:
+        type:
+          const: AuthUsersSign_in
+        description:
+          type: string
+        headers:
+          $ref: "#/components/schemas/OptionalHeaders"
+        parameters:
+          $ref: "#/components/schemas/OptionalParameters"
+        body:
+          $ref: "#/components/schemas/OptionalBody"
+        id:
+          type: string
+        password:
+          type: string
+        mfaToken:
+          type: string
+
+    AuthProvidersPassword:
+      type: object
+      description: AuthProvidersPassword — Executes openflex POST endpoint /auth/providers/password.
+      additionalProperties: false
+      required:
+        - type
+        - currentPassword
+        - newPassword
+      properties:
+        type:
+          const: AuthProvidersPassword
+        description:
+          type: string
+        headers:
+          $ref: "#/components/schemas/OptionalHeaders"
+        parameters:
+          $ref: "#/components/schemas/OptionalParameters"
+        body:
+          $ref: "#/components/schemas/OptionalBody"
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+
+    Users:
+      type: object
+      description: Users — Executes openflex GET endpoint /users. Supported parameters are pointOfSaleIds and groupTypes.
+      additionalProperties: false
+      required:
+        - type
+        - pointOfSaleIds
+        - groupTypes
+      properties:
+        type:
+          const: Users
+        description:
+          type: string
+        headers:
+          $ref: "#/components/schemas/OptionalHeaders"
+        parameters:
+          $ref: "#/components/schemas/OptionalParameters"
+        pointOfSaleIds:
+          type: array
+          items:
+            type: string
+        groupTypes:
+          type: array
+          items:
+            type: string
+
+    CreateOpportunity:
+      type: object
+      description: CreateOpportunity — Creates an openflex opportunity from its 'opportunity' property and executes the associated processing sequence.
+      additionalProperties: false
+      required:
+        - type
+        - opportunity
+      properties:
+        type:
+          const: CreateOpportunity
+        description:
+          type: string
+        opportunity:
+          type: object
+          minProperties: 1
+          additionalProperties:
+            $ref: "#/components/schemas/JsonValue"
+
+    SFAuth2Token:
+      type: object
+      description: SFAuth2Token — Executes salesforce POST endpoint /services/oauth2/token.
+      additionalProperties: false
+      required:
+        - type
+      properties:
+        type:
+          const: SFAuth2Token
+        description:
+          type: string
+        headers:
+          $ref: "#/components/schemas/OptionalHeaders"
+        parameters:
+          $ref: "#/components/schemas/OptionalParameters"
+        body:
+          $ref: "#/components/schemas/OptionalBody"
+        username:
+          type: string
+        password:
+          type: string
+        client_id:
+          type: string
+        client_secret:
+          type: string
+
+    SOApiLoginCheck:
+      type: object
+      description: SOApiLoginCheck — Executes service opportunity POST endpoint /api/login_check.
+      additionalProperties: false
+      required:
+        - type
+      properties:
+        type:
+          const: SOApiLoginCheck
+        description:
+          type: string
+        headers:
+          $ref: "#/components/schemas/OptionalHeaders"
+        parameters:
+          $ref: "#/components/schemas/OptionalParameters"
+        body:
+          $ref: "#/components/schemas/OptionalBody"
+        username:
+          type: string
+        password:
+          type: string
+
+    SOApiOpportunities:
+      type: object
+      description: SOApiOpportunities — Executes service opportunity POST endpoint /api/opportunities.
+      additionalProperties: false
+      required:
+        - type
+        - body
+      properties:
+        type:
+          const: SOApiOpportunities
+        description:
+          type: string
+        headers:
+          $ref: "#/components/schemas/OptionalHeaders"
+        parameters:
+          $ref: "#/components/schemas/OptionalParameters"
+        body:
+          type: object
+          minProperties: 1
+          additionalProperties:
+            $ref: "#/components/schemas/JsonValue"
+
+    OARequest:
+      type: object
+      description: OARequest — Executes service openai POST endpoint /chat/completions with its prompt property as the prompt text sent to OpenAI.
+      additionalProperties: false
+      required:
+        - type
+        - prompt
+      properties:
+        type:
+          const: OARequest
+        description:
+          type: string
+        headers:
+          $ref: "#/components/schemas/OptionalHeaders"
+        parameters:
+          $ref: "#/components/schemas/OptionalParameters"
+        body:
+          $ref: "#/components/schemas/OptionalBody"
+        prompt:
+          $ref: "#/components/schemas/JsonValueNoNull"
+        prePromptFile:
+          type: string
+
+    Memorize:
+      type: object
+      description: Memorize — Memorizes a JSON value of the last response.
+      additionalProperties: false
+      required:
+        - type
+        - asWhat
+      properties:
+        type:
+          const: Memorize
+        description:
+          type: string
+        asWhat:
+          oneOf:
+            - type: string
+            - type: object
+              minProperties: 1
+              additionalProperties:
+                anyOf:
+                  - type: string
+                  - type: integer
+
+    IsSubset:
+      type: object
+      description: IsSubset — Evaluates whether the second value is a subset of the first.
+      additionalProperties: false
+      required:
+        - type
+        - values
+      properties:
+        type:
+          const: IsSubset
+        description:
+          type: string
+        values:
+          type: array
+          items:
+            $ref: "#/components/schemas/JsonValue"
+        true:
+          type: array
+          items:
+            $ref: "#/components/schemas/SchemedTalkNode"
+        false:
+          type: array
+          items:
+            $ref: "#/components/schemas/SchemedTalkNode"
+
+    Equal:
+      type: object
+      description: Equal — Evaluates whether the second value is equal to the first.
+      additionalProperties: false
+      required:
+        - type
+        - values
+      properties:
+        type:
+          const: Equal
+        description:
+          type: string
+        values:
+          type: array
+          items:
+            $ref: "#/components/schemas/JsonValue"
+        true:
+          type: array
+          items:
+            $ref: "#/components/schemas/SchemedTalkNode"
+        false:
+          type: array
+          items:
+            $ref: "#/components/schemas/SchemedTalkNode"
+
+    Sleep:
+      type: object
+      description: Sleep — Stops execution for the specified number of seconds.
+      additionalProperties: false
+      required:
+        - type
+        - seconds
+      properties:
+        type:
+          const: Sleep
+        description:
+          type: string
+        seconds:
+          type: number
+
+    SchemedTalkNode:
+      oneOf:
+        - $ref: "#/components/schemas/UntypedDraftNode"
+        - $ref: "#/components/schemas/SchemedTalk"
+        - $ref: "#/components/schemas/SchemedTalkDoc"
+        - $ref: "#/components/schemas/GET"
+        - $ref: "#/components/schemas/POST"
+        - $ref: "#/components/schemas/PUT"
+        - $ref: "#/components/schemas/PATCH"
+        - $ref: "#/components/schemas/ProvidersEntities"
+        - $ref: "#/components/schemas/AuthProvidersSign_in"
+        - $ref: "#/components/schemas/AuthUsersSign_in"
+        - $ref: "#/components/schemas/AuthProvidersPassword"
+        - $ref: "#/components/schemas/Users"
+        - $ref: "#/components/schemas/CreateOpportunity"
+        - $ref: "#/components/schemas/SFAuth2Token"
+        - $ref: "#/components/schemas/SOApiLoginCheck"
+        - $ref: "#/components/schemas/SOApiOpportunities"
+        - $ref: "#/components/schemas/OARequest"
+        - $ref: "#/components/schemas/Memorize"
+        - $ref: "#/components/schemas/IsSubset"
+        - $ref: "#/components/schemas/Equal"
+        - $ref: "#/components/schemas/Sleep"
 
     ErrorPayload:
       type: object
@@ -169,4 +740,3 @@ components:
           type: string
         method:
           type: string
-

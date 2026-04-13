@@ -23,3 +23,16 @@ groupId = "mysql"
 artifactId = "mysql-connector-java"
 version = "9.0.0"
 path = "./lib/mysql-connector-j-9.0.0.jar"
+
+[[dependency]]
+org = "cosmobilis"
+name = "java_bindings"
+version = "0.1.0"
+repository = "local"
+
+[[dependency]]
+org = "cosmobilis"
+name = "time"
+version = "0.1.0"
+repository = "local"
+

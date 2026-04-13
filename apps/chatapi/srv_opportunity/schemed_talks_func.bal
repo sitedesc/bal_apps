@@ -3,8 +3,8 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/lang.runtime;
 import ballerina/os;
-import ballerina/time;
 import cosmobilis/chatgpt;
+import cosmobilis/time as ctime;
 
 public function process(SchemedTalk[] schemedTalks, string countryCode, boolean checkUserAuth = false) returns json|error? {
 
@@ -269,8 +269,8 @@ public function process(SchemedTalk[] schemedTalks, string countryCode, boolean 
         } else if (play(resolvedSchemedTalk, Memorize)) {
             Memorize memorize = check resolvedSchemedTalk.cloneWithType();
             check processMemorize(resolvedSchemedTalk, memorize, response, memory);
-            response = memory;
-            printResponse("Memorize", response);
+            response = memory.clone();
+            check printResponse("Memorize", response);
             played.push(memorize);
         } else if (play(resolvedSchemedTalk, IsSubset)) {
             IsSubset issubset = check resolvedSchemedTalk.cloneWithType();
@@ -284,7 +284,7 @@ public function process(SchemedTalk[] schemedTalks, string countryCode, boolean 
             } else {
                 response = isSubset(issubset.values[0], issubset.values[1]);
             }
-            printResponse("IsSubset", response);
+            check printResponse("IsSubset", response);
             played.push(issubset);
         } else if (play(resolvedSchemedTalk, Equal)) {
             Equal equal = check resolvedSchemedTalk.cloneWithType();
@@ -298,7 +298,7 @@ public function process(SchemedTalk[] schemedTalks, string countryCode, boolean 
             } else {
                 response = equal.values[0] == equal.values[1];
             }
-            printResponse("Equal", response);
+            check printResponse("Equal", response);
             played.push(equal);
         } else if (play(resolvedSchemedTalk, Sleep)) {
             Sleep sleep = check resolvedSchemedTalk.cloneWithType();
@@ -308,24 +308,18 @@ public function process(SchemedTalk[] schemedTalks, string countryCode, boolean 
                 "sleepStart": "??",
                 "sleepEnd": "??"
             };
-            time:Utc now = time:utcNow();
-            time:Zone systemZone = check new time:TimeZone();
-            time:Civil nowCivilZoned = systemZone.utcToCivil(now);
-            string nowString = check time:civilToString(nowCivilZoned);
-            sleepStartEnd["sleepStart"] = nowString;
+            sleepStartEnd["sleepStart"] = check ctime:now();
             runtime:sleep(sleep.seconds);
-            now = time:utcNow();
-            nowCivilZoned = systemZone.utcToCivil(now);
-            nowString = check time:civilToString(nowCivilZoned);
-            sleepStartEnd["sleepEnd"] = nowString;
+            sleepStartEnd["sleepEnd"] = check ctime:now();
             response = sleepStartEnd;
-            printResponse("Sleep", response);
+            check printResponse("Sleep", response);
             played.push(sleep);
         } else if (play(resolvedSchemedTalk, OARequest)) {
             OARequest oaRequest = check resolvedSchemedTalk.cloneWithType();
+            check printRequest("OARequest", oaRequest);
             response = {};
             _ = check processOARequest(resolvedSchemedTalk, oaRequest, <map<json>> response);
-            printResponse("OARequest", response);
+            check printResponse("OARequest", response);
             played.push(oaRequest);
         }
 
@@ -344,9 +338,16 @@ function printTitle(string text) {
     io:println("-----");
 }
 
-function printResponse(string 'type, json response) {
-    io:println(`response of ${'type} is:`);
+function printResponse(string 'type, json response) returns error? {
+    io:println("[" + check ctime:now() + "] " + string `response of ${'type} is:`);
     io:println(response);
+    io:println();
+}
+
+function printRequest(string 'type, anydata request) returns error? {
+
+    io:println("[" + check ctime:now() + "] " + "request :");
+    io:println(request);
     io:println();
 }
 
@@ -379,11 +380,14 @@ function processMemorize(SchemedTalk resolvedSchemedTalk, Memorize memorize, jso
                     } else {
                         memory[key] = check jsondata:read(response, `${jsonpathExpression}`);
                     }
+                } else if response is map<json> && value is string && (<string>value).startsWith("const:") {
+                    memory[key] = (<string>value).substring("const:".length());
                 } else if response is map<json> && value is string && response[value] is json {
                     memory[key] = response[value];
-                }
-                if response is json[] && value is int && response[value] is json {
+                } else if response is json[] && value is int && response[value] is json {
                     memory[key] = response[value];
+                } else {
+                    memory[key] = value;
                 }
             }
         }

@@ -1,5 +1,6 @@
 import ballerina/log;
 import ballerina/time;
+
 import cosmobilis/java_bindings.java.time as j_time;
 
 //TimeSlot has six int values: hours start, minutes start, seconds start, hours end, minutes end, seconds end
@@ -29,7 +30,7 @@ public function at(int hours, int minutes, int seconds) returns time:Civil|error
 
     log:printInfo(targetSchedule.toString());
 
-    time:Civil civilSchedule =  check time:civilFromString(targetSchedule.toString());
+    time:Civil civilSchedule = check time:civilFromString(targetSchedule.toString());
     log:printDebug(`civil time schedule:
     ${civilSchedule.toString()}`);
     return civilSchedule;
@@ -40,4 +41,12 @@ public function between(TimeSlot timeSlot, j_time:ZonedDateTime theTime = j_time
     j_time:ZonedDateTime endTime = theTime.withHour(timeSlot[3]).withMinute(timeSlot[4]).withSecond(timeSlot[5]);
 
     return (theTime.toEpochSecond() >= startTime.toEpochSecond() && theTime.toEpochSecond() <= endTime.toEpochSecond());
+}
+
+public function now() returns string|error {
+    time:Utc now = time:utcNow();
+    time:Zone systemZone = check new time:TimeZone();
+    time:Civil nowCivilZoned = systemZone.utcToCivil(now);
+    return check time:civilToString(nowCivilZoned);
+
 }
