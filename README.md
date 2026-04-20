@@ -37,7 +37,7 @@ Puis lancer le script à la racine du repo de publication local des packages:
 ```
 ./local_publish.sh
 ```
-_(NB: pour publier un seul package: cd dans son répertoire, puis : bal pack; bal push --repository local)_
+_NB: pour publier un seul package: cd dans son répertoire, puis : bal pack; bal push --repository local...il est conseillé de faire un alias: alias pub='bal pack; bal push --repository local' et de lancer l'alias_
 
 Puis, pour utiliser my_package_name dans une app, rajouter sa dépendance dans le fichier Ballerina.toml de l'app:
 ```
