@@ -34,6 +34,8 @@ Le Super CV est une instance de ce schéma.
     - sous-section :
       <ul><li><p><strong>...</strong></p><ul><li><p>...</p></li></ul></li></ul>
 
+  - une fois le CV cible généré, le valider par rapport au schéma XSD, et corriger les erreur de balisage si nécéssaire.
+
 - fin de la règle: "format XML".
 
 - règle "Structure, Contenus et Optionnalité des section du Template CV XML":

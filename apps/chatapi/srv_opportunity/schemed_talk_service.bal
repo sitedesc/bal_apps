@@ -47,23 +47,23 @@ service http:Service / on new http:Listener(port) {
     resource function post schemed_talks(http:Request request, SchemedTalk[] schemedTalks) returns json|http:BadRequest {
         json|error response = process(schemedTalks, "IT", true);
 
-        string requestEmitterIP = getRequestEmitterIP(request);
+        string responsesFileName = getResponsesFileName(request, response);
 
         match response {
             var e if e is error => {
-                error|() e1 = io:fileWriteJson(string `./responses/${requestEmitterIP}.json`, [e.message(), e.detail().toBalString()]);
+                error|() e1 = io:fileWriteJson(responsesFileName, [e.message(), e.detail().toBalString()]);
                 return http:BAD_REQUEST;
             }
             var foo if foo is json => {
-                error|() e = io:fileWriteJson(string `./responses/${requestEmitterIP}.json`, foo);
+                error|() e = io:fileWriteJson(responsesFileName, foo);
                 return response;
             }
         }
     }
 
-    resource function post schemed_talks_responses(http:Request request) returns json {
-        string requestEmitterIP = getRequestEmitterIP(request);
-        json|error content = io:fileReadJson(string `./responses/${requestEmitterIP}.json`);
+    resource function post schemed_talks_responses(http:Request request, SchemedTalk[] schemedTalks) returns json {
+        string responsesFileName = getResponsesFileName(request, schemedTalks);
+        json|error content = io:fileReadJson(responsesFileName);
         match content {
             var e if e is error => {
                 return "No response found.";

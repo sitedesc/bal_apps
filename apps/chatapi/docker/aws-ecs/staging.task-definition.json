@@ -55,16 +55,16 @@
                 "value": "^https://opportunity.stag.itautomotive.fr$"
             },{
                 "name": "OPENFLEX_AUTH_SERVER_URI",
-                "value": "https://identity-api.openflex-preprod.eu"
+                "value": "https://localhost"
             },{
                 "name": "OPENFLEX_SELLING_URI",
-                "value": "https://selling-api.openflex-preprod.eu"
+                "value": "https://localhost"
             },{
                 "name": "OPENFLEX_CUSTOMERS_URI",
-                "value": "https://customer-api.openflex-preprod.eu"
+                "value": "https://localhost"
             },{
                 "name": "OPENFLEX_GATEWAY_URI",
-                "value": "https://gateway-api.openflex-preprod.eu"
+                "value": "https://localhost"
             },{
                 "name": "JWT_SECRET_KEY",
                 "value": "%kernel.project_dir%/config/jwt/staging/private.pem"
@@ -73,7 +73,7 @@
                 "value": "%kernel.project_dir%/config/jwt/staging/public.pem"
             },{
                 "name": "SALESFORCE_API_URL",
-                "value": "https://bymycar--rec04.sandbox.my.salesforce.com"
+                "value": "https://localhost"
             }],
             "mountPoints": [
                 {

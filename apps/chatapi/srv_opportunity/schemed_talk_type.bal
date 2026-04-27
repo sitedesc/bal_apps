@@ -209,3 +209,10 @@ type Sleep record {
     string description = "Stops execution for the specified number of seconds. Returns the start and end time of the stoped execution.";
     decimal seconds;
 };
+
+type TalkThread record {
+    *SchemedTalk;
+    "TalkThread" 'type = "TalkThread";
+    string description = "Without id property set, generates and returns a unique id value (type 4 uuid) as a new thread id, and associates the execution of the schemed talk of this request, to this thread. With an id property set, associates the execution of the schemed talk of this request, to this thread.";
+    string id?;
+};

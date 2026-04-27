@@ -5,6 +5,7 @@ import ballerina/lang.runtime;
 import ballerina/os;
 import cosmobilis/chatgpt;
 import cosmobilis/time as ctime;
+import ballerina/uuid;
 
 public function process(SchemedTalk[] schemedTalks, string countryCode, boolean checkUserAuth = false) returns json|error? {
 
@@ -73,6 +74,8 @@ public function process(SchemedTalk[] schemedTalks, string countryCode, boolean 
     (SchemedTalk|map<json>)[] played = [];
     map<json> memory = {};
     foreach SchemedTalk schemedTalk in schemedTalks {
+//for response time related issues like timeout debug purpose:
+//runtime:sleep(45);
         SchemedTalk resolvedSchemedTalk = check resolveExpressions(schemedTalk.toJsonString(), response, memory);
         if (play(resolvedSchemedTalk, GET)) {
             GET get = check resolvedSchemedTalk.cloneWithType();
@@ -321,6 +324,16 @@ public function process(SchemedTalk[] schemedTalks, string countryCode, boolean 
             _ = check processOARequest(resolvedSchemedTalk, oaRequest, <map<json>> response);
             check printResponse("OARequest", response);
             played.push(oaRequest);
+        } else if (play(resolvedSchemedTalk, TalkThread)) {
+            TalkThread talkThread = check resolvedSchemedTalk.cloneWithType();
+            resolvedSchemedTalk.description = talkThread.description;
+            check printRequest("TalkThread", talkThread);
+            played.push(talkThread);
+            if (talkThread?.id == ()) {
+                talkThread.id = uuid:createType4AsString();
+            }
+            response = talkThread.toJson();
+            check printResponse("TalkThread", response);
         }
 
         if (!play(resolvedSchemedTalk, SchemedTalkDoc)) {

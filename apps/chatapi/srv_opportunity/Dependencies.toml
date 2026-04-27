@@ -332,6 +332,9 @@ dependencies = [
 	{org = "ballerina", name = "lang.int"},
 	{org = "ballerina", name = "time"}
 ]
+modules = [
+	{org = "ballerina", packageName = "uuid", moduleName = "uuid"}
+]
 
 [[package]]
 org = "ballerinai"
@@ -348,7 +351,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "cdc"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
 	{org = "ballerina", name = "crypto"},
 	{org = "ballerina", name = "data.jsondata"},
@@ -427,6 +430,7 @@ dependencies = [
 	{org = "ballerina", name = "os"},
 	{org = "ballerina", name = "sql"},
 	{org = "ballerina", name = "url"},
+	{org = "ballerina", name = "uuid"},
 	{org = "ballerinai", name = "observe"},
 	{org = "ballerinax", name = "mysql"},
 	{org = "cosmobilis", name = "chatgpt"},

@@ -329,3 +329,32 @@ function decodeFunctionCall(string input) returns map<string|string[]>|error {
         "parameters": parameters
     };
 }
+
+type SchemedTalkArray SchemedTalk[];
+
+function getResponsesFileName(http:Request request, SchemedTalk[]|json|error body) returns string {
+    string requestEmitterIP = getRequestEmitterIP(request);
+    string defaultFileName = string `./responses/${requestEmitterIP}.json`;
+    SchemedTalk[]|error schemedTalks = body is SchemedTalk[] ? <SchemedTalk[]> body : body is json ? body.cloneWithType(SchemedTalkArray) : <error> body;
+    io:println(schemedTalks);
+    if (schemedTalks is SchemedTalk[] && schemedTalks.length() > 0) {
+            SchemedTalk[] aTalkThread = 
+                from SchemedTalk talkThread in schemedTalks
+                    where talkThread.'type == "TalkThread"
+                    limit 1
+                    select talkThread;
+     io:println(aTalkThread);
+            TalkThread?|error talkThread = aTalkThread.length() > 0 ?  (aTalkThread[0]).cloneWithType(TalkThread) : ();
+            //string?|error talkThreadId = talkThread is map<json> ? <string?> talkThread["id"] : ();
+            string? talkThreadId =  talkThread is TalkThread ? talkThread?.id : ();
+            string responsesFileName = talkThreadId is string ?
+                string `./responses/${talkThreadId}.json`
+                :
+                defaultFileName;
+
+            return responsesFileName;
+
+    } else {
+        return defaultFileName;
+    }
+}

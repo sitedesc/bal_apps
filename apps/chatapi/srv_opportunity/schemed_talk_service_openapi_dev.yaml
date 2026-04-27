@@ -59,10 +59,10 @@ paths:
                 value:
                   - type: SchemedTalkDoc
                     description: >-
-                      Ce scénario génère un CV ciblé pour une offre d'emploi, à partir d'un CV
+                      Ce scénario génère un CV et une LM ciblés pour une offre d'emploi, à partir d'un CV
                       source contenant une version très détaillée et exhaustive des compétences
                       et expériences du candidat. L'analyse de l'offre et de ce CV source pour
-                      générer le CV ciblé est faite par un LLM.
+                      générer le CV et la LM ciblés est faite par un LLM.
 
                   - type: Memorize
                     description: >-
@@ -157,26 +157,34 @@ paths:
 
   /schemed_talks_responses:
     post:
-      summary: Retrieve detailed execution diagnostics
+      summary: Retrieve execution details
       description: |
-        This endpoint provides detailed diagnostics when a SchemedTalk execution fails.
+        This endpoint provides the responses of a `/schemed_talks` execution when no error occurs, or detailed diagnostics when a `/schemed_talks` execution fails.
 
         It is especially useful when:
+        - One needs to get back responses of a past execution
         - A type conversion error occurs
         - A memory variable is missing or misnamed
         - A JSONPath expression is invalid
-        - The main execution response is too concise
 
-        Typical usage:
+        Typical usage in valid execution case:
+        - use a TalkThread in the executed `/schemed_talks`: it returns the TalkThread with a generated id
+        - set this TalkThread with its id in the body of this request to get the responses of the executed `/schemed_talks`
+        - for example: client with a short timeout can use this mechanism to get the reponses asynchronously
+
+        Typical usage in error case:
         - Execute `/schemed_talks`
-        - If the response indicates a failure, inspect `/schemed_talks_responses`
-          for detailed error context.
+        - If the response indicates a failure, inspect `/schemed_talks_responses` with [] as its body
+          for detailed error context of the last `/schemed_talks` executed
       operationId: postSchemedTalksResponses
       requestBody:
+        required: true
         content:
-          "*/*":
+          application/json:
             schema:
-              description: Callback payload (internal use)
+              type: array
+              items:
+                $ref: "#/components/schemas/SchemedTalkResponsesNode"
       responses:
         "201":
           description: Diagnostic information
@@ -190,7 +198,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorPayload"
-
 components:
   schemas:
     PrimitiveScalar:
@@ -230,6 +237,12 @@ components:
         - type: object
           additionalProperties:
             $ref: "#/components/schemas/JsonValue"
+
+    ManagedService:
+      type: string
+      enum:
+        - salesforce
+        - openai
 
     OptionalHeaders:
       type: string
@@ -284,106 +297,37 @@ components:
         description:
           type: string
 
-ManagedService:
-  type: string
-  enum:
-    - identity
-    - selling
-    - gateway
-    - salesforce
-    - srv_opportunity
-    - openai
-
-GET:
-  type: object
-  description: GET — Executes an openflex or salesforce HTTP GET request.
-  additionalProperties: false
-  required:
-    - type
-    - service
-  properties:
-    type:
-      const: GET
-    service:
-      $ref: "#/components/schemas/ManagedService"
-    description:
-      type: string
-    headers:
-      $ref: "#/components/schemas/OptionalHeaders"
-    parameters:
-      $ref: "#/components/schemas/OptionalParameters"
-
-POST:
-  type: object
-  description: POST — Executes an openflex or salesforce HTTP POST request.
-  additionalProperties: false
-  required:
-    - type
-    - service
-  properties:
-    type:
-      const: POST
-    service:
-      $ref: "#/components/schemas/ManagedService"
-    description:
-      type: string
-    headers:
-      $ref: "#/components/schemas/OptionalHeaders"
-    parameters:
-      $ref: "#/components/schemas/OptionalParameters"
-    body:
-      $ref: "#/components/schemas/OptionalBody"
-
-PUT:
-  type: object
-  description: PUT — Executes an openflex or salesforce HTTP PUT request.
-  additionalProperties: false
-  required:
-    - type
-    - service
-  properties:
-    type:
-      const: PUT
-    service:
-      $ref: "#/components/schemas/ManagedService"
-    description:
-      type: string
-    headers:
-      $ref: "#/components/schemas/OptionalHeaders"
-    parameters:
-      $ref: "#/components/schemas/OptionalParameters"
-    body:
-      $ref: "#/components/schemas/OptionalBody"
-
-PATCH:
-  type: object
-  description: PATCH — Executes an openflex or salesforce HTTP PATCH request.
-  additionalProperties: false
-  required:
-    - type
-    - service
-  properties:
-    type:
-      const: PATCH
-    service:
-      $ref: "#/components/schemas/ManagedService"
-    description:
-      type: string
-    headers:
-      $ref: "#/components/schemas/OptionalHeaders"
-    parameters:
-      $ref: "#/components/schemas/OptionalParameters"
-    body:
-      $ref: "#/components/schemas/OptionalBody"
-    ProvidersEntities:
+    GET:
       type: object
-      description: ProvidersEntities — Executes openflex POST endpoint /providers/entities.
+      description: GET — Executes an HTTP GET request of a managed service.
       additionalProperties: false
       required:
         - type
+        - service
       properties:
         type:
-          const: ProvidersEntities
+          const: GET
+        service:
+          $ref: "#/components/schemas/ManagedService"
+        description:
+          type: string
+        headers:
+          $ref: "#/components/schemas/OptionalHeaders"
+        parameters:
+          $ref: "#/components/schemas/OptionalParameters"
+
+    POST:
+      type: object
+      description: POST — Executes an HTTP POST request of a managed service.
+      additionalProperties: false
+      required:
+        - type
+        - service
+      properties:
+        type:
+          const: POST
+        service:
+          $ref: "#/components/schemas/ManagedService"
         description:
           type: string
         headers:
@@ -392,21 +336,19 @@ PATCH:
           $ref: "#/components/schemas/OptionalParameters"
         body:
           $ref: "#/components/schemas/OptionalBody"
-        id:
-          type: string
-        password:
-          type: string
 
-    AuthProvidersSign_in:
+    PUT:
       type: object
-      description: AuthProvidersSign_in — Executes openflex POST endpoint /auth/providers/sign-in.
+      description: PUT — Executes an HTTP PUT request of a managed service.
       additionalProperties: false
       required:
         - type
-        - entityId
+        - service
       properties:
         type:
-          const: AuthProvidersSign_in
+          const: PUT
+        service:
+          $ref: "#/components/schemas/ManagedService"
         description:
           type: string
         headers:
@@ -415,22 +357,19 @@ PATCH:
           $ref: "#/components/schemas/OptionalParameters"
         body:
           $ref: "#/components/schemas/OptionalBody"
-        entityId:
-          type: string
-        id:
-          type: string
-        password:
-          type: string
 
-    AuthUsersSign_in:
+    PATCH:
       type: object
-      description: AuthUsersSign_in — Executes openflex POST endpoint /auth/users/sign-in.
+      description: PATCH — Executes an HTTP PATCH request of a managed service.
       additionalProperties: false
       required:
         - type
+        - service
       properties:
         type:
-          const: AuthUsersSign_in
+          const: PATCH
+        service:
+          $ref: "#/components/schemas/ManagedService"
         description:
           type: string
         headers:
@@ -439,80 +378,6 @@ PATCH:
           $ref: "#/components/schemas/OptionalParameters"
         body:
           $ref: "#/components/schemas/OptionalBody"
-        id:
-          type: string
-        password:
-          type: string
-        mfaToken:
-          type: string
-
-    AuthProvidersPassword:
-      type: object
-      description: AuthProvidersPassword — Executes openflex POST endpoint /auth/providers/password.
-      additionalProperties: false
-      required:
-        - type
-        - currentPassword
-        - newPassword
-      properties:
-        type:
-          const: AuthProvidersPassword
-        description:
-          type: string
-        headers:
-          $ref: "#/components/schemas/OptionalHeaders"
-        parameters:
-          $ref: "#/components/schemas/OptionalParameters"
-        body:
-          $ref: "#/components/schemas/OptionalBody"
-        currentPassword:
-          type: string
-        newPassword:
-          type: string
-
-    Users:
-      type: object
-      description: Users — Executes openflex GET endpoint /users. Supported parameters are pointOfSaleIds and groupTypes.
-      additionalProperties: false
-      required:
-        - type
-        - pointOfSaleIds
-        - groupTypes
-      properties:
-        type:
-          const: Users
-        description:
-          type: string
-        headers:
-          $ref: "#/components/schemas/OptionalHeaders"
-        parameters:
-          $ref: "#/components/schemas/OptionalParameters"
-        pointOfSaleIds:
-          type: array
-          items:
-            type: string
-        groupTypes:
-          type: array
-          items:
-            type: string
-
-    CreateOpportunity:
-      type: object
-      description: CreateOpportunity — Creates an openflex opportunity from its 'opportunity' property and executes the associated processing sequence.
-      additionalProperties: false
-      required:
-        - type
-        - opportunity
-      properties:
-        type:
-          const: CreateOpportunity
-        description:
-          type: string
-        opportunity:
-          type: object
-          minProperties: 1
-          additionalProperties:
-            $ref: "#/components/schemas/JsonValue"
 
     SFAuth2Token:
       type: object
@@ -540,53 +405,9 @@ PATCH:
         client_secret:
           type: string
 
-    SOApiLoginCheck:
-      type: object
-      description: SOApiLoginCheck — Executes service opportunity POST endpoint /api/login_check.
-      additionalProperties: false
-      required:
-        - type
-      properties:
-        type:
-          const: SOApiLoginCheck
-        description:
-          type: string
-        headers:
-          $ref: "#/components/schemas/OptionalHeaders"
-        parameters:
-          $ref: "#/components/schemas/OptionalParameters"
-        body:
-          $ref: "#/components/schemas/OptionalBody"
-        username:
-          type: string
-        password:
-          type: string
-
-    SOApiOpportunities:
-      type: object
-      description: SOApiOpportunities — Executes service opportunity POST endpoint /api/opportunities.
-      additionalProperties: false
-      required:
-        - type
-        - body
-      properties:
-        type:
-          const: SOApiOpportunities
-        description:
-          type: string
-        headers:
-          $ref: "#/components/schemas/OptionalHeaders"
-        parameters:
-          $ref: "#/components/schemas/OptionalParameters"
-        body:
-          type: object
-          minProperties: 1
-          additionalProperties:
-            $ref: "#/components/schemas/JsonValue"
-
     OARequest:
       type: object
-      description: OARequest — Executes service openai POST endpoint /chat/completions with its prompt property as the prompt text sent to OpenAI.
+      description: OARequest — Executes service openai POST endpoint /chat/completions with its prompt property as the prompt text sent to OpenAI and optionally preceded by the text contained in the prePromptFile file.
       additionalProperties: false
       required:
         - type
@@ -609,7 +430,16 @@ PATCH:
 
     Memorize:
       type: object
-      description: Memorize — Memorizes a JSON value of the last response.
+      description: |-
+        This request shoud be read: Memorize "as" <key> "What":
+        Memorizes a JSON value specified by the "asWhat" property:
+        - if asWhat is a string, the last response is memorized under this string as its name. 
+        - if asWhat is an object then each of its properties values should specify a value via these patterns: 
+          - a string : memorizes under the property name, the property value of the last response with the property name being this string (so the response should be a json object),
+          - 'const:string' : memorizes under the property name, the string after 'const:',
+          - 'jsonpath:path' : memorizes under the property name, the json value of the last response matched by the path (see https://www.rfc-editor.org/rfc/rfc9535 and test with https://jsonpath.com),
+          - number :  memorizes under the property name, the json value with rank number in the last reponse (so the response should be a json array).
+          - none of the previous patterns: memorizes this value under the property name.
       additionalProperties: false
       required:
         - type
@@ -631,7 +461,7 @@ PATCH:
 
     IsSubset:
       type: object
-      description: IsSubset — Evaluates whether the second value is a subset of the first.
+      description: IsSubset — Evaluates whether the second value of values property is a subset of the first.
       additionalProperties: false
       required:
         - type
@@ -656,7 +486,7 @@ PATCH:
 
     Equal:
       type: object
-      description: Equal — Evaluates whether the second value is equal to the first.
+      description: Equal — Evaluates whether the second value of values property is equal to the first.
       additionalProperties: false
       required:
         - type
@@ -694,29 +524,40 @@ PATCH:
         seconds:
           type: number
 
+    TalkThread:
+      type: object
+      description: TalkThread — Without id property set, generates and returns a unique id value (type 4 uuid) as a new thread id, and associates the execution of the schemed talk of this request, to this thread. With an id property set, associates the execution of the schemed talk of this request, to this thread.
+      additionalProperties: false
+      required:
+        - type
+      properties:
+        type:
+          const: TalkThread
+        description:
+          type: string
+        id:
+          type: string
+
     SchemedTalkNode:
       oneOf:
         - $ref: "#/components/schemas/UntypedDraftNode"
         - $ref: "#/components/schemas/SchemedTalk"
         - $ref: "#/components/schemas/SchemedTalkDoc"
+        - $ref: "#/components/schemas/TalkThread"
         - $ref: "#/components/schemas/GET"
         - $ref: "#/components/schemas/POST"
         - $ref: "#/components/schemas/PUT"
         - $ref: "#/components/schemas/PATCH"
-        - $ref: "#/components/schemas/ProvidersEntities"
-        - $ref: "#/components/schemas/AuthProvidersSign_in"
-        - $ref: "#/components/schemas/AuthUsersSign_in"
-        - $ref: "#/components/schemas/AuthProvidersPassword"
-        - $ref: "#/components/schemas/Users"
-        - $ref: "#/components/schemas/CreateOpportunity"
         - $ref: "#/components/schemas/SFAuth2Token"
-        - $ref: "#/components/schemas/SOApiLoginCheck"
-        - $ref: "#/components/schemas/SOApiOpportunities"
         - $ref: "#/components/schemas/OARequest"
         - $ref: "#/components/schemas/Memorize"
         - $ref: "#/components/schemas/IsSubset"
         - $ref: "#/components/schemas/Equal"
         - $ref: "#/components/schemas/Sleep"
+
+    SchemedTalkResponsesNode:
+      oneOf:
+        - $ref: "#/components/schemas/TalkThread"
 
     ErrorPayload:
       type: object
