@@ -1,0 +1,331 @@
+Jeu de règles par défaut complet de génération de CV ciblé pour une offre :
+
+- objectif : générer en XML une version de CV estimée la plus pertinente :
+  - pour une "Offre Cible"  dont le lien et la copie du texte sont copiés ci-dessous dans ce prompt,
+  - et à partir d'un CV XML appelé "Super CV" donné aussi ci-dessous, et qui contient les sections contenant les informations à remanier et/ou filtrer et/ou reformuler (notament adapter les termes et formulation au ton de l'offre cible) et/ou restructurer et/ou dédupliquer et/ou synthétiser... pour produire la version de CV XML la plus pertinente pour l'offre, et tenant sur trois pages idéalement et quatre pages maximum. Ce "Super CV" contient notament la totalité des expériences avec le plus de détail possible (voir la section "Déscription du Super CV" ci-dessous).
+  - On appelle cette version XML de CV ciblé pour une Offre Cible: "le CV Cible".
+
+Ne prend pas en compte d'information qui viendrait de versions précédentes de ces données là et que tu aurais mémorisé,ni d'informations déduites de ces dernières: toutes les données dont tu as besoin sont ci-dessous.
+Il faut que tu analyses complètement le Super CV ci-dessous, ainsi que le schema xsd donné ci-dessous.
+Le Super CV est une instance de ce schéma.
+
+- règle "format XML": le format XML du "Super CV" et du CV Cible à générer est défini par les règles suivantes:
+  - le CV Cible à générer doit être conforme au "schéma XSD de CV" donné ci-dessous;
+  - il faut respecter systématiquement l’échappement de tous les caractères réservés XML dans tous les CV générés ( &, " ...);
+  - il faut respecter le "Template CV XML" suivant :
+
+  <document section-numbering="true" figure-numbering="true" features="RESUME"> 
+    <h text-align="justify">...</h> 
+    <p/> 
+    <section id="Contact" coex="...">...</section> 
+    <section id="Objectives" coex="...">...</section> 
+    <section id="skills" coex="...">...</section> 
+    <section id="Employment" coex="...">...</section> 
+    <section id="Education" coex="...">...</section> 
+    <section id="Languages" coex="...">...</section> 
+    <section id="Interest" coex="...">...</section> 
+    <section id="NOTES" coex="...">...</section>
+  </document>
+
+  - les attributs coex doivent contenir le texte du titre de section (<section><h>).
+  - dans les sections id="skills" et id="Employment", deux structures (conformes au Schéma XSD) sont possibles :
+    - liste simple :
+      <ul><li><p>...</p></li></ul>
+    - sous-section :
+      <ul><li><p><strong>...</strong></p><ul><li><p>...</p></li></ul></li></ul>
+
+  - une fois le CV cible généré, le valider par rapport au schéma XSD, et corriger les erreur de balisage si nécéssaire.
+
+- fin de la règle: "format XML".
+
+- règle "Structure, Contenus et Optionnalité des section du Template CV XML":
+  - les sections sont prévues à la base pour contenir les informations correspondant à leur attribut id: la section id = "Contact" est sensée contenir les information de contact du candidat, "Objectives" : un résumé de ces objectif professionnel, "skills" : ses compétences etc...;
+  - si c'est estimé pertinent, on peut ne pas respecter cela et y mettre/ajouter d'autres types d'information que prévu. Par exemple si l'on estime qu'une structuration différente du CV est plus pertinente à l'analyse de l'offre. Mais il faut respecter techniquement que:	
+  - les sections suivantes sont obligatoires: Contact, Objectives, skills, Employment, Education, Languages, Interest.
+  - il faut recopier tel quel les section purement informatives en les traduisant selon la langue cible: Contact, Education, Languages. Elles peuvent être néanmoins résumées pour respecter la contrainte de taille du CV.
+  - la section Employment n'est pas très bien nommée: elle est prévue pour contenir l'expérience professionelle du candidat.
+  - la section NOTES est optionelle.
+
+
+
+  - RÈGLE — COMPÉTENCES CONNEXES AVEC RACCORD IMPLICITE À L’OFFRE:
+
+    - Lorsqu’une compétence demandée dans l’Offre Cible n’est pas présente telle quelle dans le Super CV,
+mais qu’une compétence du Super CV peut raisonnablement être considérée comme appartenant
+au même domaine technique ou fonctionnel :
+    - 1. On appelle dans la suite une telle compétence: "une compétence connexe" de la compétence de l'offre.
+    - 2. Il faut mentionner uniquement la compétence connexe dans le CV cible en indiquant, dans la langue de l'offre, qu'elle est connexe à la compétence de l’Offre.
+    - 2. Il faut extraire du Super CV, les expériences de cette compétence connexe, et les ajouter dans les expériences du CV cible.
+    - 3. La compétence demandée dans l’Offre Cible ne doit jamais être ajoutée comme compétence détenue.
+    - 4. La compétence citée dans l’Offre Cible :
+      - est mentionnée uniquement à titre d’exemple,
+      - n’est jamais listée comme compétence,
+      - n’est jamais utilisée ailleurs dans le CV.
+   - 5. Il est strictement interdit :
+     - d’indiquer qu’une compétence est absente,
+     - d’ajouter des notes explicatives,
+     - de produire des phrases méta (ex. « non mentionné dans le Super CV »),
+     - de justifier ou commenter la règle.
+
+  - les experiences générées doivent indiquer un ou plusieurs employeur ou client en regard de la période (début/fin) de l'expérience.
+
+  - RÈGLE — CONTINUITÉ CHRONOLOGIQUE DES EXPÉRIENCES
+
+    - Lors de la génération d’un CV Cible :
+     - il est autorisé de résumer fortement une expériences non prioritaires pour l’Offre Cible ;
+     - il est autorisé d'aggréger de telles expériences non prioritaires et qui se suivent chronologiquement, en une seule "macro expériences" avec les dates début/fin de cette chronologie ; 
+     - il est interdit de supprimer entièrement une expérience si sa suppression crée un trou chronologique supérieur à 3 mois dans l’historique professionnel ;
+     - dans ce cas, l’expérience doit être conservée sous une forme compressée, avec :
+     - employeur
+     - période
+     - domaine / contexte
+     - résumé très synthétique de son contenu.
+
+  - générer des caractères tiret HYPHEN-MINUS (U+002D) et pas des NON-BREAKING HYPHEN (U+2011).
+
+- sauf si elles matchent une compétence principale ou connexe demandée dans l'offre,
+les expériences du Super CV strictement avant 2005 doivent être aggégées dans une expérience, sans indication de dates ni années, et nommée "Expériences antérieures", et à traduire dans la langue du CV cible (voir règle "langue du CV" ci-après).
+
+- règle de références entre expériences: le Super CV contient deux chronologies d'expériences dans la section des expériences professionnelles:
+  - la principale qui commence au début de cette section, et une secondaire des mes activité via mon auto entreprise "it-doc".
+  - certaines expériences font référence à des expériences de cet activité secondaire. Si ces expériences font partie du CV cible généré, alors il faut aussi inclure les expériences référencées dans le CV cible.
+
+- régle de non qualification des contenus générés: ne jamais ajouter entre parenthèse de raison pour lesquels un texte a été généré ainsi ou encore de référence aux règles de génération prise en compte dans la génération du texte.
+
+- règle "entité caratère xml": lorsqu'une entité caractère xml doit être générée, ne générer que des reference numérique de caractère (exemple &#2128;), et pas de référence d’entité caractère nommé (exemple: &mdash;).
+
+- fin de la règle: "Structure, Contenus et Optionnalité des section du Template CV XML".
+
+ - règle "liens dans les CV": le balisage d'un lien est de la forme: <a href="...">...</a>. Si tu décides de générer un terme qui est un lien dans le Super CV, alors recopier ce lien tel quel du Super CV, en le traduisant au passage si besoin. Ne pas le générer sous une autre forme. 
+
+- règle "langue du CV": générer le CV dans la langue de l'Offre Cible. Le Super CV étant en anglais: si l'Offre Cible est en français, et que l'on recopie des contenus de section, paragraphe, termes (n'étant pas des noms propre ou abbréviation technique), ou autre du Super CV: il faut les traduire en français. Quelquesoit la langue des textes à générer, il faut générer des textes correctes grammaticalement et au niveau de l'orthographe. Il faut donc accentuer les caractères qui doivent l'être, etc...
+
+- règle "surdéfinition": les règles ci-dessus peuvent être surdéfinies ci-dessous: appliquer la version surdéfinie.
+
+- régle "aucun style par API": lorsque le XML est retourné en réponse à l'appel d'un endpoint de l'API openai, il faut renvoyer UNIQUEMENT le contenu XML, strictement sans aucun caractère avant ou après <document>…</document>. Pas de ```xml, pas de markdown, pas de quotes.
+
+- régle "erreur de lecture XML": si une erreur technique de parsing XML ne permet pas de lire tout le contenu XML, retourner cette erreur.
+
+- Déscription du Super CV:
+  - il est conforme au "Schéma XSD de CV" ci-dessous;
+  - il est conforme aux régles qui le concernent ci-dessus et/ou ci-dessous si elles sont surdéfinies pour lui ci-dessous.
+  - il contient notament une aggrégation de toutes les compétences et expériences les plus détaillées du candidat depuis le début de sa carrière à aujourd'hui.
+  - cette aggrégation peut contenir des parties qui reformulent les mêmes experiences différemment: lorsqu'on trouve dans ce Super CV XML, des parties séparées par des "----------" (comme par exemple des listes d'item séparés par des "------"), c'est qu'elles contiennent probablement des reformulation des mêmes élément d'expérience.
+- fin de la Déscription du Super CV.
+
+- schéma XSD de CV :
+
+<?xml version="1.0" encoding="utf-8" ?>
+  <xs:element name="section" type="section.type"/>
+  <xs:element name="practice" type="practice.type"/>
+  <xs:element name="a" substitutionGroup="abstract-plaintextelement" type="hyperlink.type"/>
+
+  <xs:element name="strong" substitutionGroup="abstract-richtextelement" type="richtext.type"/>
+  <xs:element name="sub" substitutionGroup="abstract-plaintextelement" type="plaintext.type"/>
+
+  <xs:element name="sup" substitutionGroup="abstract-plaintextelement" type="plaintext.type"/>
+
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="person" minOccurs="1"/>
+  </xs:complexType>
+      <xs:sequence>
+        <xs:element ref="person" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:attribute ref="email" use="optional"/>
+      <xs:attribute name="division" use="optional" type="xs:string"/>
+  </xs:element>
+
+        <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+  <xs:element name="abstract-media"            abstract="true"/>
+
+  <!-- plaintext.type -->
+      <xs:element ref="abstract-plaintextelement"/>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+    <xs:attribute ref="ignore_for"/>
+      <xs:element ref="abstract-richtextelement"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  <!-- hyperlink.type -->
+  <xs:complexType name="hyperlink.type" mixed="true">
+  </xs:complexType>
+
+  <!-- paragraph.type -->
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <!-- code.type -->
+  <xs:complexType name="code.type" mixed="true">
+    </xs:choice>
+    <xs:sequence>
+      <xs:element ref="abstract-media" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element ref="legend" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute ref="align"        use="optional" />
+    <!--    <xs:attribute ref="left-indent"  use="optional" default="0" /> -->
+    <xs:attribute ref="width" use="optional" />
+  </xs:complexType>
+  <xs:complexType name="practices.type" mixed="false">
+    <xs:sequence>
+      <xs:element ref="meta" minOccurs="0"/>
+    <xs:attribute ref="ignore_for"/>
+  </xs:complexType>
+    <xs:sequence>
+    </xs:sequence>
+    <xs:attribute ref="section-numbering" use="optional" />
+    <xs:attribute ref="figure-numbering" use="optional" />
+
+      <xs:element ref="h"    />
+      <!-- At least 1 block or section and all blocks precede sections. -->
+      <xs:choice>
+      </xs:choice>
+    <xs:attribute ref="ignore_for"/>
+    <xs:attribute ref="features"/>
+    <xs:attribute ref="last_modified"/>
+    <xs:sequence>
+      <xs:element ref="h"    />
+      <xs:choice>
+        <xs:element ref="abstract-block" maxOccurs="unbounded" />
+      <xs:element ref="section" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+    <xs:attribute ref="view" use="optional" default="normal"/>
+    <xs:attribute ref="behavior" use="optional" default="section"/>
+    <xs:attribute ref="id" use="optional"/>
+    <xs:attribute ref="coex" use="optional"/>
+    <xs:attribute ref="ignore_for"/>
+      <xs:element ref="categories" minOccurs="1" maxOccurs="1" />
+        <xs:element ref="abstract-block" maxOccurs="unbounded" />
+    <xs:attribute ref="view" use="optional" default="normal"/>
+    <xs:attribute ref="behavior" use="optional" default="section"/>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <xs:complexType name="data_definition.type" mixed="false">
+    <xs:sequence>
+      </xs:choice>
+    <xs:attribute ref="view" use="optional" default="list"/>
+    <xs:attribute ref="behavior" use="optional" default="section"/>
+    <xs:attribute ref="managed" use="required" default="true"/>
+    <xs:attribute ref="symfony_service_id" use="optional"/>
+    <xs:attribute ref="gitlab_repository" use="optional"/>
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+  <xs:complexType name="data_constraints_definition.type" mixed="false">
+    <xs:sequence>
+        <xs:element ref="data_constraint_definition" />
+    </xs:sequence>
+    <xs:attribute ref="view" use="optional" default="normal"/>
+    <xs:attribute ref="behavior" use="optional" default="section"/>
+    <xs:attribute ref="id" use="optional"/>
+    <xs:attribute ref="implementation_class" use="optional"/>
+    <xs:attribute ref="implementation_method" use="optional"/>
+      <xs:element ref="h"    />
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute ref="symfony_service_id" use="optional"/>
+    <xs:attribute ref="gitlab_repository" use="optional"/>
+    <xs:attribute ref="ignore_for"/>
+      <xs:element ref="h-sub" minOccurs="0" maxOccurs="1" />
+      <xs:element ref="property_constraints_definition" minOccurs="0" maxOccurs="1" />
+
+  <xs:complexType name="property_constraints_definition.type" mixed="false">
+    <xs:sequence>
+      <xs:element ref="h"    />
+      <xs:element ref="h-sub" minOccurs="0" maxOccurs="1" />
+      <!-- At least 1 block or section and all blocks precede sections. -->
+      <xs:choice>
+    <xs:attribute ref="behavior" use="optional" default="section"/>
+    <xs:attribute ref="ignore_for"/>
+      <xs:element ref="date" minOccurs="0" maxOccurs="1" />
+    <xs:sequence>
+      <xs:enumeration value="Evolution analysis" id="evolution_analysis"/>
+
+    </xs:choice>
+      <xs:attributeGroup ref="rdfaLite"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="border-type.type">
+    </xs:restriction>
+    </xs:restriction>
+  <xs:simpleType name="behavior.type">
+    <xs:restriction base="xs:string">
+    </xs:sequence>
+  <xs:complexType name="li.type" mixed="false">
+    </xs:sequence>
+    <xs:attribute ref="status" use="optional" />
+    <xs:attribute ref="ignore_for"/>
+      <xs:attributeGroup ref="rdfaLite"/>
+  </xs:complexType>
+
+      <xs:enumeration value="left"/>
+  <xs:complexType name="tableType">
+      <xs:element name="tbody" type="tbodyType" />
+    </xs:sequence>
+        <xs:restriction base="xs:nonNegativeInteger">
+  <xs:complexType name="tbodyType">
+  </xs:complexType>
+    </xs:restriction>
+  </xs:attribute>
+
+  <xs:attribute name="src" type="xs:anyURI"/>
+  <xs:attribute name="section-numbering" type="xs:boolean"/>
+
+  <xs:attribute name="view" type="view.type"/>
+
+  <xs:attribute name="behavior" type="behavior.type"/>
+
+  <xs:attribute name="switch">
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+        <xs:enumeration value="none"/>
+        <xs:enumeration value="enabled"/>
+        <xs:enumeration value="disabled"/>
+      </xs:restriction>
+
+  <xs:attribute name="implementation_class" type="xs:string"/>
+  <xs:attribute name="implementation_method" type="xs:string"/>
+  <xs:attribute name="symfony_service_id" type="xs:string"/>
+  <xs:attribute name="gitlab_repository" type="xs:string"/>
+
+
+  <xs:attribute name="border-type" type="border-type.type"/>
+
+  <xs:attribute name="text-align" type="text-align.type"/>
+
+  <xs:attribute name="align" type="align.type"/>
+
+  <!-- crossed :  flag telling the content is "crossed", for example on order list items, it tells that this item is
+  "crossed" : if this item is a task list item, then this means this task is done;
+  so the fact that this attribute exists or not means something whatever its value is.
+  -->
+  <xs:attribute name="crossed" type="xs:string"/>
+
+  <!-- status :  flag telling the content is a "status", for example in order list items like a task list items,
+  it tells that this item is a status of a task parent item;
+  so the fact that this attribute exists or not means something whatever its value is. -->
+  <xs:attribute name="status" type="xs:string"/>
+
+  <!-- if a value is set, as a blank sepated list of "codes", then its element is ignored if
+  one of this codes is within the blank separated list of codes, of the "ignore" parameter passed to the stylesheet.
+  This implements an applicability mechanism, example for a resume document:
+  - suppose you want to manage resumes for different target jobs: "web developper", "dev lead" or "jobAtDisneyOffer";
+  - the you want to ignore the element of your CV that don't apply to one of, or some of, them, by setting the ignore_for
+  attribute value to one of, or some of, them : example : the ignore_for value " dev_lead jobAtDisneyOffer " tells that this
+  element should be ignored for "web developper" and "jobAtDisneyOffer" target jobs;
+  - if the stylesheet is called to deliver the resume for a "web developper" job, then it will be called
+  with a "ignore" parameter value " dev_lead jobAtDisneyOffer ", so this element will not appear in the delivered resume.
+  -->
+
+  <xs:attribute name="ignore_for" type="xs:string"/>
+  <xs:attribute name="last_modified" type="xs:dateTime"/>
+  <xs:attribute name="features" type="xs:string"/>
+</xs:schema>
+
+FIN DES RÈGLES.
+
+Voilà ci-dessous le Super CV XML:
+
+<document last_modified="2026-10-01T14:00:28+02:00" section-numbering="true" figure-numbering="true" features="MARKDOWN RESUME SKATELECTRIQUE ARTURIA"><h text-align="justify" ignore_for="">Curriculum Vitae – Franck Delahaye</h><p/><section id="Contact" coex="Contact"><h>Contact</h><p>Anton Delahaye</p><p>anto.delahaye@gmail.com</p><p>+33 7 67 02 12 22</p><p>Grenoble, France</p><p>Developer web php/symfony and agentique e-commerce. Business analyst IT product.</p></section><section id="Objectives" coex="Professional summary"><h>Professional summary/Objectif</h><p>Web Developer with a background in BTS SIO → Application Developer Bachelor’s Degree → Master’s Degree in Information Systems and Software Architecture, with 2 years of work-study experience at Bee2link.</p><p>Experience in web application development, software design and Agile environments. Particularly interested in PHP/Symfony backend development and application architectures. Trained in new AI-assisted development methods using Claude.</p><p/></section><section id="skills" coex="Key skills"><h>Key skills/Compétences</h><p/><section coex="Technologies &amp; Frameworks" id="Skills-Technologies_Frameworks"><h>Technologies &amp; Frameworks</h><ul><li><p><strong>Symfony / Twig / PHP</strong> – Web application development, backend development and development of an in-house CMS.</p></li><li><p><strong>HTML / CSS</strong> – Front-end web development and integration.</p></li><li><p><strong>WordPress</strong> – Website development and content management.</p></li><li><p><strong>Rust</strong> – Basic experience in web development and software development.</p></li><li><p><strong>SQL</strong> – Database querying and data management.</p></li><li><p><strong>Claude AI</strong> – AI-assisted development for website redesign, implementation and evolution.</p></li><li><p><strong>Wordpress</strong> – Mastery of implementation</p></li></ul><p/></section><section coex="Development &amp; Software Engineering" id="Skills-Development_S0oftware_Engineering"><h>Development &amp; Software Engineering</h><ul><li><p><strong>Web application development</strong> – Design and development of business and web applications.</p></li><li><p><strong>Application design</strong> – Software design and understanding of application architecture.</p></li><li><p><strong>Backend development</strong> – Particular interest and experience in PHP/Symfony backend development.</p></li><li><p><strong>AI-assisted development</strong> – Use of Claude as a development agent to support design, implementation and iteration.</p></li></ul><p/></section><section coex="Project Management &amp; Agile" id="Skills-Project_Management_Agile"><h>Project Management &amp; Agile</h><ul><li><p><strong>Agile / Scrum</strong> – Experience working in Agile environments and Scrum methodology.</p></li><li><p><strong>Project management</strong> – Task specification, task acceptance testing and product analysis.</p></li><li><p><strong>Business analysis</strong> – Analysis of business applications and participation in product evolution.</p></li><li><p><strong>Jira / Confluence / Notion</strong> – Task management, documentation and project collaboration.</p></li><li><p><strong>Figma / FigJam</strong> – UI/UX collaboration and design-related project work.</p></li><li><p ignore_for=""><strong>Github / Gitlab</strong> – Version control, collaborative development and project management workflows.</p></li></ul><p/></section><section coex="Development Tools &amp; Environment" id="Skills-Development_Tools_Environment"><h>Development Tools &amp; Environment</h><ul><li><p><strong>Git / GitHub</strong> – Version control and collaborative development.</p></li><li><p><strong>Debian / Linux</strong> – Development environment and Linux administration fundamentals.</p></li></ul><p/></section><section coex="Professional &amp; Cross-functional Skills" id="Skills-Professional_Cross-functional_Skills"><h>Professional &amp; Cross-functional Skills</h><ul><li><p><strong>Web development &amp; Business Analysis</strong> – Combination of technical development skills and business/product understanding.</p></li><li><p><strong>Agile collaboration</strong> – Collaboration with developers, product teams and business stakeholders.</p></li><li><p><strong>Software design</strong> – Understanding of application structure and technical implementation.</p></li><li><p><strong>English</strong> – B1 / Intermediate.</p></li></ul><p/></section></section><section id="Employment" coex="Professional experience"><h>Professional experience / Expérience professionnelle</h><ul><li><p><strong>Freelance</strong><strong> - France Media Group - Grenoble, - Jul 2026 – Aug 2026</strong></p><ul><li><p><strong>Projects: Website redesign, WordPress development &amp; AI-assisted development</strong></p><p/><ul><li><p><strong>Technologies and tools:</strong> WordPress, PHP, HTML, CSS, JavaScript, Figma, Claude AI, Git/GitHub.</p></li><li><p><strong>Role:</strong> Web Developer – AI-assisted development.</p></li></ul><p><strong>Responsibilities:</strong></p><ul><li><p>Redesigned the <strong>Ski-Mag</strong> website using WordPress and developed practical experience with the CMS.</p></li><li><p>Developed the <strong>Parapente</strong> website using an AI-assisted development approach with Claude.</p></li><li><p>Implemented a workflow for transforming <strong>Figma designs into front-end implementations</strong> using Claude.</p></li><li><p>Developed workflows and processes to improve the efficiency and reliability of AI-assisted development across projects.</p></li><li><p>Developed <strong>back-office features</strong> with the assistance of Claude.</p></li><li><p>Developed both <strong>backend and frontend features</strong> using an AI-assisted development workflow.</p></li><li><p>Experimented with new development methods based on AI coding agents to accelerate implementation and iteration.</p></li></ul><p/></li></ul></li><li><p><strong>Business Analyst</strong><strong> - Bee2link - Chambéry, France - Sep 2024 – Oct 2025</strong></p><ul><li><p><strong>Project: OpenFlex automotive distribution platform</strong></p><p/><ul><li><p><strong>Role:</strong> Business Analyst.</p></li><li><p><strong>Product:</strong> OpenFlex.</p></li><li><p><strong>Tools:</strong> Jira, Confluence, PowerPoint, Figma, FigJam.</p></li></ul><p><strong>Responsibilities:</strong></p><ul><li><p>Analysed business requirements and use cases for the <strong>OpenFlex</strong> product.</p></li><li><p>Identified and documented business needs with product and business stakeholders.</p></li><li><p>Participated in meetings with OpenFlex customers to understand their requirements and expectations.</p></li><li><p>Led and facilitated meetings around product topics and requirements.</p></li><li><p>Created and maintained functional tickets for the development team.</p></li><li><p>Wrote and structured requirements based on business needs.</p></li><li><p>Performed <strong>functional testing and acceptance testing</strong> of developed features.</p></li><li><p>Analysed product evolution and contributed to discussions around functional solutions.</p></li><li><p>Created PowerPoint presentations to support meetings and communicate product topics.</p></li></ul></li></ul></li><li><p><strong>Web Developer / Assistant Project Manager</strong> - <strong>ItAutomotive - Chambéry, France - Dec 2023 – Aug 2024</strong></p><p/></li><li><p><strong>Project: UCAR web application and in-house CMS</strong></p><p/><ul><li><p><strong>Role:</strong> Web Developer / Assistant Project Manager.</p></li><li><p><strong>Technologies and tools:</strong> PHP, Symfony, Twig, HTML, CSS, Docker, Git.</p></li></ul><p><strong>Responsibilities:</strong></p><ul><li><p>Developed new features for a business web application using <strong>Symfony</strong>, on both backend and frontend sides.</p></li><li><p>Worked on the <strong>UCAR.fr back-office</strong> and contributed to its evolution.</p></li><li><p>Improved and maintained the company's <strong>in-house CMS</strong>.</p></li><li><p>Participated in the analysis and implementation of application features.</p></li><li><p>Worked within a development team using collaborative development practices.</p></li><li><p>Gained hands-on experience with <strong>Docker</strong> for application development and local environments.</p></li></ul></li></ul><ul><li><p><strong>Web Developer Intern</strong> - <strong>Kreatys - Meylan</strong><strong>, France -Apr 2023 – Sep 2023</strong></p><p/></li><li><p><strong>Projects: Business web applications, lead management &amp; e-commerce</strong></p><p/><ul><li><p><strong>Technologies:</strong> PHP, Symfony, Bootstrap, HTML, CSS, Git.</p></li><li><p><strong>Role:</strong> Web Developer Intern.</p></li></ul><p><strong>Responsibilities:</strong></p><ul><li><p>Developed web applications mainly using <strong>Symfony and PHP</strong>.</p></li><li><p>Implemented backend features and contributed to frontend development.</p></li><li><p>Worked on different business projects, including <strong>lead management and e-commerce applications</strong>.</p></li><li><p>Developed and integrated user interfaces using Bootstrap.</p></li><li><p>Participated in the evolution and maintenance of existing web applications.</p></li></ul></li></ul><ul><li><p>Web Developer - <strong>ITDoc - Grenoble</strong><strong>, France -Sep 2020 – Jul 2022</strong></p><p/></li><li><p><strong>Project: Asian food delivery e-commerce platform</strong></p><ul><li><p><strong>Technologies:</strong> Rust, PHP, Symfony, HTML, CSS, Git, GitHub.</p></li><li><p><strong>Role:</strong> Web Developer – Work-study program.</p></li></ul><p><strong>Responsibilities:</strong></p><ul><li><p>Contributed to the development of an <strong>e-commerce platform for Asian food delivery</strong>.</p></li><li><p>Developed web features and participated in the evolution of the platform.</p></li><li><p>Gained practical experience with <strong>Rust</strong> in a web development context.</p></li><li><p>Developed foundational knowledge of <strong>PHP and Symfony</strong>.</p></li><li><p>Used <strong>Git and GitHub</strong> for source control and collaborative development.</p></li></ul></li><li><p/></li></ul><p/><p/></section><section id="Education" coex="Education &amp; training"><h>Education &amp; training / Cursus et formation</h><ul><li><p>CESI – Master's Degree in Information Systems &amp; Software Architecture</p><p><strong>Meylan, France · Dec 2023 – Oct 2025</strong></p><p><strong>Professional Master's Degree – Work-study program</strong></p><p><strong>Technical and project work:</strong></p><p/><ul><li><p>Developed a <strong>proof of concept (POC) for an e-commerce platform</strong> as part of a team of three.</p></li><li><p>Designed a microservices-oriented architecture using <strong>JavaScript, Symfony, Docker and RabbitMQ</strong>.</p></li><li><p>Gained knowledge of <strong>CI/CD concepts</strong>, application hosting and deployment architectures.</p></li><li><p>Developed project management and team management skills.</p></li><li><p>Worked collaboratively on software architecture and technical implementation.</p></li></ul></li><li><p>Simplon – Bachelor's Degree in Application Development</p><p><strong>Échirolles, France · Nov 2022 – Nov 2023</strong></p><p><strong>Concepteur Développeur d'Applications</strong></p><ul><li><p>Application and software development.</p></li><li><p>Web development using <strong>JavaScript and Symfony</strong>.</p></li><li><p>UI/UX and application prototyping.</p></li><li><p>Introduction to <strong>mobile application development with React Native</strong>.</p></li><li><p>Software design and application development methodologies.</p></li></ul></li><li><p>BTS SIO – IT Services for Organizations</p><p><strong>CFP La Charmille · Sep 2020 – Jul 2022</strong></p><p><strong>Specialization: Software Development</strong></p><ul><li><p>Fundamentals of web development.</p></li><li><p><strong>HTML / CSS</strong> development.</p></li><li><p>Version control with <strong>Git / GitHub</strong>.</p></li><li><p>Introduction to software development and application design.</p></li><li><p>Two-year work-study program at IT-DOC.</p></li></ul></li><li><p>Scientific Baccalaureate</p><p><strong>France · 2018</strong></p></li></ul></section><section id="Languages" coex="Languages"><h>Languages / Langues</h><ul><li typeof="LanguageSkill" resource="#lang_fr"><p>French – native language </p></li><li typeof="LanguageSkill" resource="#lang_en"><p> English – professional </p></li></ul><p/></section><section id="Interest" coex="Interests"><h>Interests</h><p>Pratique du handball (12 ans), CrossFit, Randonnée,Voyages, Jeux vidéo, Mangas</p><p/></section></document>
