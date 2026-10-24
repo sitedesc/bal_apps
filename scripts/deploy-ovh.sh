@@ -9,7 +9,9 @@ cd "$(dirname "$0")/.."; set -a; . ./.env; set +a
 REMOTE="${OVH_SSH}"; DIR="${OVH_DIR}"
 DC='docker compose -f docker-compose.yml -f docker-compose.prod.yml'
 
-[ -z "$(git status --porcelain --untracked-files=no)" ] || { echo "Modifications non commitées : commiter d'abord (le serveur déploie origin/main)."; git status --short --untracked-files=no; exit 1; }
+# Le serveur déploie origin/main : ce qui n'est pas commité ne part pas (avertissement, pas d'arrêt :
+# le dépôt porte aussi des fichiers de travail modifiés localement, hors périmètre du déploiement).
+[ -z "$(git status --porcelain --untracked-files=no)" ] || { echo "ATTENTION — modifications locales non commitées, non déployées :"; git status --short --untracked-files=no; }
 echo "== git push origin main"; git push -q origin main
 if [ "${1:-}" = "--secrets" ]; then
   echo "== secrets -> serveur"
