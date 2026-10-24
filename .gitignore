@@ -5,3 +5,7 @@ Secrets.*.toml
 target
 tmp
 .devcontainer.json
+
+# Docker (tchatapi) : secrets locaux
+.env
+docker/chatapi/Config.toml

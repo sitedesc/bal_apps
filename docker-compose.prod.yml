@@ -1,0 +1,23 @@
+# Override de production — serveur OVH it-doc, /srv/bal_apps, https://chatapi.sitems.org
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Aucun port publié : itdoc_nginx atteint chatapi_web par le réseau partagé edge_itdoc (alias unique).
+services:
+  chatapi_api:
+    ports: !reset []
+    environment:
+      OPENAPI_SERVER: https://chatapi.sitems.org
+      OPENAPI_PORT: "443"
+    volumes:
+      - ./docker/chatapi/Config.toml:/srv/app/srv_opportunity/Config.toml:ro
+      - chatapi_responses:/srv/app/srv_opportunity/responses
+  chatapi_web:
+    ports: !reset []
+    networks:
+      default: {}
+      edge_itdoc:
+        aliases:
+          - chatapi_web
+networks:
+  edge_itdoc:
+    external: true
+  default: {}

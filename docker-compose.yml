@@ -1,0 +1,36 @@
+# tchatapi (apps/chatapi/srv_opportunity) en Docker — dev (cette VM) et base de la prod.
+#   cp .env.example .env ; cp docker/chatapi/Config_template.toml docker/chatapi/Config.toml  (+ secrets)
+#   ./run.sh start   -> Swagger UI http://localhost:8090  (API directe http://localhost:9090)
+# Prod : docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+services:
+  chatapi_api:
+    build:
+      context: .
+      dockerfile: docker/chatapi/Dockerfile
+    container_name: chatapi_api
+    env_file: .env            # SALESFORCE_TEST_AUTH, OPENFLEX_TEST_AUTH, SRV_OPPORTUNITY_TEST_AUTH (bloc ## chatapi conf)
+    environment:
+      OPENAPI_SERVER: ${OPENAPI_SERVER:-http://localhost}
+      OPENAPI_PORT: ${OPENAPI_PORT:-8090}
+    ports:
+      - "${CHATAPI_API_PORT:-9090}:9090"
+    volumes:
+      - ./docker/chatapi/Config.toml:/srv/app/srv_opportunity/Config.toml:ro
+      - chatapi_responses:/srv/app/srv_opportunity/responses
+      # dev : les scénarios du dépôt sont éditables sans rebuild
+      - ./apps/chatapi/srv_opportunity/SchemedTalks:/srv/app/srv_opportunity/SchemedTalks
+    restart: unless-stopped
+
+  chatapi_web:
+    build:
+      context: .
+      dockerfile: docker/chatapi/web/Dockerfile
+    container_name: chatapi_web
+    depends_on:
+      - chatapi_api
+    ports:
+      - "${CHATAPI_WEB_PORT:-8090}:80"
+    restart: unless-stopped
+
+volumes:
+  chatapi_responses:

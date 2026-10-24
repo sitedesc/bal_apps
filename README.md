@@ -2,7 +2,7 @@
 
 Ce repository gère le développement et déploiement de services d'application [Ballerina](http://www.ballerina.io) via une architecture à composant (ou package en langage Ballerina).
  
-Son repertoire "apps" contient un répertoire par service d'application déployable dans divers plateformes cibles (docker n'est pas supporté aujourd'hui, seulement des VM linux AWS ).
+Son repertoire "apps" contient un répertoire par service d'application déployable dans divers plateformes cibles (VM linux AWS, et Docker pour tchatapi : voir « Docker » plus bas).
 
 Un service d'application est prévu pour:
 - exposer un ou plusieurs services constitués de un ou plusieurs endpoints: en base HTTP/REST/JSON et WebSocket/HTTP/REST/JSON (les autres protocoles supportés par Ballerina sont possibles aussi),
@@ -259,3 +259,13 @@ fi
 ```
 source ~/.profile
 ```
+
+
+## Docker (tchatapi — apps/chatapi/srv_opportunity)
+
+Depuis le 24/10/2026, tchatapi se construit et s'exécute en Docker : `docker/chatapi/Dockerfile` (build
+multi-étapes : publication locale des modules `java_bindings`, `time`, `chatgpt` puis `bal build`, exécution
+sur Java 21), `docker/chatapi/web/` (Swagger UI + routage nginx), `docker-compose.yml` (dev) et
+`docker-compose.prod.yml` (serveur OVH it-doc, https://chatapi.sitems.org). Hors git : `.env` (bloc
+`## chatapi conf`) et `docker/chatapi/Config.toml`. Mode d'emploi et exploitation : `deploy/ovh/RUNBOOK.md`,
+pilotage : `./run.sh`.
