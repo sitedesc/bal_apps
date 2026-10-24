@@ -9,3 +9,7 @@ tmp
 # Docker (tchatapi) : secrets locaux
 .env
 docker/chatapi/Config.toml
+
+# tchatapi : configuration locale (secrets) et résultats d exécution
+apps/chatapi/srv_opportunity/Config.toml
+apps/chatapi/srv_opportunity/responses/
