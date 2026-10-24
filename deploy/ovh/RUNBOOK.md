@@ -33,10 +33,11 @@ Le contrat OpenAPI servi par `/openapi_dev` est adapté au démarrage (`OPENAPI_
 | Vhost | `deploy/ovh/chatapi.conf` → dépôt it-doc/sitesv2 `docker/nginx/vhosts.d/chatapi.conf` (source de vérité) et `/srv/sitesv2/docker/nginx/vhosts.d/` |
 | Réseau | `chatapi_web` rejoint `edge_itdoc` sous l'alias `chatapi_web` ; `chatapi_api` reste interne |
 
-Déploiement, depuis cette VM : `./run.sh deploy` (rsync du dépôt sans `.git`, `.env` et `Config.toml` poussés,
-`docker compose … up -d --build` sur le serveur : la compilation Ballerina y prend plusieurs minutes).
-Rsync et non `git pull` : l'origine `github.com/sitedesc/bal_apps` est privée et le serveur n'y a pas de clé de
-déploiement ; un miroir GitLab it-doc1 permettrait de passer au modèle aiacms/odoo.
+Déploiement — modèle aiacms/odoo (clone + `git pull`). Une fois : la clé publique du serveur
+(`~/.ssh/id_ed25519.pub` de deployer) est déclarée **Deploy key** (lecture seule) du dépôt GitHub
+`sitedesc/bal_apps`, et `/srv/bal_apps` est un clone de `git@github.com:sitedesc/bal_apps.git` (sans sudo).
+Puis, depuis cette VM, après commit : `./run.sh deploy` (push de main, `git pull --ff-only` + `up -d --build`
+sur le serveur) ; `./run.sh deploy --secrets` pousse aussi `.env` et `docker/chatapi/Config.toml`, hors git.
 
 Vérif : `curl -s https://chatapi.sitems.org/openapi_dev | head`, puis Swagger UI → `/schemed_talks` avec
 l'exemple de `/schemed_talk_examples`, puis `/schemed_talks_responses`.
