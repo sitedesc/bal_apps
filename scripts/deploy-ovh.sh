@@ -19,6 +19,7 @@ if [ "${1:-}" = "--secrets" ]; then
   scp -q docker/chatapi/Config.toml "$REMOTE:$DIR/docker/chatapi/Config.toml"; ssh "$REMOTE" "chmod 644 $DIR/docker/chatapi/Config.toml"
 fi
 echo "== git pull + build + up sur $REMOTE:$DIR (compilation Ballerina : plusieurs minutes)"
-ssh "$REMOTE" "cd $DIR && git pull --ff-only origin main && test -f .env && test -f docker/chatapi/Config.toml || { echo 'ERREUR : .env ou docker/chatapi/Config.toml absent (relancer avec --secrets)'; exit 1; }
-  $DC up -d --build --remove-orphans 2>&1 | tail -4 && $DC ps"
+ssh "$REMOTE" "cd $DIR && git pull --ff-only origin main" || { echo "ERREUR : git pull a échoué sur le serveur (voir ci-dessus)"; exit 1; }
+ssh "$REMOTE" "cd $DIR && test -f .env && test -f docker/chatapi/Config.toml" || { echo "ERREUR : .env ou docker/chatapi/Config.toml absent sur le serveur (relancer avec --secrets)"; exit 1; }
+ssh "$REMOTE" "cd $DIR && $DC up -d --build --remove-orphans 2>&1 | tail -4 && $DC ps"
 echo "OK — https://${CHATAPI_HOST}/"
