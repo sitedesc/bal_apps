@@ -30,7 +30,8 @@ Le contrat OpenAPI servi par `/openapi_dev` est adapté au démarrage (`OPENAPI_
 | Serveur | `deployer@135.125.75.39`, répertoire `/srv/bal_apps` |
 | DNS | `chatapi.sitems.org` A → 135.125.75.39 (API Gandi, `odoo/scripts/dns-gandi.sh set chatapi`) |
 | TLS | certbot `--standalone` avec arrêt bref d'itdoc_nginx (posé le 24/10/2026, expire 22/01/2027, renouvellement par le timer) |
-| Vhost | `deploy/ovh/chatapi.conf` → dépôt it-doc/sitesv2 `docker/nginx/vhosts.d/chatapi.conf` (source de vérité) et `/srv/sitesv2/docker/nginx/vhosts.d/` |
+| TLS, tchatapi.org | même procédure ; un certificat pour `tchatapi.org` et `www.tchatapi.org` (posé le 22/11/2026, expire 20/02/2027). Zone DNS chez Gandi : `@`, `www` et `*` en A vers le VPS |
+| Vhost | `deploy/ovh/chatapi.conf` → dépôt it-doc/sitesv2 `docker/nginx/vhosts.d/chatapi.conf` (source de vérité ; deux exemplaires à tenir identiques, voir l'en-tête du fichier) et `/srv/sitesv2/docker/nginx/vhosts.d/` |
 | Réseau | `chatapi_web` rejoint `edge_itdoc` sous l'alias `chatapi_web` ; `chatapi_api` reste interne |
 
 Déploiement — modèle aiacms/odoo (clone + `git pull`). Une fois : la clé publique du serveur
